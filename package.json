@@ -1,9 +1,0 @@
-{
-  "name": "bankofneon",
-  "version": "1.0.0",
-  "description": "Aplicativo HTML para GitHub Pages",
-  "main": "index.html",
-  "scripts": {},
-  "author": "corkybrasil-cmyk",
-  "license": "MIT"
-}
