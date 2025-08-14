@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alunos - Bank of Neon</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Lista de Alunos</h1>
+    <form id="cadastroAlunoForm">
+        <input type="text" id="novoAlunoNome" placeholder="Nome do aluno" required>
+        <input type="password" id="novoAlunoSenha" placeholder="Senha" required>
+        <button type="submit">Cadastrar</button>
+    </form>
+    <h2>Alunos cadastrados</h2>
+    <ul id="listaAlunos"></ul>
+    <script type="module" src="js/firebase-init.js"></script>
+    <script type="module" src="js/alunos.js"></script>
+</body>
+</html>
