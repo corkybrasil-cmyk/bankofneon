@@ -14,10 +14,36 @@ const firebaseConfig = {
   measurementId: "G-D3G4M9F17R"
 };
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+function logInitEnvironmentDiagnostics() {
+  try {
+    const isFileProtocol = window.location?.protocol === 'file:';
+    const origin = window.location?.origin;
+    if (isFileProtocol) {
+      console.warn('[Firebase Init] Rodando via file://. Prefira servir via http/https (ex.: GitHub Pages ou um servidor local) para evitar limitações do navegador.');
+    }
+    console.log('[Firebase Init] Origin:', origin);
+  } catch (_) {
+    // ignora erros de ambiente
+  }
+}
 
-// Teste: Verifique se o Firebase foi inicializado
+let app;
+let analytics;
+
+try {
+  logInitEnvironmentDiagnostics();
+  app = initializeApp(firebaseConfig);
+  console.log('[Firebase Init] App inicializado com sucesso');
+  try {
+    analytics = getAnalytics(app);
+    console.log('[Firebase Init] Analytics inicializado');
+  } catch (analyticsError) {
+    console.warn('[Firebase Init] Falha ao inicializar Analytics (ok continuar sem):', analyticsError?.message || analyticsError);
+  }
+} catch (initError) {
+  console.error('[Firebase Init] Erro ao inicializar Firebase App:', initError?.message || initError);
+}
+
+// Expor no window para facilitar debug no console
 window.firebaseApp = app;
 window.firebaseAnalytics = analytics;
-console.log('Firebase inicializado:', app);
