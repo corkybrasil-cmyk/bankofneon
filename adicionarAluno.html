@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Adicionar Aluno • Banco da Neon</title>
+  <style>
+    :root { --bg: #0b0f14; --panel: #131a22; --panel-alt: #111820; --text: #e6eef8; --muted: #9fb3c8; --border: #223042; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0b0f14; color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 20px; }
+    .card { background: linear-gradient(180deg, var(--panel), var(--panel-alt)); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    h1 { margin: 0 0 12px 0; font-size: 20px; }
+    p.helper { margin: 0 0 16px 0; color: var(--muted); font-size: 13px; }
+    .form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+    input[type="text"], input[type="password"], select { width: 100%; background: #0e141b; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; outline: none; }
+    .checkbox { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px dashed var(--border); border-radius: 10px; }
+    .actions { margin-top: 12px; display: flex; gap: 10px; }
+    button { background: linear-gradient(180deg, #162231, #111a25); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+    button.primary { border-color: #1b3b2e; background: linear-gradient(180deg, #1b3b2e, #11231c); color: #c6ffea; }
+    .muted { color: var(--muted); font-size: 12px; }
+    a { color: #1ee1a8; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Adicionar novo aluno</h1>
+      <p class="helper">Preencha todos os campos e clique em "Adicionar". Ao salvar: quandoRegistrou = serverTimestamp(), saldo = 1000.</p>
+      <div class="form">
+        <div>
+          <label for="firstName">firstName</label>
+          <input id="firstName" type="text" placeholder="Ex.: Marcel" />
+        </div>
+        <div>
+          <label for="lastName">lastName</label>
+          <input id="lastName" type="text" placeholder="Ex.: Tasso" />
+        </div>
+        <div>
+          <label for="idAluno">idAluno</label>
+          <input id="idAluno" type="text" placeholder="Ex.: c7f0128" />
+        </div>
+        <div>
+          <label for="user">user</label>
+          <input id="user" type="text" placeholder="Ex.: marcelrpg" />
+        </div>
+        <div>
+          <label for="password">password</label>
+          <input id="password" type="password" placeholder="Mín. 8 caracteres" />
+        </div>
+        <div>
+          <label for="periodo">periodo</label>
+          <input id="periodo" type="text" placeholder="Ex.: Manhã" />
+        </div>
+        <div class="checkbox">
+          <input id="ativo" type="checkbox" />
+          <label for="ativo">ativo</label>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="btnAdd">Adicionar</button>
+        <a href="dev.html">Ir para Dev</a>
+      </div>
+      <p class="muted">Coleção: alunos</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+    try { await signInAnonymously(getAuth(app)); } catch {}
+
+    let db; try { db = getFirestore(app, "bancodaneondb"); } catch { db = getFirestore(app); }
+    const alunosCol = collection(db, "alunos");
+
+    const $ = (s) => document.querySelector(s);
+    const btnAdd = $("#btnAdd");
+
+    btnAdd.addEventListener("click", async () => {
+      const firstName = $("#firstName").value.trim();
+      const lastName = $("#lastName").value.trim();
+      const idAluno = $("#idAluno").value.trim();
+      const user = $("#user").value.trim();
+      const password = $("#password").value.trim();
+      const periodo = $("#periodo").value.trim();
+      const ativo = $("#ativo").checked === true;
+
+      const missing = [];
+      if (!firstName) missing.push("firstName");
+      if (!lastName) missing.push("lastName");
+      if (!idAluno) missing.push("idAluno");
+      if (!user) missing.push("user");
+      if (!password || password.length < 8) missing.push("password (min 8)");
+      if (!periodo) missing.push("periodo");
+      if (missing.length) { alert("Preencha: " + missing.join(", ")); return; }
+
+      btnAdd.disabled = true;
+      try {
+        const payload = { firstName, lastName, idAluno, user, password, periodo, ativo, quandoRegistrou: serverTimestamp(), saldo: 1000 };
+        const ref = await addDoc(alunosCol, payload);
+        alert("Aluno criado: " + ref.id);
+        ["#firstName","#lastName","#idAluno","#user","#password","#periodo"].forEach(sel => $(sel).value = "");
+        $("#ativo").checked = false;
+      } catch (e) { console.error(e); alert("Erro: " + (e?.message || e)); }
+      finally { btnAdd.disabled = false; }
+    });
+  </script>
+</body>
+</html>
+
+

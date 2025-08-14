@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Dev • Banco da Neon</title>
+  <style>
+    :root {
+      --bg: #0b0f14; --panel: #131a22; --panel-alt: #111820; --text: #e6eef8; --muted: #9fb3c8; --accent: #1ee1a8; --border: #223042; --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; color: var(--text); background: #0b0f14; }
+    .app-header { padding: 16px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); background: #0f1520; position: sticky; top:0; z-index:2; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, minmax(420px, auto)); gap: 16px; padding: 16px; }
+    .card { background: linear-gradient(180deg, var(--panel), var(--panel-alt)); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; }
+    h2 { margin: 0 0 12px 0; font-size: 18px; }
+    .actions { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+    ul.list { margin: 8px 0 0 0; padding: 0; list-style: none; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+    ul.list li { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    button { background: #111a25; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+    button.warn { border-color: #5c3b00; background: linear-gradient(180deg, #5c3b00, #2b1c00); color: #ffe8b3; }
+    .grid-compact { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 8px; }
+    .pill { font-size: 11px; border: 1px solid var(--border); border-radius: 9999px; padding: 4px 8px; color: var(--muted); }
+    @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <div>Banco da Neon • Dev</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="index.html" style="color: var(--accent); text-decoration: none;">Sair</a>
+      <a href="adicionarAluno.html" style="color: var(--accent); text-decoration: none;">Adicionar Aluno</a>
+    </div>
+  </div>
+
+  <main class="grid">
+    <section class="card" id="q2">
+      <h2>Lista de alunos (idAluno por nome)</h2>
+      <div class="actions">
+        <button id="btnRefreshList">Refresh</button>
+        <span style="color:#9fb3c8; font-size:12px;">Clique em um nome para ver o idAluno</span>
+      </div>
+      <ul class="list" id="listNames"></ul>
+    </section>
+
+    <section class="card" id="q3">
+      <h2>Excluir aluno</h2>
+      <div class="actions">
+        <button class="warn" id="btnRefreshDelete">Refresh</button>
+        <span style="color:#9fb3c8; font-size:12px;">Clique em um nome para solicitar exclusão</span>
+      </div>
+      <ul class="list" id="listDelete"></ul>
+    </section>
+
+    <section class="card" id="q4">
+      <h2>Debug Firebase</h2>
+      <div class="grid-compact" id="debugButtons"></div>
+    </section>
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:20;">
+    <div class="modal" style="width:min(92vw,520px); background:#111820; border:1px solid var(--border); border-radius:12px; padding:16px;">
+      <h3 id="modalTitle" style="margin:0 0 8px 0;">Título</h3>
+      <p id="modalMessage" style="margin:0 0 12px 0; color:#9fb3c8;">Mensagem</p>
+      <div class="actions">
+        <button id="modalNo">Não</button>
+        <button id="modalYes" class="warn">Sim</button>
+        <button id="modalClose">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+    try { await signInAnonymously(getAuth(app)); } catch {}
+
+    let db; try { db = getFirestore(app, "bancodaneondb"); } catch { db = getFirestore(app); }
+    const alunosCol = collection(db, "alunos");
+
+    // Reuso de lógica essencialmente igual ao app original (Q2 a Q4)
+    const $ = (s) => document.querySelector(s);
+    const listNamesEl = $("#listNames");
+    const listDeleteEl = $("#listDelete");
+    const btnRefreshList = $("#btnRefreshList");
+    const btnRefreshDelete = $("#btnRefreshDelete");
+    const overlay = $("#modalOverlay");
+    const modalTitle = $("#modalTitle");
+    const modalMessage = $("#modalMessage");
+    const modalNo = $("#modalNo");
+    const modalYes = $("#modalYes");
+    const modalClose = $("#modalClose");
+
+    function openModal({ title, message, mode = "info", onYes = null }) {
+      modalTitle.textContent = title || "Mensagem";
+      modalMessage.textContent = message || "";
+      overlay.style.display = "flex";
+      if (mode === "confirm") {
+        modalYes.style.display = "inline-block"; modalNo.style.display = "inline-block"; modalClose.style.display = "none";
+        modalYes.onclick = () => { try { onYes && onYes(); } finally { closeModal(); } };
+        modalNo.onclick = () => closeModal();
+      } else {
+        modalYes.style.display = "none"; modalNo.style.display = "none"; modalClose.style.display = "inline-block";
+        modalClose.onclick = () => closeModal();
+      }
+    }
+    function closeModal() { overlay.style.display = "none"; }
+
+    async function fetchAlunos() {
+      const snapshot = await getDocs(alunosCol);
+      const result = [];
+      snapshot.forEach(d => { const data = d.data(); result.push({ docId: d.id, firstName: data?.firstName ?? "(sem nome)", idAluno: data?.idAluno ?? "(sem idAluno)" }); });
+      return result;
+    }
+    function renderList(targetEl, items, onClick) {
+      targetEl.innerHTML = "";
+      if (!items.length) { const li = document.createElement("li"); li.innerHTML = '<span style="color:#9fb3c8; font-size:12px;">Nenhum aluno encontrado.</span>'; targetEl.appendChild(li); return; }
+      items.forEach(item => { const li = document.createElement("li"); const name = document.createElement("span"); name.textContent = item.firstName; li.addEventListener("click", () => onClick(item)); li.appendChild(name); targetEl.appendChild(li); });
+    }
+
+    btnRefreshList.addEventListener("click", async () => {
+      btnRefreshList.disabled = true;
+      try { const arr = await fetchAlunos(); renderList(listNamesEl, arr, (item) => openModal({ title: `Aluno: ${item.firstName}`, message: `idAluno: ${item.idAluno}`, mode: "info" })); }
+      catch (e) { console.error(e); alert(e?.message || e); }
+      finally { btnRefreshList.disabled = false; }
+    });
+
+    btnRefreshDelete.addEventListener("click", async () => {
+      btnRefreshDelete.disabled = true;
+      try {
+        const arr = await fetchAlunos();
+        renderList(listDeleteEl, arr, (item) => openModal({ title: `Excluir: ${item.firstName}`, message: `Deseja excluir? (idAluno: ${item.idAluno})`, mode: "confirm", onYes: async () => { try { await deleteDoc(doc(db, "alunos", item.docId)); btnRefreshDelete.click(); } catch (e) { console.error(e); alert(e?.message || e); } } }));
+      } catch (e) { console.error(e); alert(e?.message || e); }
+      finally { btnRefreshDelete.disabled = false; }
+    });
+
+    // Debug essencial (subset)
+    const debugArea = $("#debugButtons");
+    const debugActions = [
+      { id: "dbg1", label: "Conectividade", hint: "Checa online e ping API", fn: async () => { console.log("navigator.onLine=", navigator.onLine); try { const r = await fetch("https://firestore.googleapis.com/.well-known/apikey", { method: "HEAD" }); console.log("Ping status:", r.status); } catch (e) { console.log("Ping falhou:", e?.message || e); } } },
+      { id: "dbg2", label: "Listar alunos", hint: "Obtém e lista alunos", fn: async () => { try { const arr = await fetchAlunos(); console.log(arr); } catch (e) { console.error(e); } } },
+      { id: "dbg3", label: "Estado auth", hint: "Mostra auth anônima", fn: () => { console.log("Auth anônima em uso."); } }
+    ];
+    debugActions.forEach(({ id, label, hint, fn }) => { const b = document.createElement("button"); b.id = id; b.textContent = label; b.title = hint || label; b.setAttribute("aria-label", hint || label); b.addEventListener("click", fn); debugArea.appendChild(b); });
+
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  </script>
+</body>
+</html>
+
+
