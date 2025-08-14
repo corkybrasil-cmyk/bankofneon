@@ -112,7 +112,7 @@
 
       btnAdd.disabled = true;
       try {
-        const payload = { firstName, lastName, idAluno, user, password, periodo, ativo, quandoRegistrou: serverTimestamp(), saldo: 1000 };
+        const payload = { firstName, lastName, idAluno, user, password, periodo, ativo, classe: "aluno", quandoRegistrou: serverTimestamp(), saldo: 1000 };
         const ref = await addDoc(alunosCol, payload);
         alert("Aluno criado: " + ref.id);
         ["#firstName","#lastName","#idAluno","#user","#password","#periodo"].forEach(sel => $(sel).value = "");

@@ -159,8 +159,18 @@
           setError("Senha incorreta.");
           return;
         }
-        // OK -> redireciona para dev.html
-        window.location.href = "dev.html";
+        // OK -> guarda sessão simples no localStorage e redireciona
+        try {
+          localStorage.setItem("bn.currentUser", JSON.stringify({
+            user: userDoc.user,
+            firstName: userDoc.firstName || null,
+            lastName: userDoc.lastName || null,
+            saldo: userDoc.saldo ?? null,
+            classe: userDoc.classe || null,
+            idAluno: userDoc.idAluno || null
+          }));
+        } catch {}
+        window.location.href = userDoc.classe === "professor" ? "dev.html" : "dashboard.html";
       } catch (e) {
         console.error(e);
         setError(e?.message || String(e));

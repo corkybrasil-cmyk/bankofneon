@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Dashboard • Banco da Neon</title>
+  <style>
+    :root { --bg:#0b0f14; --text:#e6eef8; --muted:#9fb3c8; --panel:#131a22; --border:#223042; --accent:#1ee1a8; }
+    *{ box-sizing:border-box; }
+    body { margin:0; background: #0b0f14; color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .card { background: linear-gradient(180deg, var(--panel), #111820); border:1px solid var(--border); border-radius:14px; padding:16px; }
+    .row { display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px; }
+    a { color: var(--accent); text-decoration:none; }
+    .big { font-size: 22px; font-weight: 700; }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="row">
+      <div class="muted">Dashboard</div>
+      <div style="display:flex; gap:12px;">
+        <a href="dev.html">Dev</a>
+        <a href="adicionarAluno.html">Adicionar</a>
+        <a href="index.html" onclick="localStorage.removeItem('bn.currentUser')">Sair</a>
+      </div>
+    </div>
+    <div class="card">
+      <div id="saudacao" class="big">Olá, ...</div>
+      <div id="saldo" class="big" style="margin-top:8px;">Seu saldo é ...</div>
+      <div class="muted" style="margin-top:10px;">Os dados são carregados do Firestore.</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+    try { await signInAnonymously(getAuth(app)); } catch {}
+
+    let db; try { db = getFirestore(app, "bancodaneondb"); } catch { db = getFirestore(app); }
+
+    const sessRaw = localStorage.getItem("bn.currentUser");
+    if (!sessRaw) { window.location.href = "index.html"; }
+    let sess = null;
+    try { sess = JSON.parse(sessRaw); } catch { sess = null; }
+    if (!sess || !sess.user) { window.location.href = "index.html"; }
+
+    const $ = (s) => document.querySelector(s);
+    const saudacaoEl = $("#saudacao");
+    const saldoEl = $("#saldo");
+
+    // Busca dados atualizados do Firestore por segurança
+    try {
+      const alunosCol = collection(db, "alunos");
+      const q = query(alunosCol, where("user", "==", sess.user), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const d = snap.docs[0];
+        const data = d.data();
+        const nome = data?.firstName || sess.firstName || sess.user;
+        const saldo = data?.saldo ?? sess.saldo ?? 0;
+        saudacaoEl.textContent = `Olá, ${nome}`;
+        saldoEl.textContent = `Seu saldo é ${saldo}`;
+      } else {
+        saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
+        saldoEl.textContent = `Seu saldo é ${sess.saldo ?? 0}`;
+      }
+    } catch (e) {
+      console.error(e);
+      saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
+      saldoEl.textContent = `Seu saldo é ${sess.saldo ?? 0}`;
+    }
+  </script>
+</body>
+</html>
+
+
