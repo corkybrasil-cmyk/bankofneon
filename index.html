@@ -225,6 +225,7 @@
     // Import dos SDKs (versão 12.1.0 conforme codigofirebase.txt)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
     import {
       getFirestore,
       collection,
@@ -253,6 +254,24 @@
       analytics = getAnalytics(app);
     } catch (err) {
       console.warn("Analytics não disponível neste contexto:", err?.message || err);
+    }
+
+    // Autenticação anônima (caso suas regras exijam auth)
+    let auth;
+    try {
+      auth = getAuth(app);
+      signInAnonymously(auth).catch((e) => {
+        console.warn("Falha ao autenticar anonimamente (habilite no Console > Auth > Métodos de login):", e?.code, e?.message || e);
+      });
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log("Auth anônima OK, uid:", user.uid);
+        } else {
+          console.log("Usuário não autenticado.");
+        }
+      });
+    } catch (e) {
+      console.warn("Auth não disponível:", e?.message || e);
     }
 
     // Firestore: banco nomeado "bancodaneondb" e coleção "alunos"
@@ -456,19 +475,19 @@
     const debugArea = $("#debugButtons");
     const debugActions = [
       {
-        id: "dbg1", label: "Init Firebase", fn: () => {
+        id: "dbg1", label: "Init Firebase", hint: "Exibe o app e o projectId para conferir a configuração.", fn: () => {
           console.log("App:", app);
           console.log("Config OK? projectId=", firebaseConfig.projectId);
         }
       },
       {
-        id: "dbg2", label: "Firestore ativo?", fn: () => {
+        id: "dbg2", label: "Firestore ativo?", hint: "Mostra a instância do Firestore e o path da coleção.", fn: () => {
           console.log("DB:", db);
           console.log("Coleção:", alunosCol?.path);
         }
       },
       {
-        id: "dbg3", label: "Conectividade", fn: async () => {
+        id: "dbg3", label: "Conectividade", hint: "Checa navigator.onLine e faz ping na API do Firestore.", fn: async () => {
           console.log("navigator.onLine=", navigator.onLine);
           try {
             const r = await fetch("https://firestore.googleapis.com/.well-known/apikey", { method: "HEAD" });
@@ -479,7 +498,7 @@
         }
       },
       {
-        id: "dbg4", label: "Teste leitura (1)", fn: async () => {
+        id: "dbg4", label: "Teste leitura (1)", hint: "Lê a coleção 'alunos' e mede o tempo gasto.", fn: async () => {
           try {
             const t0 = performance.now();
             const arr = await fetchAlunos();
@@ -490,33 +509,33 @@
         }
       },
       {
-        id: "dbg5", label: "Tempo refresh Q2", fn: async () => {
+        id: "dbg5", label: "Tempo refresh Q2", hint: "Aciona o refresh do Q2 e registra a duração.", fn: async () => {
           const t0 = performance.now();
           await btnRefreshList.click();
           console.log("Tempo Q2:", (performance.now()-t0).toFixed(0), "ms");
         }
       },
       {
-        id: "dbg6", label: "DOM listas", fn: () => {
+        id: "dbg6", label: "DOM listas", hint: "Verifica a presença dos elementos de lista Q2 e Q3.", fn: () => {
           console.log("listNames existe?", !!listNamesEl, listNamesEl);
           console.log("listDelete existe?", !!listDeleteEl, listDeleteEl);
         }
       },
       {
-        id: "dbg7", label: "Listeners refresh", fn: () => {
+        id: "dbg7", label: "Listeners refresh", hint: "Mostra referências aos botões de refresh.", fn: () => {
           console.log("btnRefreshList:", btnRefreshList);
           console.log("btnRefreshDelete:", btnRefreshDelete);
         }
       },
       {
-        id: "dbg8", label: "Validar formulário", fn: () => {
+        id: "dbg8", label: "Validar formulário", hint: "Lista quais campos obrigatórios estão vazios.", fn: () => {
           const required = ["#firstName","#lastName","#idAluno","#user","#password","#periodo"];
           const empty = required.filter(sel => !document.querySelector(sel)?.value?.trim());
           console.log("Campos vazios:", empty);
         }
       },
       {
-        id: "dbg9", label: "Escrita teste", fn: async () => {
+        id: "dbg9", label: "Escrita teste", hint: "Cria e remove um doc na coleção 'debug' para testar escrita.", fn: async () => {
           try {
             const payload = { kind: "debug", quando: serverTimestamp() };
             const tmp = await addDoc(collection(db, "debug"), payload);
@@ -529,29 +548,29 @@
         }
       },
       {
-        id: "dbg10", label: "Último erro", fn: () => {
+        id: "dbg10", label: "Último erro", hint: "Mostra o último erro capturado e a stack.", fn: () => {
           console.log("lastError=", lastError);
           if (lastError?.stack) console.log(lastError.stack);
         }
       },
       {
-        id: "dbg11", label: "Versão SDK", fn: () => {
+        id: "dbg11", label: "Versão SDK", hint: "Exibe a versão do SDK esperada pelo app.", fn: () => {
           console.log("SDK esperado: 12.1.0 (CDN)");
         }
       },
       {
-        id: "dbg12", label: "Config credenciais", fn: () => {
+        id: "dbg12", label: "Config credenciais", hint: "Imprime projectId, authDomain e storageBucket.", fn: () => {
           console.log({ projectId: firebaseConfig.projectId, authDomain: firebaseConfig.authDomain, storageBucket: firebaseConfig.storageBucket });
         }
       },
       {
-        id: "dbg13", label: "Analytics ok?", fn: () => {
+        id: "dbg13", label: "Analytics ok?", hint: "Verifica se Analytics está disponível e se o contexto é seguro.", fn: () => {
           console.log("Analytics:", analytics || "(indisponível)");
           console.log("Secure context:", window.isSecureContext);
         }
       },
       {
-        id: "dbg14", label: "Coleção vazia?", fn: async () => {
+        id: "dbg14", label: "Coleção vazia?", hint: "Conta quantos documentos existem em 'alunos'.", fn: async () => {
           try {
             const arr = await fetchAlunos();
             console.log(arr.length === 0 ? "Coleção 'alunos' vazia" : `Alunos: ${arr.length}`);
@@ -559,12 +578,12 @@
         }
       },
       {
-        id: "dbg15", label: "Checar 'ativo'", fn: () => {
+        id: "dbg15", label: "Checar 'ativo'", hint: "Lê o estado atual do checkbox 'ativo'.", fn: () => {
           console.log("Check ativo (checkbox):", $("#ativo").checked);
         }
       },
       {
-        id: "dbg16", label: "Permissões (read)", fn: async () => {
+        id: "dbg16", label: "Permissões (read)", hint: "Tenta ler 'alunos' e detecta PERMISSION_DENIED.", fn: async () => {
           try {
             await fetchAlunos();
             console.log("Leitura permitida.");
@@ -572,13 +591,22 @@
             lastError = e; console.error("Possível PERMISSION_DENIED:", e?.code, e?.message || e);
           }
         }
+      },
+      {
+        id: "dbg17", label: "Auth estado", hint: "Mostra auth, currentUser e uid em uso.", fn: () => {
+          console.log("Auth:", auth);
+          console.log("currentUser:", auth?.currentUser);
+          console.log("uid:", auth?.currentUser?.uid || null);
+        }
       }
     ];
 
     // Renderizar botões de debug
-    debugActions.forEach(({ id, label, fn }) => {
+    debugActions.forEach(({ id, label, hint, fn }) => {
       const b = document.createElement("button");
       b.id = id; b.textContent = label; b.addEventListener("click", fn);
+      b.title = hint || label;
+      b.setAttribute("aria-label", hint || label);
       debugArea.appendChild(b);
     });
 
