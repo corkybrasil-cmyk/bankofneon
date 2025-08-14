@@ -29,7 +29,6 @@
     <div class="card">
       <div id="saudacao" class="big">Olá, ...</div>
       <div id="saldo" class="big" style="margin-top:8px;">Seu saldo é ...</div>
-      <div class="muted" style="margin-top:10px;">Os dados são carregados do Firestore.</div>
     </div>
   </div>
 
@@ -65,8 +64,17 @@
     const saudacaoEl = $("#saudacao");
     const saldoEl = $("#saldo");
 
+    // Spinner overlay
+    const spinner = document.createElement('div');
+    spinner.id = 'spinner';
+    spinner.style.cssText = 'display:flex; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); align-items:center; justify-content:center;';
+    spinner.innerHTML = '<div style="width:56px; height:56px; border:6px solid rgba(255,255,255,0.2); border-top-color:#1ee1a8; border-radius:50%; animation: spin 1s linear infinite;"></div>';
+    document.body.appendChild(spinner);
+    const style = document.createElement('style'); style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }'; document.head.appendChild(style);
+
     // Busca dados atualizados do Firestore por segurança
     try {
+      spinner.style.display = 'flex';
       const alunosCol = collection(db, "alunos");
       const q = query(alunosCol, where("user", "==", sess.user), limit(1));
       const snap = await getDocs(q);
@@ -85,7 +93,7 @@
       console.error(e);
       saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
       saldoEl.textContent = `Seu saldo é ${sess.saldo ?? 0}`;
-    }
+    } finally { spinner.style.display = 'none'; }
   </script>
 </body>
 </html>

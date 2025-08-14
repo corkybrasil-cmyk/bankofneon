@@ -88,6 +88,8 @@
     </div>
   </section>
 
+  
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
@@ -131,6 +133,7 @@
     const errEl = $("#err");
 
     function setError(msg) { errEl.textContent = msg || ""; }
+    
 
     async function findUserDoc(username) {
       const q = query(alunosCol, where("user", "==", username), limit(1));
@@ -139,6 +142,10 @@
       const d = snap.docs[0];
       return { id: d.id, ...d.data() };
     }
+
+    // Enter no campo senha envia o login
+    const pwdEl = document.querySelector('#password');
+    pwdEl?.addEventListener('keydown', (e) => { if (e.key === 'Enter') btnLogin.click(); });
 
     btnLogin.addEventListener("click", async () => {
       setError("");
@@ -170,7 +177,8 @@
             idAluno: userDoc.idAluno || null
           }));
         } catch {}
-        window.location.href = userDoc.classe === "professor" ? "dev.html" : "dashboard.html";
+        // Redireciona sempre para dashboard.html conforme solicitado
+        window.location.href = "dashboard.html";
       } catch (e) {
         console.error(e);
         setError(e?.message || String(e));
@@ -190,7 +198,7 @@
         console.log("Usuários em 'alunos':", users);
       } catch (e) {
         console.error("Erro ao listar usuários:", e?.code, e?.message || e);
-      }
+      } finally {}
     });
   </script>
 </body>

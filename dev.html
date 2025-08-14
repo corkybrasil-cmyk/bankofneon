@@ -71,6 +71,8 @@
     </div>
   </div>
 
+  
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
@@ -106,6 +108,8 @@
     const modalNo = $("#modalNo");
     const modalYes = $("#modalYes");
     const modalClose = $("#modalClose");
+    const showSpinner = () => {};
+    const hideSpinner = () => {};
 
     function openModal({ title, message, mode = "info", onYes = null }) {
       modalTitle.textContent = title || "Mensagem";
@@ -136,18 +140,19 @@
 
     btnRefreshList.addEventListener("click", async () => {
       btnRefreshList.disabled = true;
-      try { const arr = await fetchAlunos(); renderList(listNamesEl, arr, (item) => openModal({ title: `Aluno: ${item.firstName}`, message: `idAluno: ${item.idAluno}`, mode: "info" })); }
+      try { showSpinner(); const arr = await fetchAlunos(); renderList(listNamesEl, arr, (item) => openModal({ title: `Aluno: ${item.firstName}`, message: `idAluno: ${item.idAluno}`, mode: "info" })); }
       catch (e) { console.error(e); alert(e?.message || e); }
-      finally { btnRefreshList.disabled = false; }
+      finally { btnRefreshList.disabled = false; hideSpinner(); }
     });
 
     btnRefreshDelete.addEventListener("click", async () => {
       btnRefreshDelete.disabled = true;
       try {
+        showSpinner();
         const arr = await fetchAlunos();
         renderList(listDeleteEl, arr, (item) => openModal({ title: `Excluir: ${item.firstName}`, message: `Deseja excluir? (idAluno: ${item.idAluno})`, mode: "confirm", onYes: async () => { try { await deleteDoc(doc(db, "alunos", item.docId)); btnRefreshDelete.click(); } catch (e) { console.error(e); alert(e?.message || e); } } }));
       } catch (e) { console.error(e); alert(e?.message || e); }
-      finally { btnRefreshDelete.disabled = false; }
+      finally { btnRefreshDelete.disabled = false; hideSpinner(); }
     });
 
     // Debug essencial (subset)
