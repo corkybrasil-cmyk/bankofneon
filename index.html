@@ -307,19 +307,28 @@
     const modalYes = $("#modalYes");
     const modalClose = $("#modalClose");
 
-    function openModal({ title, message, mode = "info", onYes = null }) {
+    function openModal({ title, message, mode = "info", onYes = null, yesLabel, noLabel, closeLabel }) {
       modalTitle.textContent = title || "Mensagem";
       modalMessage.textContent = message || "";
       overlay.style.display = "flex";
-      // Modes: info -> só fechar; confirm -> sim/não
+      // Reset texts
+      modalYes.textContent = yesLabel || "Sim";
+      modalNo.textContent = noLabel || "Não";
+      modalClose.textContent = closeLabel || "Fechar";
+      // Modes: info -> só fechar; confirm -> sim/não; success -> fechar + ação extra
       if (mode === "confirm") {
         modalYes.style.display = "inline-block";
         modalNo.style.display = "inline-block";
         modalClose.style.display = "none";
-        modalYes.onclick = () => {
-          try { onYes && onYes(); } finally { closeModal(); }
-        };
+        modalYes.onclick = () => { try { onYes && onYes(); } finally { closeModal(); } };
         modalNo.onclick = () => closeModal();
+      } else if (mode === "success") {
+        modalYes.style.display = "inline-block";
+        modalNo.style.display = "none";
+        modalClose.style.display = "inline-block";
+        if (!yesLabel) modalYes.textContent = "Ver nas listas";
+        modalYes.onclick = () => { try { onYes && onYes(); } finally { closeModal(); } };
+        modalClose.onclick = () => closeModal();
       } else {
         modalYes.style.display = "none";
         modalNo.style.display = "none";
@@ -370,10 +379,20 @@
           saldo: 1000
         };
         const docRef = await addDoc(alunosCol, payload);
-        openModal({ title: "Sucesso", message: `Aluno criado (docId: ${docRef.id}).`, mode: "info" });
+        openModal({
+          title: "Sucesso",
+          message: `Aluno criado (docId: ${docRef.id}).`,
+          mode: "success",
+          yesLabel: "Ver nas listas",
+          closeLabel: "Fechar",
+          onYes: () => { try { document.querySelector('#q2')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {} }
+        });
         // limpa form
         ["#firstName","#lastName","#idAluno","#user","#password","#periodo"].forEach(sel => $(sel).value = "");
         $("#ativo").checked = false;
+        // Atualiza listas Q2 e Q3 automaticamente
+        try { btnRefreshList.click(); } catch {}
+        try { btnRefreshDelete.click(); } catch {}
       } catch (err) {
         lastError = err;
         console.error("Erro ao adicionar aluno:", err);
@@ -473,6 +492,13 @@
 
     // Botões de Debug (Q4)
     const debugArea = $("#debugButtons");
+    function randomOf(list) { return list[Math.floor(Math.random()*list.length)]; }
+    function randomString(len, charset = "abcdefghijklmnopqrstuvwxyz") {
+      let out = "";
+      for (let i = 0; i < len; i++) out += charset[Math.floor(Math.random() * charset.length)];
+      return out;
+    }
+    function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
     const debugActions = [
       {
         id: "dbg1", label: "Init Firebase", hint: "Exibe o app e o projectId para conferir a configuração.", fn: () => {
@@ -597,6 +623,44 @@
           console.log("Auth:", auth);
           console.log("currentUser:", auth?.currentUser);
           console.log("uid:", auth?.currentUser?.uid || null);
+        }
+      },
+      {
+        id: "dbg18", label: "Gerar aluno aleatório", hint: "Cria um doc em 'alunos' com dados randômicos e ativo=true.", fn: async () => {
+          try {
+            const firstName = capitalize(randomString(6));
+            const lastName = capitalize(randomString(7));
+            const idAluno = randomString(7, "abcdefghijklmnopqrstuvwxyz0123456789");
+            const user = randomString(8);
+            const periodo = randomOf(["Manhã", "Tarde", "Noite"]);
+            const payload = {
+              firstName,
+              lastName,
+              idAluno,
+              user,
+              password: "12345678",
+              periodo,
+              ativo: true,
+              quandoRegistrou: serverTimestamp(),
+              saldo: 1000
+            };
+            const ref = await addDoc(alunosCol, payload);
+            console.log("Aluno aleatório criado:", ref.id, payload);
+            // Atualiza listas Q2 e Q3 automaticamente
+            try { btnRefreshList.click(); } catch {}
+            try { btnRefreshDelete.click(); } catch {}
+            // Modal de sucesso com opção de ver listas
+            openModal({
+              title: "Sucesso",
+              message: `Aluno aleatório criado (docId: ${ref.id}).`,
+              mode: "success",
+              yesLabel: "Ver nas listas",
+              closeLabel: "Fechar",
+              onYes: () => { try { document.querySelector('#q2')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {} }
+            });
+          } catch (e) {
+            lastError = e; console.error("Falha ao gerar aluno:", e?.code, e?.message || e);
+          }
         }
       }
     ];
