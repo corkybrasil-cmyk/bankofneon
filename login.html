@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Login • Banco da Neon</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #131a22;
+      --panel-alt: #111820;
+      --text: #e6eef8;
+      --muted: #9fb3c8;
+      --accent: #1ee1a8;
+      --border: #223042;
+      --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% -10%, #0e1621 0%, var(--bg) 50%),
+                  radial-gradient(1000px 700px at 110% 110%, #0c141e 0%, var(--bg) 55%);
+      display: grid; place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(92vw, 420px);
+      background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+    h1 { margin: 0 0 6px 0; font-size: 20px; }
+    p.helper { margin: 0 0 16px 0; color: var(--muted); font-size: 13px; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      background: #0e141b;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    .field { margin-bottom: 12px; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+    button {
+      background: linear-gradient(180deg, #162231, #111a25);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    button.primary { border-color: #1b3b2e; background: linear-gradient(180deg, #1b3b2e, #11231c); color: #c6ffea; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 6px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+    a.link { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <section class="card">
+    <h1>Entrar</h1>
+    <p class="helper">Use seu usuário e senha cadastrados na coleção "alunos".</p>
+
+    <div class="field">
+      <label for="user">Usuário</label>
+      <input id="user" type="text" placeholder="Ex.: marcelrpg" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label for="password">Senha</label>
+      <input id="password" type="password" placeholder="Sua senha" autocomplete="current-password" />
+    </div>
+    <div class="actions">
+      <button id="btnLogin" class="primary">Entrar</button>
+      <button id="btnDebugUsers" title="Lista todos os 'user' em alunos no console" aria-label="Listar usuários">Debug: Listar usuários</button>
+    </div>
+    <div id="err" class="error"></div>
+    <div class="row">
+      <span class="muted">Coleção: alunos</span>
+      <a class="link" href="index.html" title="Ir para o app">Ir para o app</a>
+    </div>
+  </section>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      limit,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    // Config (do seu codigofirebase.txt)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+
+    // Firestore (usa banco nomeado se disponível, com fallback)
+    let db;
+    try { db = getFirestore(app, "bancodaneondb"); } catch { db = getFirestore(app); }
+    const alunosCol = collection(db, "alunos");
+
+    // Autenticação anônima para permitir leitura (segundo as regras sugeridas)
+    try { await signInAnonymously(getAuth(app)); } catch (e) {
+      console.warn("Auth anônima indisponível:", e?.code, e?.message || e);
+    }
+
+    const $ = (s) => document.querySelector(s);
+    const btnLogin = $("#btnLogin");
+    const btnDebugUsers = $("#btnDebugUsers");
+    const errEl = $("#err");
+
+    function setError(msg) { errEl.textContent = msg || ""; }
+
+    async function findUserDoc(username) {
+      const q = query(alunosCol, where("user", "==", username), limit(1));
+      const snap = await getDocs(q);
+      if (snap.empty) return null;
+      const d = snap.docs[0];
+      return { id: d.id, ...d.data() };
+    }
+
+    btnLogin.addEventListener("click", async () => {
+      setError("");
+      const username = $("#user").value.trim();
+      const password = $("#password").value;
+      if (!username || !password) {
+        setError("Preencha usuário e senha.");
+        return;
+      }
+      btnLogin.disabled = true;
+      try {
+        const userDoc = await findUserDoc(username);
+        if (!userDoc) {
+          setError("Usuário não encontrado.");
+          return;
+        }
+        if (String(userDoc.password || "") !== String(password)) {
+          setError("Senha incorreta.");
+          return;
+        }
+        // OK -> redireciona para o app
+        window.location.href = "index.html";
+      } catch (e) {
+        console.error(e);
+        setError(e?.message || String(e));
+      } finally {
+        btnLogin.disabled = false;
+      }
+    });
+
+    btnDebugUsers.addEventListener("click", async () => {
+      try {
+        const snap = await getDocs(alunosCol);
+        const users = [];
+        snap.forEach(d => {
+          const data = d.data();
+          users.push({ docId: d.id, user: data?.user ?? null });
+        });
+        console.log("Usuários em 'alunos':", users);
+      } catch (e) {
+        console.error("Erro ao listar usuários:", e?.code, e?.message || e);
+      }
+    });
+  </script>
+</body>
+</html>
+
+
