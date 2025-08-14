@@ -5,30 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Dashboard • Banco da Neon</title>
   <style>
-    :root { --bg:#0b0f14; --text:#e6eef8; --muted:#9fb3c8; --panel:#131a22; --border:#223042; --accent:#1ee1a8; }
+    :root {
+      --primary: #5a039a;
+      --secondary: #b6f902;
+      --secondary-700: #8bb601;
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #5d5d6a;
+      --border: #e8e8ef;
+    }
     *{ box-sizing:border-box; }
-    body { margin:0; background: #0b0f14; color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; }
-    .wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
-    .card { background: linear-gradient(180deg, var(--panel), #111820); border:1px solid var(--border); border-radius:14px; padding:16px; }
-    .row { display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px; }
-    a { color: var(--accent); text-decoration:none; }
-    .big { font-size: 22px; font-weight: 700; }
+    body {
+      margin:0; color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto;
+      background:
+        radial-gradient(800px 600px at 100% -10%, rgba(90,3,154,0.10), rgba(90,3,154,0.0) 60%),
+        var(--bg);
+    }
+    .header { background: var(--primary); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(90,3,154,0.25); }
+    .brand { display:flex; align-items:center; gap: 12px; }
+    .brand img { height: 80px; width: auto; display:block; }
+    .brand .title { font-weight: 800; letter-spacing: .2px; }
+    .nav a { color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 999px; }
+    .nav a:hover { background: rgba(255,255,255,0.12); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(16, 20, 40, 0.08); }
+    .row { display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px; }
+    a { color: var(--primary); text-decoration:none; }
+    .big { font-size: 24px; font-weight: 800; }
     .muted { color: var(--muted); }
+    .pill { display:inline-flex; align-items:center; gap:8px; background: linear-gradient(180deg, var(--secondary), var(--secondary-700)); color: #202420; padding: 6px 12px; border-radius: 999px; font-weight: 700; border: 1px solid rgba(0,0,0,0.06); }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="row">
-      <div class="muted">Dashboard</div>
-      <div style="display:flex; gap:12px;">
-        <a href="dev.html">Dev</a>
-        <a href="adicionarAluno.html">Adicionar</a>
-        <a href="index.html" onclick="localStorage.removeItem('bn.currentUser')">Sair</a>
-      </div>
+  <div class="header">
+    <div class="brand">
+      <img src="logotipo.svg" alt="Neon" />
+      <div class="title">Banco da Neon</div>
     </div>
+    <nav class="nav">
+      <a href="dev.html">Dev</a>
+      <a href="adicionarAluno.html">Adicionar</a>
+      <a href="index.html" onclick="localStorage.removeItem('bn.currentUser')">Sair</a>
+    </nav>
+  </div>
+  <div class="wrap">
     <div class="card">
-      <div id="saudacao" class="big">Olá, ...</div>
-      <div id="saldo" class="big" style="margin-top:8px;">Seu saldo é ...</div>
+      <div class="row" style="margin-bottom:8px;">
+        <div id="saudacao" class="big">Olá, ...</div>
+        <div class="pill" id="saldoPill">Saldo: <span id="saldoNum">...</span></div>
+      </div>
+      <div class="muted">Os dados são carregados do Firestore.</div>
     </div>
   </div>
 
@@ -62,9 +90,9 @@
 
     const $ = (s) => document.querySelector(s);
     const saudacaoEl = $("#saudacao");
-    const saldoEl = $("#saldo");
+    const saldoNumEl = $("#saldoNum");
 
-    // Spinner overlay
+    // Spinner overlay (mantido)
     const spinner = document.createElement('div');
     spinner.id = 'spinner';
     spinner.style.cssText = 'display:flex; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); align-items:center; justify-content:center;';
@@ -84,15 +112,15 @@
         const nome = data?.firstName || sess.firstName || sess.user;
         const saldo = data?.saldo ?? sess.saldo ?? 0;
         saudacaoEl.textContent = `Olá, ${nome}`;
-        saldoEl.textContent = `Seu saldo é ${saldo}`;
+        saldoNumEl.textContent = `${saldo}`;
       } else {
         saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
-        saldoEl.textContent = `Seu saldo é ${sess.saldo ?? 0}`;
+        saldoNumEl.textContent = `${sess.saldo ?? 0}`;
       }
     } catch (e) {
       console.error(e);
       saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
-      saldoEl.textContent = `Seu saldo é ${sess.saldo ?? 0}`;
+      saldoNumEl.textContent = `${sess.saldo ?? 0}`;
     } finally { spinner.style.display = 'none'; }
   </script>
 </body>
