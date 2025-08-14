@@ -13,15 +13,24 @@ try {
 
 const loginForm = document.getElementById('loginForm');
 const loginMsg = document.getElementById('loginMsg');
+const loginButton = loginForm?.querySelector('button[type="submit"]');
+let isSubmitting = false;
 
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (isSubmitting) return;
   if (!db) {
     loginMsg.textContent = 'Erro de inicialização do banco. Veja o console.';
     console.error('[Login] Firestore indisponível. Verifique a inicialização do Firebase.');
     return;
   }
   try {
+    isSubmitting = true;
+    if (loginButton) {
+      loginButton.disabled = true;
+      loginButton.textContent = 'Entrando...';
+    }
+    loginMsg.textContent = 'Verificando credenciais...';
     const nome = document.getElementById('alunoNome').value;
     const senha = document.getElementById('alunoSenha').value;
     if (!nome || !senha) {
@@ -65,5 +74,11 @@ loginForm.addEventListener('submit', async (e) => {
       console.error('[Login] Erro durante a consulta de login:', loginError?.message || loginError);
     }
     loginMsg.textContent = 'Erro ao realizar login. Veja o console.';
+  } finally {
+    isSubmitting = false;
+    if (loginButton) {
+      loginButton.disabled = false;
+      loginButton.textContent = 'Entrar';
+    }
   }
 });

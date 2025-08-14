@@ -1,0 +1,49 @@
+Firestore Database
+databaseName = bancodaneondb
+collectionName = alunos
+
+uhPvmR9efSc1XIiIQf4K = 
+
+ativo
+true
+(boolean)
+
+
+firstName
+"Marcel"
+(string)
+
+
+idAluno
+"c7f0128"
+(string)
+
+
+lastName
+"Tasso"
+(string)
+
+
+password
+"12345678"
+(string)
+
+
+periodo
+"Manhã"
+(string)
+
+
+quandoRegistrou
+14 de agosto de 2025 às 16:49:36 UTC-3
+(timestamp)
+
+
+saldo
+1000
+(number)
+
+
+user
+"marcelrpg"
+(string)

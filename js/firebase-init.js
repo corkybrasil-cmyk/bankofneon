@@ -3,6 +3,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+import { initializeFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
@@ -29,11 +30,18 @@ function logInitEnvironmentDiagnostics() {
 
 let app;
 let analytics;
+let db;
 
 try {
   logInitEnvironmentDiagnostics();
   app = initializeApp(firebaseConfig);
   console.log('[Firebase Init] App inicializado com sucesso');
+  try {
+    db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+    console.log('[Firebase Init] Firestore inicializado (auto detecção de long polling ativada)');
+  } catch (firestoreInitError) {
+    console.warn('[Firebase Init] Falha ao personalizar Firestore; usando padrão:', firestoreInitError?.message || firestoreInitError);
+  }
   try {
     analytics = getAnalytics(app);
     console.log('[Firebase Init] Analytics inicializado');
@@ -47,3 +55,4 @@ try {
 // Expor no window para facilitar debug no console
 window.firebaseApp = app;
 window.firebaseAnalytics = analytics;
+window.firebaseDb = db;
