@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Banco da Neon - App Alunos</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #131a22;
+      --panel-alt: #111820;
+      --text: #e6eef8;
+      --muted: #9fb3c8;
+      --accent: #1ee1a8;
+      --accent-2: #5ad1ff;
+      --danger: #ff6b6b;
+      --warning: #ffd166;
+      --ok: #38d9a9;
+      --border: #223042;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% -10%, #0e1621 0%, var(--bg) 50%),
+                  radial-gradient(1000px 700px at 110% 110%, #0c141e 0%, var(--bg) 55%);
+    }
+    .app-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .brand { font-weight: 700; letter-spacing: 0.2px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, minmax(420px, auto));
+      gap: 16px;
+      padding: 16px;
+    }
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.02);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .card h2 { margin: 0 0 12px 0; font-size: 18px; font-weight: 700; }
+    .card p.helper { margin: 0 0 16px 0; color: var(--muted); font-size: 13px; }
+    .form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+    input[type="text"], input[type="password"], select {
+      width: 100%;
+      background: #0e141b;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .checkbox {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border: 1px dashed var(--border); border-radius: 10px;
+    }
+    .actions { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      background: linear-gradient(180deg, #162231, #111a25);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    button.primary { border-color: #1b3b2e; background: linear-gradient(180deg, #1b3b2e, #11231c); color: #c6ffea; }
+    button.warn { border-color: #5c3b00; background: linear-gradient(180deg, #5c3b00, #2b1c00); color: #ffe8b3; }
+    button.danger { border-color: #5c1010; background: linear-gradient(180deg, #5c1010, #2b0606); color: #ffd6d6; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    ul.list { margin: 8px 0 0 0; padding: 0; list-style: none; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+    ul.list li {
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer;
+    }
+    ul.list li:last-child { border-bottom: none; }
+    ul.list li button { padding: 6px 10px; font-size: 12px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .grid-compact { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 8px; }
+    .legend { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .legend .pill { font-size: 11px; border: 1px solid var(--border); border-radius: 9999px; padding: 4px 8px; color: var(--muted); }
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 20;
+    }
+    .modal {
+      width: min(92vw, 520px);
+      background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    }
+    .modal h3 { margin: 0 0 8px 0; }
+    .modal p { margin: 0 0 12px 0; color: var(--muted); }
+    .modal .actions { justify-content: flex-end; }
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; grid-template-rows: none; }
+      .form { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <div class="brand">Banco da Neon • Firestore "alunos"</div>
+    <div class="legend">
+      <span class="pill">DB: <span class="mono">bancodaneondb</span></span>
+      <span class="pill">Coleção: <span class="mono">alunos</span></span>
+    </div>
+  </div>
+
+  <main class="grid">
+    <!-- Quadrante 1: Adicionar aluno -->
+    <section class="card" id="q1">
+      <h2>Adicionar novo aluno</h2>
+      <p class="helper">Preencha todos os campos e clique em "Adicionar". Campos obrigatórios: firstName, lastName, idAluno, user, password, periodo.</p>
+      <div class="form">
+        <div>
+          <label for="firstName">firstName</label>
+          <input id="firstName" type="text" placeholder="Ex.: Marcel" />
+        </div>
+        <div>
+          <label for="lastName">lastName</label>
+          <input id="lastName" type="text" placeholder="Ex.: Tasso" />
+        </div>
+        <div>
+          <label for="idAluno">idAluno</label>
+          <input id="idAluno" type="text" placeholder="Ex.: c7f0128" />
+        </div>
+        <div>
+          <label for="user">user</label>
+          <input id="user" type="text" placeholder="Ex.: marcelrpg" />
+        </div>
+        <div>
+          <label for="password">password</label>
+          <input id="password" type="password" placeholder="Mín. 8 caracteres" />
+        </div>
+        <div>
+          <label for="periodo">periodo</label>
+          <input id="periodo" type="text" placeholder="Ex.: Manhã" />
+        </div>
+        <div class="checkbox">
+          <input id="ativo" type="checkbox" />
+          <label for="ativo">ativo</label>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="btnAdd">Adicionar</button>
+        <span class="muted">Ao salvar: quandoRegistrou = serverTimestamp(), saldo = 1000</span>
+      </div>
+    </section>
+
+    <!-- Quadrante 2: Listar & inspecionar idAluno -->
+    <section class="card" id="q2">
+      <h2>Lista de alunos (idAluno por nome)</h2>
+      <div class="actions">
+        <button id="btnRefreshList">Refresh</button>
+        <span class="muted">Clique em um nome para ver o idAluno</span>
+      </div>
+      <ul class="list" id="listNames"></ul>
+    </section>
+
+    <!-- Quadrante 3: Excluir aluno -->
+    <section class="card" id="q3">
+      <h2>Excluir aluno</h2>
+      <div class="actions">
+        <button class="warn" id="btnRefreshDelete">Refresh</button>
+        <span class="muted">Clique em um nome para solicitar exclusão</span>
+      </div>
+      <ul class="list" id="listDelete"></ul>
+    </section>
+
+    <!-- Quadrante 4: Debug -->
+    <section class="card" id="q4">
+      <h2>Debug Firebase</h2>
+      <p class="helper">Botões para diagnosticar problemas comuns: inicialização, leitura, escrita, DOM e conectividade. Veja o console (F12).</p>
+      <div class="grid-compact" id="debugButtons"></div>
+    </section>
+  </main>
+
+  <!-- Modal genérico -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Título</h3>
+      <p id="modalMessage">Mensagem</p>
+      <div class="actions">
+        <button id="modalNo" class="">Não</button>
+        <button id="modalYes" class="danger">Sim</button>
+        <button id="modalClose" class="primary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + App logic -->
+  <script type="module">
+    // Import dos SDKs (versão 12.1.0 conforme codigofirebase.txt)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    // Config do seu projeto (de codigofirebase.txt)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    let analytics;
+    try {
+      analytics = getAnalytics(app);
+    } catch (err) {
+      console.warn("Analytics não disponível neste contexto:", err?.message || err);
+    }
+
+    // Firestore: banco nomeado "bancodaneondb" e coleção "alunos"
+    // Se a sua instância usa apenas o banco padrão, remover o segundo argumento abaixo.
+    let db;
+    try {
+      db = getFirestore(app, "bancodaneondb");
+    } catch (e) {
+      console.warn("getFirestore(app, 'bancodaneondb') falhou; usando default:", e?.message || e);
+      db = getFirestore(app);
+    }
+
+    const alunosCol = collection(db, "alunos");
+
+    // Estado em memória para listas
+    let cacheList = []; // [{ docId, firstName, idAluno }]
+    let cacheDelete = []; // [{ docId, firstName, idAluno }]
+    let lastError = null;
+
+    // Utilidades DOM
+    const $ = (sel) => document.querySelector(sel);
+    const listNamesEl = $("#listNames");
+    const listDeleteEl = $("#listDelete");
+    const btnAdd = $("#btnAdd");
+    const btnRefreshList = $("#btnRefreshList");
+    const btnRefreshDelete = $("#btnRefreshDelete");
+
+    // Modal genérico (info/confirm)
+    const overlay = $("#modalOverlay");
+    const modalTitle = $("#modalTitle");
+    const modalMessage = $("#modalMessage");
+    const modalNo = $("#modalNo");
+    const modalYes = $("#modalYes");
+    const modalClose = $("#modalClose");
+
+    function openModal({ title, message, mode = "info", onYes = null }) {
+      modalTitle.textContent = title || "Mensagem";
+      modalMessage.textContent = message || "";
+      overlay.style.display = "flex";
+      // Modes: info -> só fechar; confirm -> sim/não
+      if (mode === "confirm") {
+        modalYes.style.display = "inline-block";
+        modalNo.style.display = "inline-block";
+        modalClose.style.display = "none";
+        modalYes.onclick = () => {
+          try { onYes && onYes(); } finally { closeModal(); }
+        };
+        modalNo.onclick = () => closeModal();
+      } else {
+        modalYes.style.display = "none";
+        modalNo.style.display = "none";
+        modalClose.style.display = "inline-block";
+        modalClose.onclick = () => closeModal();
+      }
+    }
+    function closeModal() { overlay.style.display = "none"; }
+
+    // Form: adicionar aluno
+    btnAdd.addEventListener("click", async () => {
+      const firstName = $("#firstName").value.trim();
+      const lastName = $("#lastName").value.trim();
+      const idAluno = $("#idAluno").value.trim();
+      const user = $("#user").value.trim();
+      const password = $("#password").value.trim();
+      const periodo = $("#periodo").value.trim();
+      const ativo = $("#ativo").checked === true;
+
+      // Validação simples
+      const missing = [];
+      if (!firstName) missing.push("firstName");
+      if (!lastName) missing.push("lastName");
+      if (!idAluno) missing.push("idAluno");
+      if (!user) missing.push("user");
+      if (!password || password.length < 8) missing.push("password (min 8)");
+      if (!periodo) missing.push("periodo");
+      if (missing.length) {
+        openModal({
+          title: "Campos obrigatórios",
+          message: `Preencha: ${missing.join(", ")}`,
+          mode: "info"
+        });
+        return;
+      }
+
+      btnAdd.disabled = true;
+      try {
+        const payload = {
+          firstName,
+          lastName,
+          idAluno,
+          user,
+          password,
+          periodo,
+          ativo,
+          quandoRegistrou: serverTimestamp(),
+          saldo: 1000
+        };
+        const docRef = await addDoc(alunosCol, payload);
+        openModal({ title: "Sucesso", message: `Aluno criado (docId: ${docRef.id}).`, mode: "info" });
+        // limpa form
+        ["#firstName","#lastName","#idAluno","#user","#password","#periodo"].forEach(sel => $(sel).value = "");
+        $("#ativo").checked = false;
+      } catch (err) {
+        lastError = err;
+        console.error("Erro ao adicionar aluno:", err);
+        openModal({ title: "Erro", message: String(err?.message || err), mode: "info" });
+      } finally {
+        btnAdd.disabled = false;
+      }
+    });
+
+    // Listas (Q2 e Q3)
+    async function fetchAlunos() {
+      const snapshot = await getDocs(alunosCol);
+      const result = [];
+      snapshot.forEach((d) => {
+        const data = d.data();
+        result.push({
+          docId: d.id,
+          firstName: data?.firstName ?? "(sem nome)",
+          idAluno: data?.idAluno ?? "(sem idAluno)"
+        });
+      });
+      return result;
+    }
+
+    function renderList(targetEl, items, onClick) {
+      targetEl.innerHTML = "";
+      if (!items.length) {
+        const li = document.createElement("li");
+        li.innerHTML = '<span class="muted">Nenhum aluno encontrado.</span>';
+        targetEl.appendChild(li);
+        return;
+      }
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        const name = document.createElement("span");
+        name.textContent = item.firstName;
+        li.addEventListener("click", () => onClick(item));
+        li.appendChild(name);
+        targetEl.appendChild(li);
+      });
+    }
+
+    btnRefreshList.addEventListener("click", async () => {
+      btnRefreshList.disabled = true;
+      const t0 = performance.now();
+      try {
+        cacheList = await fetchAlunos();
+        renderList(listNamesEl, cacheList, (item) => {
+          openModal({
+            title: `Aluno: ${item.firstName}`,
+            message: `idAluno: ${item.idAluno}`,
+            mode: "info"
+          });
+        });
+      } catch (err) {
+        lastError = err;
+        console.error("Erro no refresh (Q2):", err);
+        openModal({ title: "Erro no refresh (Q2)", message: String(err?.message || err), mode: "info" });
+      } finally {
+        const dt = (performance.now() - t0).toFixed(0);
+        console.log(`Refresh Q2 levou ${dt} ms`);
+        btnRefreshList.disabled = false;
+      }
+    });
+
+    btnRefreshDelete.addEventListener("click", async () => {
+      btnRefreshDelete.disabled = true;
+      try {
+        cacheDelete = await fetchAlunos();
+        renderList(listDeleteEl, cacheDelete, (item) => {
+          openModal({
+            title: `Excluir: ${item.firstName}`,
+            message: `Deseja excluir este aluno? (idAluno: ${item.idAluno})`,
+            mode: "confirm",
+            onYes: async () => {
+              try {
+                await deleteDoc(doc(db, "alunos", item.docId));
+                console.log("Aluno excluído (docId)", item.docId);
+                // Atualiza a lista após exclusão
+                btnRefreshDelete.click();
+              } catch (err) {
+                lastError = err;
+                console.error("Erro ao excluir:", err);
+                openModal({ title: "Erro ao excluir", message: String(err?.message || err), mode: "info" });
+              }
+            }
+          });
+        });
+      } catch (err) {
+        lastError = err;
+        console.error("Erro no refresh (Q3):", err);
+        openModal({ title: "Erro no refresh (Q3)", message: String(err?.message || err), mode: "info" });
+      } finally {
+        btnRefreshDelete.disabled = false;
+      }
+    });
+
+    // Botões de Debug (Q4)
+    const debugArea = $("#debugButtons");
+    const debugActions = [
+      {
+        id: "dbg1", label: "Init Firebase", fn: () => {
+          console.log("App:", app);
+          console.log("Config OK? projectId=", firebaseConfig.projectId);
+        }
+      },
+      {
+        id: "dbg2", label: "Firestore ativo?", fn: () => {
+          console.log("DB:", db);
+          console.log("Coleção:", alunosCol?.path);
+        }
+      },
+      {
+        id: "dbg3", label: "Conectividade", fn: async () => {
+          console.log("navigator.onLine=", navigator.onLine);
+          try {
+            const r = await fetch("https://firestore.googleapis.com/.well-known/apikey", { method: "HEAD" });
+            console.log("Ping Firestore API status:", r.status);
+          } catch (e) {
+            console.log("Falha ao pingar Firestore API:", e?.message || e);
+          }
+        }
+      },
+      {
+        id: "dbg4", label: "Teste leitura (1)", fn: async () => {
+          try {
+            const t0 = performance.now();
+            const arr = await fetchAlunos();
+            console.log(`Leu ${arr.length} alunos em ${(performance.now()-t0).toFixed(0)} ms`, arr);
+          } catch (e) {
+            lastError = e; console.error("Erro leitura:", e);
+          }
+        }
+      },
+      {
+        id: "dbg5", label: "Tempo refresh Q2", fn: async () => {
+          const t0 = performance.now();
+          await btnRefreshList.click();
+          console.log("Tempo Q2:", (performance.now()-t0).toFixed(0), "ms");
+        }
+      },
+      {
+        id: "dbg6", label: "DOM listas", fn: () => {
+          console.log("listNames existe?", !!listNamesEl, listNamesEl);
+          console.log("listDelete existe?", !!listDeleteEl, listDeleteEl);
+        }
+      },
+      {
+        id: "dbg7", label: "Listeners refresh", fn: () => {
+          console.log("btnRefreshList:", btnRefreshList);
+          console.log("btnRefreshDelete:", btnRefreshDelete);
+        }
+      },
+      {
+        id: "dbg8", label: "Validar formulário", fn: () => {
+          const required = ["#firstName","#lastName","#idAluno","#user","#password","#periodo"];
+          const empty = required.filter(sel => !document.querySelector(sel)?.value?.trim());
+          console.log("Campos vazios:", empty);
+        }
+      },
+      {
+        id: "dbg9", label: "Escrita teste", fn: async () => {
+          try {
+            const payload = { kind: "debug", quando: serverTimestamp() };
+            const tmp = await addDoc(collection(db, "debug"), payload);
+            console.log("Doc debug criado:", tmp.id);
+            await deleteDoc(doc(db, "debug", tmp.id));
+            console.log("Doc debug removido:", tmp.id);
+          } catch (e) {
+            lastError = e; console.error("Erro escrita teste:", e);
+          }
+        }
+      },
+      {
+        id: "dbg10", label: "Último erro", fn: () => {
+          console.log("lastError=", lastError);
+          if (lastError?.stack) console.log(lastError.stack);
+        }
+      },
+      {
+        id: "dbg11", label: "Versão SDK", fn: () => {
+          console.log("SDK esperado: 12.1.0 (CDN)");
+        }
+      },
+      {
+        id: "dbg12", label: "Config credenciais", fn: () => {
+          console.log({ projectId: firebaseConfig.projectId, authDomain: firebaseConfig.authDomain, storageBucket: firebaseConfig.storageBucket });
+        }
+      },
+      {
+        id: "dbg13", label: "Analytics ok?", fn: () => {
+          console.log("Analytics:", analytics || "(indisponível)");
+          console.log("Secure context:", window.isSecureContext);
+        }
+      },
+      {
+        id: "dbg14", label: "Coleção vazia?", fn: async () => {
+          try {
+            const arr = await fetchAlunos();
+            console.log(arr.length === 0 ? "Coleção 'alunos' vazia" : `Alunos: ${arr.length}`);
+          } catch (e) { lastError = e; console.error(e); }
+        }
+      },
+      {
+        id: "dbg15", label: "Checar 'ativo'", fn: () => {
+          console.log("Check ativo (checkbox):", $("#ativo").checked);
+        }
+      },
+      {
+        id: "dbg16", label: "Permissões (read)", fn: async () => {
+          try {
+            await fetchAlunos();
+            console.log("Leitura permitida.");
+          } catch (e) {
+            lastError = e; console.error("Possível PERMISSION_DENIED:", e?.code, e?.message || e);
+          }
+        }
+      }
+    ];
+
+    // Renderizar botões de debug
+    debugActions.forEach(({ id, label, fn }) => {
+      const b = document.createElement("button");
+      b.id = id; b.textContent = label; b.addEventListener("click", fn);
+      debugArea.appendChild(b);
+    });
+
+    // Acessibilidade básica: fechar modal com ESC
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  </script>
+</body>
+</html>
+
+
