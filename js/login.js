@@ -5,8 +5,8 @@ import { getFirestore, collection, query, where, getDocs } from "https://www.gst
 
 let db;
 try {
-  db = getFirestore();
-  console.log('[Login] Firestore obtido com sucesso');
+  db = getFirestore(undefined, 'bancodaneondb');
+  console.log('[Login] Firestore obtido com sucesso (db: bancodaneondb)');
 } catch (firestoreError) {
   console.error('[Login] Erro ao obter Firestore:', firestoreError?.message || firestoreError);
 }
@@ -39,7 +39,8 @@ loginForm.addEventListener('submit', async (e) => {
     }
 
     const alunosRef = collection(db, 'alunos');
-    const q = query(alunosRef, where('nome', '==', nome), where('senha', '==', senha));
+    // Ajuste para os campos do seu Firestore: user / password
+    const q = query(alunosRef, where('user', '==', nome), where('password', '==', senha));
 
     console.log('[Login] Executando consulta no Firestore', { collection: 'alunos', filtros: { nome, senhaMasked: senha ? '***' : '' } });
     const querySnapshot = await getDocs(q);

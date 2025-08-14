@@ -37,8 +37,9 @@ try {
   app = initializeApp(firebaseConfig);
   console.log('[Firebase Init] App inicializado com sucesso');
   try {
-    db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
-    console.log('[Firebase Init] Firestore inicializado (auto detecção de long polling ativada)');
+    // Usa a database nomeada "bancodaneondb" conforme firebaseInfo.txt
+    db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true }, 'bancodaneondb');
+    console.log('[Firebase Init] Firestore inicializado na database "bancodaneondb" (auto long polling)');
   } catch (firestoreInitError) {
     console.warn('[Firebase Init] Falha ao personalizar Firestore; usando padrão:', firestoreInitError?.message || firestoreInitError);
   }

@@ -5,8 +5,8 @@ import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.c
 
 let db;
 try {
-  db = getFirestore();
-  console.log('[Alunos] Firestore obtido com sucesso');
+  db = getFirestore(undefined, 'bancodaneondb');
+  console.log('[Alunos] Firestore obtido com sucesso (db: bancodaneondb)');
 } catch (firestoreError) {
   console.error('[Alunos] Erro ao obter Firestore:', firestoreError?.message || firestoreError);
 }
@@ -27,8 +27,8 @@ cadastroForm.addEventListener('submit', async (e) => {
       console.warn('[Alunos] Cadastro com campos vazios');
       return;
     }
-    console.log('[Alunos] Adicionando documento', { collection: 'alunos', nome });
-    await addDoc(collection(db, 'alunos'), { nome, senha });
+    console.log('[Alunos] Adicionando documento', { collection: 'alunos', user: nome });
+    await addDoc(collection(db, 'alunos'), { user: nome, password: senha });
     document.getElementById('novoAlunoNome').value = '';
     document.getElementById('novoAlunoSenha').value = '';
     listarAlunos();
@@ -64,7 +64,8 @@ async function listarAlunos() {
     querySnapshot.forEach((docRef) => {
       const aluno = docRef.data();
       const li = document.createElement('li');
-      li.textContent = aluno.nome;
+      const fullName = aluno.firstName && aluno.lastName ? `${aluno.firstName} ${aluno.lastName}` : (aluno.user || 'sem user');
+      li.textContent = `${fullName} — saldo: ${aluno.saldo ?? 'N/A'} — período: ${aluno.periodo ?? 'N/A'}`;
       listaAlunos.appendChild(li);
       count += 1;
     });
@@ -100,13 +101,13 @@ async function criarUsuarioPadrao() {
     let existePadrao = false;
     querySnapshot.forEach((docRef) => {
       const aluno = docRef.data();
-      if (aluno.nome === 'teste' && aluno.senha === '1234') {
+      if (aluno.user === 'teste' && aluno.password === '1234') {
         existePadrao = true;
       }
     });
     if (!existePadrao) {
       console.warn('[Alunos] Criando usuário padrão teste/1234 (apenas para desenvolvimento)');
-      await addDoc(collection(db, 'alunos'), { nome: 'teste', senha: '1234' });
+      await addDoc(collection(db, 'alunos'), { user: 'teste', password: '1234' });
     }
   } catch (seedError) {
     const code = seedError?.code;
