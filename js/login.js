@@ -19,7 +19,9 @@ loginForm.addEventListener('submit', async (e) => {
 
   if (!querySnapshot.empty) {
     loginMsg.textContent = 'Login realizado com sucesso!';
-    // Redirecionar ou mostrar dashboard
+    setTimeout(() => {
+      window.location.href = 'alunos.html';
+    }, 1000);
   } else {
     loginMsg.textContent = 'Nome ou senha incorretos.';
   }
