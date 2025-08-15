@@ -26,6 +26,12 @@
     .item{ padding:12px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
     .item:last-child{ border-bottom:none; }
     .empty{ text-align:center; color:var(--muted); padding:16px; }
+    .form{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    label{ font-size:12px; color:var(--muted); }
+    input, select, textarea{ width:100%; background:#f2f4f7; border:1px solid var(--border); border-radius:12px; padding:10px 12px; outline:none; }
+    textarea{ min-height:90px; resize:vertical; }
+    .actions{ display:flex; gap:10px; margin-top:12px; }
   </style>
 </head>
 <body>
@@ -47,8 +53,35 @@
 
     <div id="content" class="card" style="display:none;">
       <h1>Ocorrências</h1>
-      <p class="helper">Registros e comunicados relevantes.</p>
-      <ul id="listaOcorrencias" class="list"></ul>
+      <p class="helper">Somente professores podem cadastrar ocorrências.</p>
+      <div class="form">
+        <div class="field" style="grid-column: span 2;">
+          <label for="alunoSelect">Selecione o aluno</label>
+          <select id="alunoSelect"><option value="">Carregando alunos...</option></select>
+        </div>
+        <div class="field" style="grid-column: span 2;">
+          <label for="descricao">Descrição da ocorrência</label>
+          <textarea id="descricao" placeholder="Descreva a ocorrência"></textarea>
+        </div>
+        <div class="field">
+          <label for="datahora">Data e hora da ocorrência</label>
+          <input id="datahora" type="datetime-local" />
+        </div>
+        <div class="field">
+          <label for="gravidade">Gravidade</label>
+          <select id="gravidade">
+            <option value="leve">leve</option>
+            <option value="médio">médio</option>
+            <option value="grave">grave</option>
+            <option value="gravíssimo">gravíssimo</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnEnviar" class="btn">Enviar ocorrência</button>
+        <a href="dashboard.html" class="btn" style="background:#202123;">Voltar</a>
+      </div>
+      <ul id="listaOcorrencias" class="list" style="margin-top:16px;"></ul>
     </div>
   </div>
 
@@ -56,7 +89,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy, limit, where, doc, setDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
@@ -75,31 +108,52 @@
     const unauthEl = document.getElementById('unauth');
     const contentEl = document.getElementById('content');
     const listaEl = document.getElementById('listaOcorrencias');
+    const alunoSelect = document.getElementById('alunoSelect');
+    const descricaoEl = document.getElementById('descricao');
+    const datahoraEl = document.getElementById('datahora');
+    const gravidadeEl = document.getElementById('gravidade');
+    const btnEnviar = document.getElementById('btnEnviar');
     const sessRaw = localStorage.getItem('bn.currentUser');
     let sess = null; try { sess = JSON.parse(sessRaw); } catch {}
 
-    if (!sess || !sess.user) {
+    if (!sess || !sess.user || sess.classe !== 'professor') {
       unauthEl.style.display = 'flex';
     } else {
       contentEl.style.display = 'block';
       document.documentElement.classList.remove('auth-pending');
 
-      // Opcional: buscar ocorrências (modelo genérico). Ajuste a coleção se necessário.
+      // Carrega alunos para o select
+      try {
+        const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+        const alunosCol = collection(db, 'alunos');
+        const snapAlunos = await getDocs(query(alunosCol, orderBy('firstName', 'asc')));
+        const opts = [];
+        snapAlunos.forEach(d => {
+          const a = d.data();
+          const label = `${a?.firstName || ''} ${a?.lastName || ''}`.trim();
+          opts.push({ id: d.id, label });
+        });
+        opts.sort((x,y)=>x.label.localeCompare(y.label));
+        alunoSelect.innerHTML = '<option value="">Selecione o aluno</option>' + opts.map(o=>`<option value="${o.id}">${o.label}</option>`).join('');
+      } catch (e) {
+        alunoSelect.innerHTML = '<option value="">Erro ao carregar alunos</option>';
+      }
+
+      // Listagem simples das últimas ocorrências (global)
       try {
         const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
         const col = collection(db, 'ocorrencias');
-        const snap = await getDocs(query(col, orderBy('quando', 'desc'), limit(100)));
+        const snap = await getDocs(query(col, orderBy('quando', 'desc'), limit(20)));
         if (snap.empty) {
           const li = document.createElement('li'); li.className='empty'; li.textContent='Nenhuma ocorrência encontrada.'; listaEl.appendChild(li);
         } else {
           snap.forEach(d => {
             const data = d.data();
             const li = document.createElement('li'); li.className='item';
-            const titulo = data?.titulo ?? 'Ocorrência';
-            const quando = data?.quando?.toDate ? data.quando.toDate().toLocaleString() : '';
-            const desc = data?.descricao ?? '';
+            const titulo = data?.descricaoOcorrencia ?? 'Ocorrência';
+            const quando = data?.datahoraLancado?.toDate ? data.datahoraLancado.toDate().toLocaleString() : '';
             const left = document.createElement('div'); left.innerHTML = `<strong>${titulo}</strong><br><span style="color:var(--muted)">${quando}</span>`;
-            const right = document.createElement('div'); right.textContent = desc; right.style.maxWidth = '55%'; right.style.textAlign='right';
+            const right = document.createElement('div'); right.textContent = data?.falta ?? ''; right.style.maxWidth = '55%'; right.style.textAlign='right';
             li.appendChild(left); li.appendChild(right);
             listaEl.appendChild(li);
           });
@@ -108,6 +162,57 @@
         const li = document.createElement('li'); li.className='empty'; li.textContent = `Erro ao carregar: ${e?.message || e}`; listaEl.appendChild(li);
         console.error(e);
       }
+
+      // Enviar ocorrência
+      btnEnviar?.addEventListener('click', async () => {
+        const alunoId = alunoSelect.value;
+        const descricao = descricaoEl.value.trim();
+        const datahoraStr = datahoraEl.value;
+        const falta = gravidadeEl.value;
+        if (!alunoId || !descricao || !datahoraStr || !falta) {
+          alert('Preencha todos os campos.');
+          return;
+        }
+        const datahora = new Date(datahoraStr);
+        const confirmMsg = `Aluno: ${alunoSelect.options[alunoSelect.selectedIndex].text}\n`+
+                           `Data/Hora ocorrência: ${datahora.toLocaleString()}\n`+
+                           `Gravidade: ${falta}\n`+
+                           `Descrição: ${descricao}\n\nConfirmar envio?`;
+        if (!confirm(confirmMsg)) return;
+
+        try {
+          const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+          // Garante doc do aluno em ocorrencias/{docIdAluno}
+          const ocorrAlunoDocRef = doc(db, 'ocorrencias', alunoId);
+          await setDoc(ocorrAlunoDocRef, { atualizadoEm: serverTimestamp() }, { merge: true });
+          // Encontra próximo índice em ocorrencias/{docId}/ocorrenciaAluno
+          const subCol = collection(db, 'ocorrencias', alunoId, 'ocorrenciaAluno');
+          const snap = await getDocs(subCol);
+          let maxNum = 0;
+          snap.forEach(d => { const n = parseInt(d.id, 10); if (!isNaN(n) && n > maxNum) maxNum = n; });
+          const nextId = String(maxNum + 1);
+          await setDoc(doc(db, 'ocorrencias', alunoId, 'ocorrenciaAluno', nextId), {
+            datahoraLancado: serverTimestamp(),
+            datahoraOcorrencia: datahora,
+            descricaoOcorrencia: descricao,
+            docIdAluno: alunoId,
+            falta
+          });
+
+          // Lê custoFaltas (se existir) para eventual desconto (não aplicado aqui)
+          // const custoRef = doc(db, 'ocorrencias', 'custoFaltas');
+          // const custoSnap = await getDoc(custoRef);
+
+          alert('Ocorrência enviada com sucesso.');
+          descricaoEl.value = '';
+          datahoraEl.value = '';
+          gravidadeEl.value = 'leve';
+          alunoSelect.value = '';
+        } catch (e) {
+          alert(e?.message || String(e));
+          console.error(e);
+        }
+      });
     }
   </script>
 </body>
