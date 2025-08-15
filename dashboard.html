@@ -32,6 +32,7 @@
     .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(16, 20, 40, 0.08); }
     .card + .card { margin-top: 16px; }
+    #ocorrencias { min-height: 75vh; }
     .row { display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px; }
     a { color: var(--primary); text-decoration:none; }
     .big { font-size: 24px; font-weight: 800; }
@@ -48,6 +49,8 @@
     .greeting { font-size: 56px; font-weight: 800; }
     .account-label { font-size: 48px; color: var(--muted); font-weight: 800; }
     .balance { font-size: 36px; color: var(--muted); font-weight: 800; }
+    .account-line { position: relative; display: inline-block; }
+    .icon-btn { position: absolute; right: -28px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: none; background: transparent; padding: 0; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -65,7 +68,15 @@
     <div class="card">
       <div class="header-block">
         <div id="saudacao" class="greeting">Olá, ...</div>
-        <div id="robervaldo" class="account-label">Conta</div>
+        <div class="account-line">
+          <div id="robervaldo" class="account-label">Conta</div>
+          <button id="btnHide" class="icon-btn" title="Ocultar saldo" aria-label="Ocultar saldo" style="display: inline-block;">
+            <span class="mask" style="--icon: url('ocultar.svg'); --icon-color: var(--primary);"></span>
+          </button>
+          <button id="btnShow" class="icon-btn" title="Mostrar saldo" aria-label="Mostrar saldo" style="display: none;">
+            <span class="mask" style="--icon: url('mostrar.svg'); --icon-color: var(--primary);"></span>
+          </button>
+        </div>
         <div id="saldoLinha" class="balance">N$ ...</div>
       </div>
       <div class="actions-horizontal">
@@ -125,6 +136,8 @@
     const $ = (s) => document.querySelector(s);
     const saudacaoEl = $("#saudacao");
     const saldoLinhaEl = $("#saldoLinha");
+    const btnHide = $("#btnHide");
+    const btnShow = $("#btnShow");
 
     // Spinner overlay (mantido)
     const spinner = document.createElement('div');
@@ -146,16 +159,38 @@
         const nome = data?.firstName || sess.firstName || sess.user;
         const saldo = data?.saldo ?? sess.saldo ?? 0;
         saudacaoEl.textContent = `Olá, ${nome}`;
+        saldoLinhaEl.dataset.raw = String(saldo);
         saldoLinhaEl.textContent = `N$ ${saldo}`;
       } else {
         saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
+        saldoLinhaEl.dataset.raw = String(sess.saldo ?? 0);
         saldoLinhaEl.textContent = `N$ ${sess.saldo ?? 0}`;
       }
     } catch (e) {
       console.error(e);
       saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
+      saldoLinhaEl.dataset.raw = String(sess.saldo ?? 0);
       saldoLinhaEl.textContent = `N$ ${sess.saldo ?? 0}`;
     } finally { spinner.style.display = 'none'; }
+
+    // Alternância de visibilidade do saldo
+    function maskSaldo() {
+      saldoLinhaEl.textContent = 'N$ …';
+    }
+    function showSaldo() {
+      const raw = saldoLinhaEl.dataset.raw ?? '';
+      saldoLinhaEl.textContent = `N$ ${raw}`;
+    }
+    btnHide?.addEventListener('click', () => {
+      btnHide.style.display = 'none';
+      btnShow.style.display = 'inline-block';
+      maskSaldo();
+    });
+    btnShow?.addEventListener('click', () => {
+      btnShow.style.display = 'none';
+      btnHide.style.display = 'inline-block';
+      showSaldo();
+    });
   </script>
 </body>
 </html>
