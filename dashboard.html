@@ -52,13 +52,12 @@
     .balance { font-size: 36px; color: var(--muted); font-weight: 800; }
     .account-line { position: relative; display: inline-flex; align-items: baseline; gap: 8px; width: fit-content; }
     .icon-btn { position: static; width: 20px; height: 20px; border: none; background: transparent; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-    /* Layout do card principal em grid 2x2 */
-    .card-content { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 16px; align-items: start; }
-    .card-left-top { grid-column: 1; grid-row: 1; }
-    .card-left-bottom { grid-column: 1; grid-row: 2; }
-    .card-right { grid-column: 2; grid-row: 1 / span 2; justify-self: end; align-self: start; position: relative; }
+    /* Layout do card principal: profile em 2 colunas (esquerda textos, direita foto) */
+    .profile { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .profile .header-block { width: 50%; max-width: 50%; }
+    #profileWithButton { position: relative; width: clamp(220px, 90%, 420px); aspect-ratio: 1 / 1; align-self: center; margin-left: auto; }
     /* Avatar + edição */
-    .avatar { position: relative; width: clamp(220px, 90%, 420px); aspect-ratio: 1 / 1; border-radius: 50%; background: var(--primary); border: 8px solid var(--secondary); overflow: hidden; }
+    .avatar { position: relative; width: 100%; height: 100%; border-radius: 50%; background: var(--primary); border: 8px solid var(--secondary); overflow: hidden; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .avatar .placeholder { position: absolute; inset: 0; background: var(--primary); display: grid; place-items: center; }
     .avatar .placeholder img { width: 80%; height: 80%; object-fit: contain; border-radius: 50%; }
@@ -70,6 +69,8 @@
     .edit-btn .mask { width: 16px; height: 16px; background-color: #fff; --icon: url('lapis.svg'); }
     .tooltip { position: absolute; background: rgba(0,0,0,0.8); color: #fff; font-size: 12px; padding: 6px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; right: 0; bottom: 40px; transform: translateY(6px); transition: opacity .15s, transform .15s; }
     .edit-btn:hover + .tooltip, .edit-btn:focus + .tooltip { opacity: 1; transform: translateY(0); }
+    .account-label { display: inline-flex; align-items: baseline; gap: 8px; }
+    .actions-horizontal { max-width: 50%; }
     /* Modal upload */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 60; }
     .modal { width: min(92vw, 520px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
@@ -92,13 +93,11 @@
   </div>
   <div class="wrap">
     <div class="card">
-      <div class="profile">
+      <div class="profile" id="profileWithButton">
         <div class="avatar" id="avatar">
-          <img id="avatarImg" src="semfoto.png" alt="Sua foto" />
-          <button id="btnAvatarEdit" class="edit-btn" title="Edite ou adicione sua foto" aria-label="Editar foto">
-            <span class="mask"></span>
-          </button>
-          <div class="tooltip">Edite ou adicione sua foto</div>
+          <img id="avatarImg" src="" alt="Sua foto" />
+          <div id="avatarSpinner" class="spinner"></div>
+          <div id="avatarPlaceholder" class="placeholder" style="display:none;"><img src="semfoto.png" alt="Sem foto"/></div>
         </div>
         <div class="header-block">
           <div id="saudacao" class="greeting">Olá, ...</div>
@@ -113,6 +112,8 @@
           </div>
           <div id="saldoLinha" class="balance">N$ ...</div>
         </div>
+        <div id="editarButton" class="edit-btn" title="Edite ou adicione sua foto" aria-label="Editar foto"><span class="mask"></span></div>
+        <div class="tooltip">Edite ou adicione sua foto</div>
       </div>
       <div class="actions-horizontal">
         <div class="action-item">
@@ -182,7 +183,7 @@
     const btnHide = $("#btnHide");
     const btnShow = $("#btnShow");
     const btnExtrato = document.getElementById('extratoButton');
-    const btnAvatarEdit = document.getElementById('btnAvatarEdit');
+    const btnAvatarEdit = document.getElementById('editarButton');
     const avatarImg = document.getElementById('avatarImg');
     let currentDocId = null;
 
