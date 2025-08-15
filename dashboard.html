@@ -36,6 +36,10 @@
     .big { font-size: 24px; font-weight: 800; }
     .muted { color: var(--muted); }
     .pill { display:inline-flex; align-items:center; gap:8px; background: linear-gradient(180deg, var(--secondary), var(--secondary-700)); color: #202420; padding: 6px 12px; border-radius: 999px; font-weight: 700; border: 1px solid rgba(0,0,0,0.06); }
+    .actions-vertical { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .circle-btn { width: 40px; height: 40px; border-radius: 9999px; border: none; background: var(--secondary); display: grid; place-items: center; cursor: pointer; }
+    .circle-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .mask { -webkit-mask: var(--icon) center/contain no-repeat; mask: var(--icon) center/contain no-repeat; background-color: var(--icon-color, currentColor); width: 20px; height: 20px; display: block; }
   </style>
 </head>
 <body>
@@ -55,6 +59,17 @@
       <div class="row" style="margin-bottom:8px;">
         <div id="saudacao" class="big">Olá, ...</div>
         <div class="pill" id="saldoPill">Saldo: <span id="saldoNum">...</span></div>
+      </div>
+      <div class="actions-vertical">
+        <button id="pixButton" class="circle-btn" title="Pix" aria-label="Pix">
+          <span class="mask" style="--icon: url('pix.svg'); --icon-color: var(--primary);"></span>
+        </button>
+        <button id="extratoButton" class="circle-btn" title="Extrato" aria-label="Extrato">
+          <span class="mask" style="--icon: url('extrato.svg'); --icon-color: var(--secondary);"></span>
+        </button>
+        <button id="shopButton" class="circle-btn" title="Loja" aria-label="Loja">
+          <span class="mask" style="--icon: url('loja.svg'); --icon-color: var(--primary);"></span>
+        </button>
       </div>
     </div>
   </div>
