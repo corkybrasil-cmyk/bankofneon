@@ -26,6 +26,7 @@
     .header { background: var(--primary); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(90,3,154,0.25); }
     .brand { display:flex; align-items:center; gap: 12px; }
     .logo-mask { width: 60px; height: 60px; display:block; background-color: #b6f902; -webkit-mask: url('logotipo.svg') center/contain no-repeat; mask: url('logotipo.svg') center/contain no-repeat; }
+    .brand a { display: inline-block; line-height: 0; }
     .brand .title { font-weight: 800; letter-spacing: .2px; }
     .nav a { color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 999px; }
     .nav a:hover { background: rgba(255,255,255,0.12); }
@@ -51,12 +52,27 @@
     .balance { font-size: 36px; color: var(--muted); font-weight: 800; }
     .account-line { position: relative; display: inline-flex; align-items: baseline; gap: 8px; width: fit-content; }
     .icon-btn { position: static; width: 20px; height: 20px; border: none; background: transparent; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    /* Avatar + edição */
+    .profile { display: flex; align-items: center; gap: 20px; margin-bottom: 8px; }
+    .avatar { position: relative; width: 140px; height: 140px; border-radius: 50%; background: var(--primary); border: 6px solid var(--secondary); overflow: hidden; flex: 0 0 auto; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .edit-btn { position: absolute; bottom: 6px; right: 6px; width: 32px; height: 32px; border-radius: 50%; background: #111; color: #fff; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
+    .edit-btn .mask { width: 16px; height: 16px; background-color: #fff; --icon: url('lapis.svg'); }
+    .tooltip { position: absolute; bottom: 42px; right: 0; background: rgba(0,0,0,0.8); color: #fff; font-size: 12px; padding: 6px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transform: translateY(6px); transition: opacity .15s, transform .15s; }
+    .edit-btn:hover + .tooltip, .edit-btn:focus + .tooltip { opacity: 1; transform: translateY(0); }
+    /* Modal upload */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 60; }
+    .modal { width: min(92vw, 520px); background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+    .modal h3 { margin: 0 0 8px 0; }
+    .modal .actions { justify-content: flex-end; }
+    .preview { width: 160px; height: 160px; border-radius: 50%; overflow: hidden; border: 4px solid var(--secondary); background: var(--primary); margin-bottom: 12px; }
+    .preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="brand">
-      <span class="logo-mask" aria-label="Neon"></span>
+      <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
     </div>
     <nav class="nav">
       <a href="dev.html">Dev</a>
@@ -66,22 +82,31 @@
   </div>
   <div class="wrap">
     <div class="card">
-      <div class="header-block">
-        <div id="saudacao" class="greeting">Olá, ...</div>
-        <div class="account-line">
-          <div id="robervaldo" class="account-label">Conta</div>
-          <button id="btnHide" class="icon-btn" title="Ocultar saldo" aria-label="Ocultar saldo" style="display: inline-block;">
-            <span class="mask" style="--icon: url('ocultar.svg'); --icon-color: var(--primary);"></span>
+      <div class="profile">
+        <div class="avatar" id="avatar">
+          <img id="avatarImg" src="semfoto.png" alt="Sua foto" />
+          <button id="btnAvatarEdit" class="edit-btn" title="Edite ou adicione sua foto" aria-label="Editar foto">
+            <span class="mask"></span>
           </button>
-          <button id="btnShow" class="icon-btn" title="Mostrar saldo" aria-label="Mostrar saldo" style="display: none;">
-            <span class="mask" style="--icon: url('mostrar.svg'); --icon-color: var(--primary);"></span>
-          </button>
+          <div class="tooltip">Edite ou adicione sua foto</div>
         </div>
-        <div id="saldoLinha" class="balance">N$ ...</div>
+        <div class="header-block">
+          <div id="saudacao" class="greeting">Olá, ...</div>
+          <div class="account-line">
+            <div id="robervaldo" class="account-label">Conta</div>
+            <button id="btnHide" class="icon-btn" title="Ocultar saldo" aria-label="Ocultar saldo" style="display: inline-block;">
+              <span class="mask" style="--icon: url('ocultar.svg'); --icon-color: var(--primary);"></span>
+            </button>
+            <button id="btnShow" class="icon-btn" title="Mostrar saldo" aria-label="Mostrar saldo" style="display: none;">
+              <span class="mask" style="--icon: url('mostrar.svg'); --icon-color: var(--primary);"></span>
+            </button>
+          </div>
+          <div id="saldoLinha" class="balance">N$ ...</div>
+        </div>
       </div>
       <div class="actions-horizontal">
         <div class="action-item">
-          <button id="pixButton" class="circle-btn" title="Pix" aria-label="Pix">
+          <button id="pixButton" class="circle-btn" title="Pix" aria-label="Pix" onclick="window.location.href='pix.html'">
             <span class="mask" style="--icon: url('pix.svg'); --icon-color: var(--primary);"></span>
           </button>
           <span class="label">Pix</span>
@@ -109,7 +134,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getFirestore, collection, query, where, limit, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
@@ -126,6 +152,7 @@
     try { await signInAnonymously(getAuth(app)); } catch {}
 
     let db; try { db = getFirestore(app, "bancodaneondb"); } catch { db = getFirestore(app); }
+    const storage = getStorage(app, "gs://crmdaneon.firebasestorage.app");
 
     const sessRaw = localStorage.getItem("bn.currentUser");
     if (!sessRaw) { window.location.href = "index.html"; }
@@ -139,6 +166,9 @@
     const btnHide = $("#btnHide");
     const btnShow = $("#btnShow");
     const btnExtrato = document.getElementById('extratoButton');
+    const btnAvatarEdit = document.getElementById('btnAvatarEdit');
+    const avatarImg = document.getElementById('avatarImg');
+    let currentDocId = null;
 
     // Spinner overlay (mantido)
     const spinner = document.createElement('div');
@@ -157,11 +187,15 @@
       if (!snap.empty) {
         const d = snap.docs[0];
         const data = d.data();
+        currentDocId = d.id;
         const nome = data?.firstName || sess.firstName || sess.user;
         const saldo = data?.saldo ?? sess.saldo ?? 0;
         saudacaoEl.textContent = `Olá, ${nome}`;
         saldoLinhaEl.dataset.raw = String(saldo);
         saldoLinhaEl.textContent = `N$ ${saldo}`;
+        if (data?.fotoUrl) {
+          avatarImg.src = data.fotoUrl;
+        }
       } else {
         saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
         saldoLinhaEl.dataset.raw = String(sess.saldo ?? 0);
@@ -195,6 +229,55 @@
 
     // Navegação para extrato
     btnExtrato?.addEventListener('click', () => { window.location.href = 'extrato.html'; });
+
+    // Modal de upload de foto (Firebase Storage)
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h3>Editar foto</h3>
+        <div class="preview"><img id="previewImg" src="semfoto.png" alt="Prévia"/></div>
+        <input id="fileInput" type="file" accept="image/*" />
+        <div class="actions" style="margin-top:12px;">
+          <button id="btnClose" class="btn secondary">Cancelar</button>
+          <button id="btnSave" class="btn">Salvar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const fileInput = overlay.querySelector('#fileInput');
+    const previewImg = overlay.querySelector('#previewImg');
+    const btnClose = overlay.querySelector('#btnClose');
+    const btnSave = overlay.querySelector('#btnSave');
+
+    btnAvatarEdit?.addEventListener('click', () => {
+      previewImg.src = avatarImg.src || 'semfoto.png';
+      overlay.style.display = 'flex';
+    });
+    btnClose?.addEventListener('click', () => { overlay.style.display = 'none'; });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
+    fileInput?.addEventListener('change', () => {
+      const f = fileInput.files?.[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      previewImg.src = url;
+    });
+    btnSave?.addEventListener('click', async () => {
+      try {
+        if (!currentDocId) throw new Error('Usuário não resolvido.');
+        const f = fileInput.files?.[0];
+        if (!f) throw new Error('Selecione uma imagem.');
+        // Caminho: imagemAlunos/{docId}
+        const storageRef = ref(storage, `imagemAlunos/${currentDocId}`);
+        await uploadBytes(storageRef, f, { contentType: f.type });
+        const url = await getDownloadURL(storageRef);
+        await updateDoc(doc(db, 'alunos', currentDocId), { fotoUrl: url });
+        avatarImg.src = url;
+        overlay.style.display = 'none';
+      } catch (e) {
+        alert(e?.message || String(e));
+      }
+    });
   </script>
 </body>
 </html>
