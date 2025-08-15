@@ -52,9 +52,9 @@
     .balance { font-size: 36px; color: var(--muted); font-weight: 800; }
     .account-line { position: relative; display: inline-flex; align-items: baseline; gap: 8px; width: fit-content; }
     .icon-btn { position: static; width: 20px; height: 20px; border: none; background: transparent; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-    /* Layout do card principal: profile em 2 colunas (esquerda textos, direita foto) */
-    .profile { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-    .profile .header-block { width: 50%; max-width: 50%; }
+    /* Layout do card principal: Moacir à esquerda (textos+ações) e avatar à direita */
+    #cardProfile { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+    #Moacir { flex: 1 1 50%; max-width: 50%; }
     #profileWithButton { position: relative; width: clamp(220px, 90%, 420px); aspect-ratio: 1 / 1; align-self: center; margin-left: auto; }
     /* Avatar + edição */
     .avatar { position: relative; width: 100%; height: 100%; border-radius: 50%; background: var(--primary); border: 8px solid var(--secondary); overflow: hidden; }
@@ -92,14 +92,9 @@
     </nav>
   </div>
   <div class="wrap">
-    <div class="card">
-      <div class="profile" id="profileWithButton">
-        <div class="avatar" id="avatar">
-          <img id="avatarImg" src="" alt="Sua foto" />
-          <div id="avatarSpinner" class="spinner"></div>
-          <div id="avatarPlaceholder" class="placeholder" style="display:none;"><img src="semfoto.png" alt="Sem foto"/></div>
-        </div>
-        <div class="header-block">
+    <div class="card" id="cardProfile">
+      <div class="profile">
+        <div class="header-block" id="infoConta">
           <div id="saudacao" class="greeting">Olá, ...</div>
           <div class="account-line">
             <div id="robervaldo" class="account-label">Conta</div>
@@ -112,8 +107,15 @@
           </div>
           <div id="saldoLinha" class="balance">N$ ...</div>
         </div>
-        <div id="editarButton" class="edit-btn" title="Edite ou adicione sua foto" aria-label="Editar foto"><span class="mask"></span></div>
-        <div class="tooltip">Edite ou adicione sua foto</div>
+        <div id="profileWithButton">
+          <div class="avatar" id="avatar">
+            <img id="avatarImg" src="" alt="Sua foto" />
+            <div id="avatarSpinner" class="spinner"></div>
+            <div id="avatarPlaceholder" class="placeholder" style="display:none;"><img src="semfoto.png" alt="Sem foto"/></div>
+          </div>
+          <div id="editarButton" class="edit-btn" title="Edite ou adicione sua foto" aria-label="Editar foto"><span class="mask"></span></div>
+          <div class="tooltip">Edite ou adicione sua foto</div>
+        </div>
       </div>
       <div class="actions-horizontal">
         <div class="action-item">
