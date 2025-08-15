@@ -116,7 +116,8 @@
         const ref = await addDoc(alunosCol, payload);
         alert("Aluno criado: " + ref.id);
         // Lançamento de abertura de conta na subcoleção exigida
-        const extratoPath = collection(db, 'alunos', ref.id, 'extrato', 'extrato');
+        // Corrige: 'extrato' é coleção; documento com campos vai dentro dela
+        const extratoPath = collection(db, 'alunos', ref.id, 'extrato');
         await addDoc(extratoPath, {
           amount: 0,
           dateTime: serverTimestamp(),

@@ -155,7 +155,7 @@
         const saldoInicialR = remetente.saldo;
         const saldoFinalR = saldoInicialR - valor;
         // Caminho exigido: bancodaneondb/alunos/{docId}/extrato/extrato
-        await addDoc(collection(db,'alunos', remetente.gilberto, 'extrato', 'extrato'), {
+        await addDoc(collection(db,'alunos', remetente.gilberto, 'extrato'), {
           amount: -Math.abs(valor),
           dateTime: agora,
           description: descricao,
@@ -168,7 +168,7 @@
         // Extrato destinatário (isEarn true)
         const saldoInicialD = destinatario.saldo;
         const saldoFinalD = saldoInicialD + valor;
-        await addDoc(collection(db,'alunos', destinatario.gilberto, 'extrato', 'extrato'), {
+        await addDoc(collection(db,'alunos', destinatario.gilberto, 'extrato'), {
           amount: Math.abs(valor),
           dateTime: agora,
           description: `Transferência PIX - ${remetente.user}`,
