@@ -9,8 +9,27 @@
     *{ box-sizing:border-box; }
     body{ margin:0; color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; background: var(--bg); }
     .header{ background:var(--primary); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 8px 24px rgba(90,3,154,0.25); }
+    #juntinhos { display: flex; align-items: center; gap: 30px; }
     .brand{ display:flex; align-items:center; gap:12px; }
     .logo-mask{ width:48px; height:48px; display:block; background-color:#b6f902; -webkit-mask:url('logotipo.svg') center/contain no-repeat; mask:url('logotipo.svg') center/contain no-repeat; }
+    .brand a { display: inline-block; line-height: 0; }
+    .header-actions { display: flex; align-items: center; gap: 20px; }
+    .menu-btn { width: 30px; height: 30px; padding: 0; background: transparent; border: 0; transition: background-color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+    .menu-btn:hover { background: rgba(255,255,255,0.1); }
+    .menu-icon { width: 20px; height: 20px; display: block; }
+    /* Menu lateral */
+    .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background: var(--card); border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.1); transition: left 0.3s ease; z-index: 1000; }
+    .sidebar.open { left: 0; }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-header h3 { margin: 0; color: var(--primary); }
+    .btn-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+    .sidebar-nav { padding: 20px 0; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; color: var(--text); text-decoration: none; transition: background-color 0.2s; }
+    .nav-item:hover { background-color: var(--bg); }
+    .nav-item.active { background-color: var(--primary); color: #fff; }
+    .nav-icon { font-size: 20px; }
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 999; }
+    .sidebar-overlay.open { opacity: 1; visibility: visible; }
     .wrap{ max-width:720px; margin:0 auto; padding:20px; }
     .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:0 10px 30px rgba(16,20,40,0.08); }
     h1{ margin:0 0 8px 0; font-size:24px; font-weight:800; }
@@ -27,11 +46,57 @@
 </head>
 <body>
   <div class="header">
-    <div class="brand"><span class="logo-mask" aria-label="Neon"></span></div>
-    <div class="actions">
-      <a class="btn secondary" href="dashboard.html">Voltar</a>
+    <div id="juntinhos">
+      <div class="brand">
+        <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
+      </div>
+      <button id="btnMenu" class="btn menu-btn" title="Menu">
+        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6H21M3 12H21M3 18H21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-actions">
+      <a href="dashboard.html" class="btn" style="background:rgba(255,255,255,0.12)">Voltar</a>
     </div>
   </div>
+
+  <!-- Menu lateral -->
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h3>Menu</h3>
+      <button id="btnCloseSidebar" class="btn-close">&times;</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        Dashboard
+      </a>
+      <a href="extrato.html" class="nav-item">
+        <span class="nav-icon">📊</span>
+        Extrato
+      </a>
+      <a href="pix.html" class="nav-item active">
+        <span class="nav-icon">💸</span>
+        PIX
+      </a>
+      <a href="ocorrencias.html" class="nav-item">
+        <span class="nav-icon">⚠️</span>
+        Ocorrências
+      </a>
+      <a href="adicionarAluno.html" class="nav-item">
+        <span class="nav-icon">👤</span>
+        Adicionar Aluno
+      </a>
+      <a href="dev.html" class="nav-item">
+        <span class="nav-icon">🔧</span>
+        Dev
+      </a>
+    </nav>
+  </div>
+
+  <!-- Overlay para fechar o menu -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
   <div class="wrap">
     <div id="unauth" class="card" style="display:none; text-align:center;">
@@ -91,6 +156,27 @@
     const errEl = document.getElementById('err');
     let sess = null;
     try { sess = JSON.parse(sessRaw); } catch { sess = null; }
+    // Controles do menu lateral
+    const btnMenu = document.getElementById('btnMenu');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const btnCloseSidebar = document.getElementById('btnCloseSidebar');
+
+    btnMenu?.addEventListener('click', () => {
+      sidebar.classList.add('open');
+      sidebarOverlay.classList.add('open');
+    });
+
+    btnCloseSidebar?.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+
+    sidebarOverlay?.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+
     if (!sess || !sess.user) {
       unauthEl.style.display = 'block';
     } else {

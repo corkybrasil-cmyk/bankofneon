@@ -25,13 +25,38 @@
         var(--bg);
     }
     .header { background: var(--primary); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(90,3,154,0.25); }
+    #juntinhos { display: flex; align-items: center; gap: 30px; }
     .brand { display:flex; align-items:center; gap: 12px; }
     .logo-mask { width: 60px; height: 60px; display:block; background-color: #b6f902; -webkit-mask: url('logotipo.svg') center/contain no-repeat; mask: url('logotipo.svg') center/contain no-repeat; }
     .brand a { display: inline-block; line-height: 0; }
     .brand .title { font-weight: 800; letter-spacing: .2px; }
-    .nav a { color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 999px; }
-    .nav a:hover { background: rgba(255,255,255,0.12); }
+    .header-actions { display: flex; align-items: center; gap: 20px; }
+    .menu-btn { width: 30px; height: 30px; padding: 0; background: transparent; border: 0; transition: background-color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+    .menu-btn:hover { background: rgba(255,255,255,0.1); }
+    .menu-icon { width: 20px; height: 20px; display: block; }
+    /* Menu lateral */
+    .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background: var(--card); border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.1); transition: left 0.3s ease; z-index: 1000; }
+    .sidebar.open { left: 0; }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-header h3 { margin: 0; color: var(--primary); }
+    .btn-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+    .sidebar-nav { padding: 20px 0; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; color: var(--text); text-decoration: none; transition: background-color 0.2s; }
+    .nav-item:hover { background-color: var(--bg); }
+    .nav-item.active { background-color: var(--primary); color: #fff; }
+    .nav-icon { font-size: 20px; }
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 999; }
+    .sidebar-overlay.open { opacity: 1; visibility: visible; }
     .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    /* Controles de ocorrências */
+    .ocorrencias-controls { display: flex; gap: 10px; }
+    .ocorrencias-list { margin-top: 16px; }
+    .ocorrencias-list .loading { text-align: center; color: var(--muted); padding: 20px; }
+    .ocorrencia-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: #fff; }
+    .ocorrencia-info { flex: 1; }
+    .ocorrencia-tipo { font-weight: 600; color: var(--primary); }
+    .ocorrencia-data { font-size: 14px; color: var(--muted); }
+    .ocorrencia-valor { font-weight: 700; color: #dc3545; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(16, 20, 40, 0.08); }
     .card + .card { margin-top: 16px; }
     #ocorrencias { min-height: 75vh; }
@@ -83,15 +108,57 @@
 </head>
 <body>
   <div class="header">
-    <div class="brand">
-      <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
+    <div id="juntinhos">
+      <div class="brand">
+        <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
+      </div>
+      <button id="btnMenu" class="btn menu-btn" title="Menu">
+        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6H21M3 12H21M3 18H21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
-    <nav class="nav">
-      <a href="dev.html">Dev</a>
-      <a href="adicionarAluno.html">Adicionar</a>
-      <a href="index.html" onclick="localStorage.removeItem('bn.currentUser')">Sair</a>
+    <div class="header-actions">
+      <button id="btnLogout" class="btn" style="background:#dc3545;">Sair</button>
+    </div>
+  </div>
+
+  <!-- Menu lateral -->
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h3>Menu</h3>
+      <button id="btnCloseSidebar" class="btn-close">&times;</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        Dashboard
+      </a>
+      <a href="extrato.html" class="nav-item">
+        <span class="nav-icon">📊</span>
+        Extrato
+      </a>
+      <a href="pix.html" class="nav-item">
+        <span class="nav-icon">💸</span>
+        PIX
+      </a>
+      <a href="ocorrencias.html" class="nav-item">
+        <span class="nav-icon">⚠️</span>
+        Ocorrências
+      </a>
+      <a href="adicionarAluno.html" class="nav-item">
+        <span class="nav-icon">👤</span>
+        Adicionar Aluno
+      </a>
+      <a href="dev.html" class="nav-item">
+        <span class="nav-icon">🔧</span>
+        Dev
+      </a>
     </nav>
   </div>
+
+  <!-- Overlay para fechar o menu -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
   <div class="wrap">
     <div class="card" id="cardProfile">
       <div id="Moacir">
@@ -140,7 +207,16 @@
       </div>
     </div>
     <div class="card" id="ocorrencias">
-      <div class="big">Ocorrências</div>
+      <div class="row">
+        <div class="big">Ocorrências</div>
+        <div class="ocorrencias-controls">
+          <button id="btnShowOcorrencias" class="btn" style="background:var(--secondary); color:#202420;">Mostrar</button>
+          <button id="btnHideOcorrencias" class="btn" style="background:var(--muted); color:#fff; display:none;">Ocultar</button>
+        </div>
+      </div>
+      <div id="listaOcorrencias" class="ocorrencias-list" style="display:none;">
+        <div class="loading">Carregando ocorrências...</div>
+      </div>
     </div>
   </div>
 
@@ -262,8 +338,99 @@
       try { avatarEl?.classList.remove('hide-photo'); avatarPlaceholder && (avatarPlaceholder.style.display = 'none'); } catch {}
     });
 
+    // Controles do menu lateral
+    const btnMenu = document.getElementById('btnMenu');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const btnCloseSidebar = document.getElementById('btnCloseSidebar');
+    const btnLogout = document.getElementById('btnLogout');
+
+    btnMenu?.addEventListener('click', () => {
+      sidebar.classList.add('open');
+      sidebarOverlay.classList.add('open');
+    });
+
+    btnCloseSidebar?.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+
+    sidebarOverlay?.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    });
+
+    btnLogout?.addEventListener('click', () => {
+      localStorage.removeItem('bn.currentUser');
+      window.location.href = 'index.html';
+    });
+
     // Navegação para extrato
     btnExtrato?.addEventListener('click', () => { window.location.href = 'extrato.html'; });
+
+    // Controles de ocorrências
+    const btnShowOcorrencias = document.getElementById('btnShowOcorrencias');
+    const btnHideOcorrencias = document.getElementById('btnHideOcorrencias');
+    const listaOcorrencias = document.getElementById('listaOcorrencias');
+
+    btnShowOcorrencias?.addEventListener('click', async () => {
+      btnShowOcorrencias.style.display = 'none';
+      btnHideOcorrencias.style.display = 'inline-block';
+      listaOcorrencias.style.display = 'block';
+      
+      // Carrega ocorrências do aluno
+      try {
+        const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+        const ocorrenciasCol = collection(db, 'ocorrencias');
+        const snap = await getDocs(ocorrenciasCol);
+        
+        let ocorrenciasAluno = [];
+        
+        // Busca ocorrências do aluno logado
+        for (const doc of snap.docs) {
+          if (doc.id === currentDocId) {
+            const subCol = collection(db, 'ocorrencias', doc.id, 'ocorrenciaAluno');
+            const subSnap = await getDocs(subCol);
+            subSnap.forEach(subDoc => {
+              const data = subDoc.data();
+              ocorrenciasAluno.push({
+                id: subDoc.id,
+                data: data.datahoraOcorrencia?.toDate ? data.datahoraOcorrencia.toDate() : new Date(),
+                tipo: data.falta,
+                descricao: data.descricaoOcorrencia
+              });
+            });
+            break;
+          }
+        }
+        
+        // Ordena por data (mais nova primeiro)
+        ocorrenciasAluno.sort((a, b) => b.data - a.data);
+        
+        // Renderiza a lista
+        if (ocorrenciasAluno.length === 0) {
+          listaOcorrencias.innerHTML = '<div class="empty">Nenhuma ocorrência encontrada.</div>';
+        } else {
+          listaOcorrencias.innerHTML = ocorrenciasAluno.map(oc => `
+            <div class="ocorrencia-item">
+              <div class="ocorrencia-info">
+                <div class="ocorrencia-tipo">Ocorrência ${oc.tipo.charAt(0).toUpperCase() + oc.tipo.slice(1)}</div>
+                <div class="ocorrencia-data">${oc.data.toLocaleDateString('pt-BR')} às ${oc.data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error('Erro ao carregar ocorrências:', e);
+        listaOcorrencias.innerHTML = '<div class="error">Erro ao carregar ocorrências.</div>';
+      }
+    });
+
+    btnHideOcorrencias?.addEventListener('click', () => {
+      btnHideOcorrencias.style.display = 'none';
+      btnShowOcorrencias.style.display = 'inline-block';
+      listaOcorrencias.style.display = 'none';
+    });
 
     // Modal de upload de foto (Firebase Storage)
     const overlay = document.createElement('div');
@@ -344,7 +511,14 @@
         const url = await getDownloadURL(baseRef);
         await updateDoc(doc(db, 'alunos', currentDocId), { fotoUrl: url });
         logU('fotoUrl atualizada no Firestore', { url });
+        
+        // Atualiza a foto na interface
         avatarImg.src = url;
+        avatarEl.classList.remove('hide-photo');
+        avatarPlaceholder.style.display = 'none';
+        avatarSpinner.style.display = 'none';
+        avatarResolved = true;
+        
         overlay.style.display = 'none';
         logU('Processo finalizado com sucesso');
       } catch (e) {
