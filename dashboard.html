@@ -25,7 +25,7 @@
     }
     .header { background: var(--primary); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(90,3,154,0.25); }
     .brand { display:flex; align-items:center; gap: 12px; }
-    .brand img { height: 60px; width: 60px; display:block; }
+    .logo-mask { width: 60px; height: 60px; display:block; background-color: #b6f902; -webkit-mask: url('logotipo.svg') center/contain no-repeat; mask: url('logotipo.svg') center/contain no-repeat; }
     .brand .title { font-weight: 800; letter-spacing: .2px; }
     .nav a { color: #fff; text-decoration: none; padding: 8px 12px; border-radius: 999px; }
     .nav a:hover { background: rgba(255,255,255,0.12); }
@@ -56,7 +56,7 @@
 <body>
   <div class="header">
     <div class="brand">
-      <img src="logotipo.svg" alt="Neon" />
+      <span class="logo-mask" aria-label="Neon"></span>
     </div>
     <nav class="nav">
       <a href="dev.html">Dev</a>

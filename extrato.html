@@ -30,17 +30,18 @@
     }
     .header { background: var(--primary); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(90,3,154,0.25); }
     .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img { height: 48px; width: 48px; display: block; }
+    .logo-mask { width: 48px; height: 48px; display:block; background-color: #b6f902; -webkit-mask: url('logotipo.svg') center/contain no-repeat; mask: url('logotipo.svg') center/contain no-repeat; }
     .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: 0 10px 30px rgba(16, 20, 40, 0.08); }
     h1 { margin: 0 0 8px 0; font-size: 24px; font-weight: 800; }
     p.helper { margin: 0 0 16px 0; color: var(--muted); }
     .list { margin: 0; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #fff; }
-    .item { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    .item { display: grid; grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); align-items: center; }
     .item:last-child { border-bottom: none; }
-    .left { display: flex; flex-direction: column; gap: 2px; }
-    .desc { font-weight: 700; }
-    .meta { font-size: 12px; color: var(--muted); }
+    .cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .header-row { background: #f3f4f8; }
+    .header-row .cell { font-weight: 800; color: #3a3a45; }
+    .right { text-align: right; }
     .valor { font-weight: 800; }
     .credito { color: #12805a; }
     .debito { color: #a20b0b; }
@@ -59,7 +60,7 @@
 <body>
   <div class="header">
     <div class="brand">
-      <img src="logotipo.svg" alt="Neon" />
+      <span class="logo-mask" aria-label="Neon"></span>
     </div>
     <div class="actions">
       <a class="link" href="dashboard.html">Dashboard</a>
@@ -155,47 +156,26 @@
           li.textContent = 'Nenhum lançamento encontrado.';
           listaEl.appendChild(li);
         } else {
-          // Cabeçalho de 5 colunas
+          // Cabeçalho de 5 colunas (uma única linha)
           const header = document.createElement('li');
-          header.className = 'item';
-          header.innerHTML = '<div class="left"><div class="desc">Data e Hora</div></div>' +
-                             '<div class="valor">Descrição</div>' +
-                             '<div class="valor">Saldo Inicial</div>' +
-                             '<div class="valor">Amount</div>' +
-                             '<div class="valor">Saldo Final</div>';
+          header.className = 'item header-row';
+          const h1 = document.createElement('div'); h1.className = 'cell'; h1.textContent = 'Data e Hora';
+          const h2 = document.createElement('div'); h2.className = 'cell'; h2.textContent = 'Descrição';
+          const h3 = document.createElement('div'); h3.className = 'cell right'; h3.textContent = 'Saldo Inicial';
+          const h4 = document.createElement('div'); h4.className = 'cell right'; h4.textContent = 'Amount';
+          const h5 = document.createElement('div'); h5.className = 'cell right'; h5.textContent = 'Saldo Final';
+          header.appendChild(h1); header.appendChild(h2); header.appendChild(h3); header.appendChild(h4); header.appendChild(h5);
           listaEl.appendChild(header);
           items.forEach(it => {
             const li = document.createElement('li');
             li.className = 'item';
-            const col1 = document.createElement('div');
-            col1.className = 'left';
             const dt = it.dateTime ? it.dateTime.toLocaleString() : 'sem data';
-            const dtEl = document.createElement('div');
-            dtEl.className = 'desc';
-            dtEl.textContent = dt;
-            col1.appendChild(dtEl);
-
-            const col2 = document.createElement('div');
-            col2.className = 'valor';
-            col2.textContent = it.description;
-
-            const col3 = document.createElement('div');
-            col3.className = 'valor';
-            col3.textContent = `N$ ${it.saldoInicial}`;
-
-            const col4 = document.createElement('div');
-            col4.className = 'valor ' + (it.isEarn ? 'credito' : 'debito');
-            col4.textContent = `N$ ${it.amount}`;
-
-            const col5 = document.createElement('div');
-            col5.className = 'valor';
-            col5.textContent = `N$ ${it.saldoFinal}`;
-
-            li.appendChild(col1);
-            li.appendChild(col2);
-            li.appendChild(col3);
-            li.appendChild(col4);
-            li.appendChild(col5);
+            const col1 = document.createElement('div'); col1.className = 'cell'; col1.textContent = dt;
+            const col2 = document.createElement('div'); col2.className = 'cell'; col2.textContent = it.description;
+            const col3 = document.createElement('div'); col3.className = 'cell right'; col3.textContent = `N$ ${it.saldoInicial}`;
+            const col4 = document.createElement('div'); col4.className = 'cell right ' + (it.isEarn ? 'credito' : 'debito'); col4.textContent = `N$ ${it.amount}`;
+            const col5 = document.createElement('div'); col5.className = 'cell right'; col5.textContent = `N$ ${it.saldoFinal}`;
+            li.appendChild(col1); li.appendChild(col2); li.appendChild(col3); li.appendChild(col4); li.appendChild(col5);
             listaEl.appendChild(li);
           });
         }

@@ -10,7 +10,7 @@
     body{ margin:0; color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; background: var(--bg); }
     .header{ background:var(--primary); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 8px 24px rgba(90,3,154,0.25); }
     .brand{ display:flex; align-items:center; gap:12px; }
-    .brand img{ height:48px; width:48px; display:block; }
+    .logo-mask{ width:48px; height:48px; display:block; background-color:#b6f902; -webkit-mask:url('logotipo.svg') center/contain no-repeat; mask:url('logotipo.svg') center/contain no-repeat; }
     .wrap{ max-width:720px; margin:0 auto; padding:20px; }
     .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:0 10px 30px rgba(16,20,40,0.08); }
     h1{ margin:0 0 8px 0; font-size:24px; font-weight:800; }
@@ -27,7 +27,7 @@
 </head>
 <body>
   <div class="header">
-    <div class="brand"><img src="logotipo.svg" alt="Neon" /></div>
+    <div class="brand"><span class="logo-mask" aria-label="Neon"></span></div>
     <div class="actions">
       <a class="btn secondary" href="dashboard.html">Voltar</a>
     </div>
