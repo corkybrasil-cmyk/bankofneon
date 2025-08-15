@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ocorrências • Banco da Neon</title>
+  <script>
+    document.documentElement.classList.add('auth-pending');
+  </script>
+  <style>
+    :root { --primary:#5a039a; --secondary:#b6f902; --secondary-700:#8bb601; --bg:#f7f7fb; --card:#fff; --text:#1a1a1a; --muted:#5d5d6a; --border:#e8e8ef; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; background: radial-gradient(800px 600px at 100% -10%, rgba(90,3,154,0.10), rgba(90,3,154,0.0) 60%), var(--bg); }
+    .header{ background:var(--primary); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 8px 24px rgba(90,3,154,0.25); }
+    .brand{ display:flex; align-items:center; gap:12px; }
+    .logo-mask{ width:48px; height:48px; display:block; background-color:#b6f902; -webkit-mask:url('logotipo.svg') center/contain no-repeat; mask:url('logotipo.svg') center/contain no-repeat; }
+    .wrap{ max-width:980px; margin:0 auto; padding:20px; }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:0 10px 30px rgba(16,20,40,0.08); }
+    .card + .card{ margin-top:16px; }
+    h1{ margin:0 0 8px 0; font-size:24px; font-weight:800; }
+    p.helper{ margin:0 0 16px 0; color:var(--muted); }
+    .auth-pending #content{ display:none !important; visibility:hidden !important; }
+    #unauth.overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: radial-gradient(800px 600px at 100% -10%, rgba(90,3,154,0.10), rgba(90,3,154,0.0) 60%), var(--bg); z-index:100; }
+    .btn{ background:var(--primary); color:#fff; border:none; border-radius:9999px; padding:10px 16px; cursor:pointer; }
+    .list{ margin:0; padding:0; list-style:none; border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#fff; }
+    .item{ padding:12px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .item:last-child{ border-bottom:none; }
+    .empty{ text-align:center; color:var(--muted); padding:16px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand"><a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a></div>
+    <div>
+      <a href="dashboard.html" class="btn" style="background:rgba(255,255,255,0.12)">Voltar</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="unauth" class="card overlay" style="display:none; text-align:center;">
+      <div>
+        <h1>Acesso não autorizado</h1>
+        <p class="helper">Para ver as ocorrências, faça login.</p>
+        <button class="btn" onclick="window.location.href='index.html'">Ir para o login</button>
+      </div>
+    </div>
+
+    <div id="content" class="card" style="display:none;">
+      <h1>Ocorrências</h1>
+      <p class="helper">Registros e comunicados relevantes.</p>
+      <ul id="listaOcorrencias" class="list"></ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+    try { await signInAnonymously(getAuth(app)); } catch {}
+
+    const unauthEl = document.getElementById('unauth');
+    const contentEl = document.getElementById('content');
+    const listaEl = document.getElementById('listaOcorrencias');
+    const sessRaw = localStorage.getItem('bn.currentUser');
+    let sess = null; try { sess = JSON.parse(sessRaw); } catch {}
+
+    if (!sess || !sess.user) {
+      unauthEl.style.display = 'flex';
+    } else {
+      contentEl.style.display = 'block';
+      document.documentElement.classList.remove('auth-pending');
+
+      // Opcional: buscar ocorrências (modelo genérico). Ajuste a coleção se necessário.
+      try {
+        const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+        const col = collection(db, 'ocorrencias');
+        const snap = await getDocs(query(col, orderBy('quando', 'desc'), limit(100)));
+        if (snap.empty) {
+          const li = document.createElement('li'); li.className='empty'; li.textContent='Nenhuma ocorrência encontrada.'; listaEl.appendChild(li);
+        } else {
+          snap.forEach(d => {
+            const data = d.data();
+            const li = document.createElement('li'); li.className='item';
+            const titulo = data?.titulo ?? 'Ocorrência';
+            const quando = data?.quando?.toDate ? data.quando.toDate().toLocaleString() : '';
+            const desc = data?.descricao ?? '';
+            const left = document.createElement('div'); left.innerHTML = `<strong>${titulo}</strong><br><span style="color:var(--muted)">${quando}</span>`;
+            const right = document.createElement('div'); right.textContent = desc; right.style.maxWidth = '55%'; right.style.textAlign='right';
+            li.appendChild(left); li.appendChild(right);
+            listaEl.appendChild(li);
+          });
+        }
+      } catch (e) {
+        const li = document.createElement('li'); li.className='empty'; li.textContent = `Erro ao carregar: ${e?.message || e}`; listaEl.appendChild(li);
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>
+
+
