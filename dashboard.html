@@ -52,12 +52,13 @@
     .balance { font-size: 36px; color: var(--muted); font-weight: 800; }
     .account-line { position: relative; display: inline-flex; align-items: baseline; gap: 8px; width: fit-content; }
     .icon-btn { position: static; width: 20px; height: 20px; border: none; background: transparent; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-    /* Layout do card principal */
-    .card-content { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
-    .card-left { flex: 1 1 auto; min-width: 280px; }
-    .card-right { flex: 0 0 auto; position: relative; }
+    /* Layout do card principal em grid 2x2 */
+    .card-content { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 16px; align-items: start; }
+    .card-left-top { grid-column: 1; grid-row: 1; }
+    .card-left-bottom { grid-column: 1; grid-row: 2; }
+    .card-right { grid-column: 2; grid-row: 1 / span 2; justify-self: end; align-self: start; position: relative; }
     /* Avatar + edição */
-    .avatar { position: relative; width: min(45vw, 420px); height: min(45vw, 420px); border-radius: 50%; background: var(--primary); border: 8px solid var(--secondary); overflow: hidden; }
+    .avatar { position: relative; width: clamp(220px, 90%, 420px); aspect-ratio: 1 / 1; border-radius: 50%; background: var(--primary); border: 8px solid var(--secondary); overflow: hidden; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .avatar .placeholder { position: absolute; inset: 0; background: var(--primary); display: grid; place-items: center; }
     .avatar .placeholder img { width: 80%; height: 80%; object-fit: contain; border-radius: 50%; }
@@ -65,9 +66,9 @@
     .avatar .spinner::after { content: ""; width: 56px; height: 56px; border: 6px solid rgba(0,0,0,0.1); border-top-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; }
     .avatar.hide-photo .placeholder { display: grid; }
     .avatar.hide-photo img { opacity: 0.15; }
-    .edit-btn { position: absolute; width: 32px; height: 32px; border-radius: 50%; background: #111; color: #fff; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; left: 0; top: 0; transform: translate(-50%, -50%); }
+    .edit-btn { position: absolute; width: 32px; height: 32px; border-radius: 50%; background: #111; color: #fff; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; right: 0; bottom: 0; }
     .edit-btn .mask { width: 16px; height: 16px; background-color: #fff; --icon: url('lapis.svg'); }
-    .tooltip { position: absolute; background: rgba(0,0,0,0.8); color: #fff; font-size: 12px; padding: 6px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transform: translateY(6px); transition: opacity .15s, transform .15s; left: 0; top: 0; translate: -50% calc(-50% - 36px); }
+    .tooltip { position: absolute; background: rgba(0,0,0,0.8); color: #fff; font-size: 12px; padding: 6px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; right: 0; bottom: 40px; transform: translateY(6px); transition: opacity .15s, transform .15s; }
     .edit-btn:hover + .tooltip, .edit-btn:focus + .tooltip { opacity: 1; transform: translateY(0); }
     /* Modal upload */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 60; }
@@ -194,6 +195,17 @@
     const style = document.createElement('style'); style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }'; document.head.appendChild(style);
 
     // Busca dados atualizados do Firestore por segurança
+    // Avatar: inicia com spinner por 5s; se resolver a tempo, carrega foto, senão mostra semfoto
+    const avatarEl = document.getElementById('avatar');
+    const avatarSpinner = document.getElementById('avatarSpinner');
+    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+    let avatarResolved = false;
+    setTimeout(() => {
+      if (!avatarResolved) {
+        try { avatarSpinner.style.display = 'none'; } catch {}
+        try { avatarPlaceholder.style.display = 'grid'; } catch {}
+      }
+    }, 5000);
     try {
       spinner.style.display = 'flex';
       const alunosCol = collection(db, "alunos");
@@ -210,23 +222,9 @@
         saldoLinhaEl.dataset.raw = String(saldo);
         saldoLinhaEl.textContent = `N$ ${saldo}`;
         if (data?.fotoUrl) {
-          // Mostra spinner até a imagem real carregar
-          const spinner = document.createElement('div');
-          spinner.className = 'spinner';
-          document.getElementById('avatar').appendChild(spinner);
-          avatarImg.onload = () => { try { spinner.remove(); } catch {} };
+          avatarImg.onload = () => { try { avatarSpinner.style.display = 'none'; avatarResolved = true; } catch {} };
           avatarImg.src = data.fotoUrl;
-        } else {
-          // Sem foto: mantém placeholder
-          const ph = document.createElement('div');
-          ph.className = 'placeholder';
-          const img = document.createElement('img');
-          img.src = 'semfoto.png';
-          img.alt = 'Sem foto';
-          ph.appendChild(img);
-          const av = document.getElementById('avatar');
-          av.appendChild(ph);
-        }
+        } // se não houver foto, timeout exibirá placeholder após 5s
       } else {
         saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
         saldoLinhaEl.dataset.raw = String(sess.saldo ?? 0);
@@ -251,11 +249,13 @@
       btnHide.style.display = 'none';
       btnShow.style.display = 'inline-block';
       maskSaldo();
+      try { avatarEl?.classList.add('hide-photo'); avatarPlaceholder && (avatarPlaceholder.style.display = 'grid'); } catch {}
     });
     btnShow?.addEventListener('click', () => {
       btnShow.style.display = 'none';
       btnHide.style.display = 'inline-block';
       showSaldo();
+      try { avatarEl?.classList.remove('hide-photo'); avatarPlaceholder && (avatarPlaceholder.style.display = 'none'); } catch {}
     });
 
     // Navegação para extrato
