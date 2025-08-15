@@ -55,7 +55,6 @@
     /* Layout do card principal: Moacir à esquerda (textos+ações) e avatar à direita */
     #cardProfile { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
     #Moacir { flex: 1 1 50%; max-width: 50%; }
-    #profileWithButton { margin-left: auto; }
     #profileWithButton { position: relative; width: clamp(220px, 90%, 420px); aspect-ratio: 1 / 1; align-self: center; margin-left: auto; }
     /* Avatar + edição */
     .avatar { position: relative; width: 100%; height: 100%; border-radius: 50%; background: var(--primary); border: 8px solid var(--secondary); overflow: hidden; }
@@ -108,25 +107,25 @@
           </div>
           <div id="saldoLinha" class="balance">N$ ...</div>
         </div>
-      </div>
-      <div class="actions-horizontal" id="actionsButtonsBanco">
-        <div class="action-item">
-          <button id="pixButton" class="circle-btn" title="Pix" aria-label="Pix" onclick="window.location.href='pix.html'">
-            <span class="mask" style="--icon: url('pix.svg'); --icon-color: var(--primary);"></span>
-          </button>
-          <span class="label">Pix</span>
-        </div>
-        <div class="action-item">
-          <button id="extratoButton" class="circle-btn" title="Extrato" aria-label="Extrato">
-            <span class="mask" style="--icon: url('extrato.svg'); --icon-color: var(--primary);"></span>
-          </button>
-          <span class="label">Extrato</span>
-        </div>
-        <div class="action-item">
-          <button id="shopButton" class="circle-btn" title="Loja" aria-label="Loja">
-            <span class="mask" style="--icon: url('loja.svg'); --icon-color: var(--primary);"></span>
-          </button>
-          <span class="label">Loja</span>
+        <div class="actions-horizontal" id="actionsButtonsBanco">
+          <div class="action-item">
+            <button id="pixButton" class="circle-btn" title="Pix" aria-label="Pix" onclick="window.location.href='pix.html'">
+              <span class="mask" style="--icon: url('pix.svg'); --icon-color: var(--primary);"></span>
+            </button>
+            <span class="label">Pix</span>
+          </div>
+          <div class="action-item">
+            <button id="extratoButton" class="circle-btn" title="Extrato" aria-label="Extrato">
+              <span class="mask" style="--icon: url('extrato.svg'); --icon-color: var(--primary);"></span>
+            </button>
+            <span class="label">Extrato</span>
+          </div>
+          <div class="action-item">
+            <button id="shopButton" class="circle-btn" title="Loja" aria-label="Loja">
+              <span class="mask" style="--icon: url('loja.svg'); --icon-color: var(--primary);"></span>
+            </button>
+            <span class="label">Loja</span>
+          </div>
         </div>
       </div>
       <div id="profileWithButton">
