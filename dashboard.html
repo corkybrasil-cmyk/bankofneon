@@ -41,6 +41,7 @@
     .circle-btn { width: 60px; height: 60px; border-radius: 9999px; border: none; background: var(--secondary); display: grid; place-items: center; cursor: pointer; }
     .circle-btn:disabled { opacity: .6; cursor: not-allowed; }
     .mask { -webkit-mask: var(--icon) center/contain no-repeat; mask: var(--icon) center/contain no-repeat; background-color: var(--icon-color, currentColor); width: 28px; height: 28px; display: block; }
+    .icon-img { width: 28px; height: 28px; display: block; }
     .label { font-weight: 700; }
   </style>
 </head>
@@ -70,8 +71,8 @@
           <span class="label">Pix</span>
         </div>
         <div class="action-item">
-          <button id="extratoButton" class="circle-btn" title="Extrato" aria-label="Extrato">
-            <span class="mask" style="--icon: url('extrato.svg'); --icon-color: var(--secondary);"></span>
+          <button id="extratoButton" class="circle-btn" title="Extrato" aria-label="Extrato" style="background: var(--secondary-700);">
+            <img class="icon-img" src="extrato.svg" alt="Extrato" />
           </button>
           <span class="label">Extrato</span>
         </div>
