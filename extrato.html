@@ -187,20 +187,7 @@
         listaEl.appendChild(li);
         console.error(e);
       }
-      // DEBUG BUTTONS (fácil de remover)
-      // DEBUG START
-      const dbgWrap = document.createElement('div');
-      dbgWrap.style.cssText = 'display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;';
-      const mkBtn = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.className = 'btn'; b.addEventListener('click', fn); return b; };
-      let lastError = null;
-      dbgWrap.appendChild(mkBtn('DBG1: Sessão', () => console.log('sess', sess)));
-      dbgWrap.appendChild(mkBtn('DBG2: DocId (gilberto)', () => console.log('gilberto', gilberto)));
-      dbgWrap.appendChild(mkBtn('DBG3: Path', () => console.log('path', `alunos/${gilberto}/extrato`)));
-      dbgWrap.appendChild(mkBtn('DBG4: Contar docs', async () => { try { const s = await getDocs(query(extratoCol, limit(5))); console.log('count<=5', s.size); } catch(e){ console.log('err', e); } }));
-      dbgWrap.appendChild(mkBtn('DBG5: Primeiros 3', async () => { try { const s = await getDocs(query(extratoCol, orderBy('dateTime','desc'), limit(3))); console.log('first3', s.docs.map(d=>({id:d.id,...d.data()}))); } catch(e){ console.log('err', e); } }));
-      dbgWrap.appendChild(mkBtn('DBG6: Recarregar', async () => { try { listaEl.innerHTML=''; const s = await getDocs(query(extratoCol, orderBy('dateTime','desc'), limit(10))); console.log('reload size', s.size); } catch(e){ lastError=e; console.log('reload err',e);} }));
-      contentEl.appendChild(dbgWrap);
-      // DEBUG END
+      
     }
   </script>
 </body>
