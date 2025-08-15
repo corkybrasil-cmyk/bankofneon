@@ -118,24 +118,34 @@
       // Libera o conteúdo (remove o gate)
       document.documentElement.classList.remove('auth-pending');
       const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
-      const extratoCol = collection(db, 'extrato'); // Coleção 'extrato', filtrada pelo usuário logado
+      // Descobre o 'gilberto' (id do documento) do usuário logado e monta a subcoleção 'extrato'
+      const alunosCol = collection(db, 'alunos');
+      const alunoQ = query(alunosCol, where('user', '==', sess.user), limit(1));
+      const alunoSnap = await getDocs(alunoQ);
+      if (alunoSnap.empty) {
+        unauthEl.classList.add('overlay');
+        unauthEl.style.display = 'flex';
+        contentEl.style.display = 'none';
+        throw new Error('Usuário não encontrado para extrato.');
+      }
+      const alunoDoc = alunoSnap.docs[0];
+      const gilberto = alunoDoc.id;
+      // Caminho exigido: bancodaneondb/alunos/{docId}/extrato/extrato
+      const extratoCol = collection(db, 'alunos', gilberto, 'extrato', 'extrato');
       try {
-        const q = query(
-          extratoCol,
-          where('user', '==', sess.user),
-          orderBy('quando', 'desc'),
-          limit(100)
-        );
+        const q = query(extratoCol, orderBy('dateTime', 'desc'), limit(100));
         const snap = await getDocs(q);
         const items = [];
         snap.forEach(d => {
           const data = d.data();
           items.push({
             id: d.id,
-            descricao: data?.descricao ?? '(sem descrição)',
-            valor: data?.valor ?? 0,
-            tipo: data?.tipo ?? 'movimento',
-            quando: data?.quando?.toDate ? data.quando.toDate() : null
+            description: data?.description ?? '(sem descrição)',
+            amount: Number(data?.amount ?? 0),
+            isEarn: Boolean(data?.isEarn ?? false),
+            saldoInicial: Number(data?.saldoInicial ?? 0),
+            saldoFinal: Number(data?.saldoFinal ?? 0),
+            dateTime: data?.dateTime?.toDate ? data.dateTime.toDate() : null
           });
         });
 
@@ -145,25 +155,47 @@
           li.textContent = 'Nenhum lançamento encontrado.';
           listaEl.appendChild(li);
         } else {
+          // Cabeçalho de 5 colunas
+          const header = document.createElement('li');
+          header.className = 'item';
+          header.innerHTML = '<div class="left"><div class="desc">Data e Hora</div></div>' +
+                             '<div class="valor">Descrição</div>' +
+                             '<div class="valor">Saldo Inicial</div>' +
+                             '<div class="valor">Amount</div>' +
+                             '<div class="valor">Saldo Final</div>';
+          listaEl.appendChild(header);
           items.forEach(it => {
             const li = document.createElement('li');
             li.className = 'item';
-            const left = document.createElement('div');
-            left.className = 'left';
-            const desc = document.createElement('div');
-            desc.className = 'desc';
-            desc.textContent = it.descricao;
-            const meta = document.createElement('div');
-            meta.className = 'meta';
-            const dt = it.quando ? it.quando.toLocaleString() : 'sem data';
-            meta.textContent = `${dt} • ${it.tipo}`;
-            left.appendChild(desc);
-            left.appendChild(meta);
-            const valor = document.createElement('div');
-            valor.className = 'valor ' + (it.valor >= 0 ? 'credito' : 'debito');
-            valor.textContent = `N$ ${it.valor}`;
-            li.appendChild(left);
-            li.appendChild(valor);
+            const col1 = document.createElement('div');
+            col1.className = 'left';
+            const dt = it.dateTime ? it.dateTime.toLocaleString() : 'sem data';
+            const dtEl = document.createElement('div');
+            dtEl.className = 'desc';
+            dtEl.textContent = dt;
+            col1.appendChild(dtEl);
+
+            const col2 = document.createElement('div');
+            col2.className = 'valor';
+            col2.textContent = it.description;
+
+            const col3 = document.createElement('div');
+            col3.className = 'valor';
+            col3.textContent = `N$ ${it.saldoInicial}`;
+
+            const col4 = document.createElement('div');
+            col4.className = 'valor ' + (it.isEarn ? 'credito' : 'debito');
+            col4.textContent = `N$ ${it.amount}`;
+
+            const col5 = document.createElement('div');
+            col5.className = 'valor';
+            col5.textContent = `N$ ${it.saldoFinal}`;
+
+            li.appendChild(col1);
+            li.appendChild(col2);
+            li.appendChild(col3);
+            li.appendChild(col4);
+            li.appendChild(col5);
             listaEl.appendChild(li);
           });
         }

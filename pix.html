@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PIX • Banco da Neon</title>
+  <style>
+    :root { --primary:#5a039a; --secondary:#b6f902; --bg:#f7f7fb; --card:#fff; --text:#1a1a1a; --muted:#5d5d6a; --border:#e8e8ef; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; background: var(--bg); }
+    .header{ background:var(--primary); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 8px 24px rgba(90,3,154,0.25); }
+    .brand{ display:flex; align-items:center; gap:12px; }
+    .brand img{ height:48px; width:48px; display:block; }
+    .wrap{ max-width:720px; margin:0 auto; padding:20px; }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:0 10px 30px rgba(16,20,40,0.08); }
+    h1{ margin:0 0 8px 0; font-size:24px; font-weight:800; }
+    p.helper{ margin:0 0 16px 0; color:var(--muted); }
+    label{ font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
+    input{ width:100%; background:#f2f4f7; border:1px solid var(--border); border-radius:12px; padding:10px 12px; outline:none; }
+    .field{ margin-bottom:12px; }
+    .actions{ display:flex; gap:10px; margin-top:12px; }
+    .btn{ background:var(--primary); color:#fff; border:none; border-radius:9999px; padding:10px 16px; cursor:pointer; }
+    .btn.secondary{ background:#202123; }
+    .error{ color:#a20b0b; min-height:18px; margin-top:6px; }
+    .ok{ color:#12805a; min-height:18px; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand"><img src="logotipo.svg" alt="Neon" /></div>
+    <div class="actions">
+      <a class="btn secondary" href="dashboard.html">Voltar</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="unauth" class="card" style="display:none; text-align:center;">
+      <h1>Acesso não autorizado</h1>
+      <p class="helper">Faça login para usar o PIX.</p>
+      <a class="btn" href="index.html">Ir para login</a>
+    </div>
+
+    <div id="content" class="card" style="display:none;">
+      <h1>Transferência PIX</h1>
+      <p class="helper">Envie valores para outra pessoa usando a chave Pix (idAluno).</p>
+      <div class="field">
+        <label for="chavePix">Chave Pix (idAluno de destino)</label>
+        <input id="chavePix" type="text" placeholder="Ex.: c7f603" />
+      </div>
+      <div class="field">
+        <label for="descricao">Descrição</label>
+        <input id="descricao" type="text" placeholder="Ex.: Pagamento do lanche" />
+      </div>
+      <div class="field">
+        <label for="valor">Valor</label>
+        <input id="valor" type="text" inputmode="decimal" pattern="^[0-9]+([\.,][0-9]{1,2})?$" placeholder="Ex.: 50" />
+      </div>
+      <div class="actions">
+        <button id="btnTransferir" class="btn">Transferir</button>
+        <a class="btn secondary" href="dashboard.html">Voltar</a>
+      </div>
+      <div id="msg" class="ok"></div>
+      <div id="err" class="error"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, limit, getDocs, addDoc, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+    try { await signInAnonymously(getAuth(app)); } catch {}
+
+    const sessRaw = localStorage.getItem('bn.currentUser');
+    const unauthEl = document.getElementById('unauth');
+    const contentEl = document.getElementById('content');
+    const msgEl = document.getElementById('msg');
+    const errEl = document.getElementById('err');
+    let sess = null;
+    try { sess = JSON.parse(sessRaw); } catch { sess = null; }
+    if (!sess || !sess.user) {
+      unauthEl.style.display = 'block';
+    } else {
+      contentEl.style.display = 'block';
+    }
+
+    const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+
+    function $(s){ return document.querySelector(s); }
+    const btnTransferir = $('#btnTransferir');
+
+    async function getAlunoByUser(user){
+      const alunosCol = collection(db, 'alunos');
+      const q = query(alunosCol, where('user','==', user), limit(1));
+      const snap = await getDocs(q);
+      if (snap.empty) return null;
+      const d = snap.docs[0];
+      const data = d.data();
+      return { gilberto: d.id, saldo: Number(data?.saldo ?? 0), user: data?.user, firstName: data?.firstName };
+    }
+    async function getAlunoByIdAluno(idAluno){
+      const alunosCol = collection(db, 'alunos');
+      const q = query(alunosCol, where('idAluno','==', idAluno), limit(1));
+      const snap = await getDocs(q);
+      if (snap.empty) return null;
+      const d = snap.docs[0];
+      const data = d.data();
+      return { gilberto: d.id, saldo: Number(data?.saldo ?? 0), user: data?.user, firstName: data?.firstName };
+    }
+
+    function parseValor(input){
+      const s = String(input || '').replace(',', '.').trim();
+      const n = Number(s);
+      if (!isFinite(n) || n <= 0) return null;
+      return Math.round(n * 100) / 100;
+    }
+
+    btnTransferir?.addEventListener('click', async () => {
+      msgEl.textContent = '';
+      errEl.textContent = '';
+      const chave = String($('#chavePix').value || '').trim();
+      const descricao = String($('#descricao').value || '').trim();
+      const valor = parseValor($('#valor').value);
+      if (!chave || !descricao || !valor){ errEl.textContent = 'Preencha todos os campos com valores válidos (valor > 0).'; return; }
+
+      if (!confirm(`Confirmar transferência de N$ ${valor} para a chave ${chave}?`)){
+        return;
+      }
+
+      try {
+        // Carrega remetente e destinatário
+        const remetente = await getAlunoByUser(sess.user);
+        if (!remetente) { throw new Error('Remetente não encontrado'); }
+        const destinatario = await getAlunoByIdAluno(chave);
+        if (!destinatario) { throw new Error('Destinatário não encontrado'); }
+        if (remetente.gilberto === destinatario.gilberto) { throw new Error('Não é possível transferir para si mesmo.'); }
+        if (remetente.saldo < valor) { throw new Error('Saldo insuficiente.'); }
+
+        const agora = serverTimestamp();
+
+        // Extrato remetente (isEarn false)
+        const saldoInicialR = remetente.saldo;
+        const saldoFinalR = saldoInicialR - valor;
+        // Caminho exigido: bancodaneondb/alunos/{docId}/extrato/extrato
+        await addDoc(collection(db,'alunos', remetente.gilberto, 'extrato', 'extrato'), {
+          amount: -Math.abs(valor),
+          dateTime: agora,
+          description: descricao,
+          isEarn: false,
+          saldoInicial: saldoInicialR,
+          saldoFinal: saldoFinalR
+        });
+        await updateDoc(doc(db,'alunos', remetente.gilberto), { saldo: saldoFinalR });
+
+        // Extrato destinatário (isEarn true)
+        const saldoInicialD = destinatario.saldo;
+        const saldoFinalD = saldoInicialD + valor;
+        await addDoc(collection(db,'alunos', destinatario.gilberto, 'extrato', 'extrato'), {
+          amount: Math.abs(valor),
+          dateTime: agora,
+          description: `Transferência PIX - ${remetente.user}`,
+          isEarn: true,
+          saldoInicial: saldoInicialD,
+          saldoFinal: saldoFinalD
+        });
+        await updateDoc(doc(db,'alunos', destinatario.gilberto), { saldo: saldoFinalD });
+
+        msgEl.textContent = 'Transferência concluída com sucesso!';
+      } catch (e) {
+        errEl.textContent = e?.message || String(e);
+        console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>
+
+

@@ -70,7 +70,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
@@ -115,6 +115,16 @@
         const payload = { firstName, lastName, idAluno, user, password, periodo, ativo, classe: "aluno", quandoRegistrou: serverTimestamp(), saldo: 1000 };
         const ref = await addDoc(alunosCol, payload);
         alert("Aluno criado: " + ref.id);
+        // Lançamento de abertura de conta na subcoleção exigida
+        const extratoPath = collection(db, 'alunos', ref.id, 'extrato', 'extrato');
+        await addDoc(extratoPath, {
+          amount: 0,
+          dateTime: serverTimestamp(),
+          description: 'Abertura de conta',
+          isEarn: true,
+          saldoInicial: 1000,
+          saldoFinal: 1000
+        });
         ["#firstName","#lastName","#idAluno","#user","#password","#periodo"].forEach(sel => $(sel).value = "");
         $("#ativo").checked = false;
       } catch (e) { console.error(e); alert("Erro: " + (e?.message || e)); }

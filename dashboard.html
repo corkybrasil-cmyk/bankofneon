@@ -138,6 +138,7 @@
     const saldoLinhaEl = $("#saldoLinha");
     const btnHide = $("#btnHide");
     const btnShow = $("#btnShow");
+    const btnExtrato = document.getElementById('extratoButton');
 
     // Spinner overlay (mantido)
     const spinner = document.createElement('div');
@@ -191,6 +192,9 @@
       btnHide.style.display = 'inline-block';
       showSaldo();
     });
+
+    // Navegação para extrato
+    btnExtrato?.addEventListener('click', () => { window.location.href = 'extrato.html'; });
   </script>
 </body>
 </html>
