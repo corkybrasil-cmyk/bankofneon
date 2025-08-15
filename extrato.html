@@ -4,6 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Extrato • Banco da Neon</title>
+  <script>
+    // Garante que o conteúdo fique oculto até a verificação de sessão
+    document.documentElement.classList.add('auth-pending');
+  </script>
   <style>
     :root {
       --primary: #5a039a;
@@ -45,6 +49,11 @@
     .btn { background: var(--primary); color: #fff; border: none; border-radius: 9999px; padding: 10px 16px; cursor: pointer; }
     .actions { display: flex; gap: 10px; align-items: center; }
     a.link { color: #fff; text-decoration: none; background: rgba(255,255,255,0.12); padding: 6px 10px; border-radius: 999px; }
+
+    /* Gate de autenticação: conteúdo fica oculto até liberação */
+    .auth-pending #content { display: none !important; visibility: hidden !important; }
+    /* Overlay de não autorizado ocupa a tela inteira quando visível */
+    #unauth.overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: radial-gradient(800px 600px at 100% -10%, rgba(90,3,154,0.10), rgba(90,3,154,0.0) 60%), var(--bg); z-index: 100; }
   </style>
 </head>
 <body>
@@ -100,9 +109,14 @@
     try { sess = JSON.parse(sessRaw); } catch { sess = null; }
 
     if (!sess || !sess.user) {
-      unauthEl.style.display = 'block';
+      // Mostra a tela de não autorizado como overlay e mantém o conteúdo oculto
+      unauthEl.classList.add('overlay');
+      unauthEl.style.display = 'flex';
+      contentEl.style.display = 'none';
     } else {
       contentEl.style.display = 'block';
+      // Libera o conteúdo (remove o gate)
+      document.documentElement.classList.remove('auth-pending');
       const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
       const extratoCol = collection(db, 'extrato'); // Coleção 'extrato', filtrada pelo usuário logado
       try {
