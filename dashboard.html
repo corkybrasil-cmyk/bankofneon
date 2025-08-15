@@ -199,7 +199,7 @@
     const style = document.createElement('style'); style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }'; document.head.appendChild(style);
 
     // Busca dados atualizados do Firestore por segurança
-    // Avatar: inicia com spinner por 5s; se resolver a tempo, carrega foto, senão mostra semfoto
+    // Avatar: inicia com spinner por 10s; se resolver a tempo, carrega foto, senão mostra semfoto
     const avatarEl = document.getElementById('avatar');
     const avatarSpinner = document.getElementById('avatarSpinner');
     const avatarPlaceholder = document.getElementById('avatarPlaceholder');
@@ -209,7 +209,7 @@
         try { avatarSpinner.style.display = 'none'; } catch {}
         try { avatarPlaceholder.style.display = 'grid'; } catch {}
       }
-    }, 5000);
+    }, 10000);
     try {
       spinner.style.display = 'flex';
       const alunosCol = collection(db, "alunos");
@@ -228,7 +228,7 @@
         if (data?.fotoUrl) {
           avatarImg.onload = () => { try { avatarSpinner.style.display = 'none'; avatarResolved = true; } catch {} };
           avatarImg.src = data.fotoUrl;
-        } // se não houver foto, timeout exibirá placeholder após 5s
+        } // se não houver foto, timeout exibirá placeholder após 10s
       } else {
         saudacaoEl.textContent = `Olá, ${sess.firstName || sess.user}`;
         saldoLinhaEl.dataset.raw = String(sess.saldo ?? 0);
