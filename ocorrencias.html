@@ -200,11 +200,67 @@
             falta
           });
 
-          // Lê custoFaltas (se existir) para eventual desconto (não aplicado aqui)
-          // const custoRef = doc(db, 'ocorrencias', 'custoFaltas');
-          // const custoSnap = await getDoc(custoRef);
+          // Lê custoFaltas e aplica desconto no extrato do aluno
+          try {
+            const custoRef = doc(db, 'ocorrencias', 'custoFaltas');
+            const custoSnap = await getDocs(collection(db, 'ocorrencias'));
+            let custoFalta = 0;
+            
+            // Procura pelo documento custoFaltas
+            custoSnap.forEach(d => {
+              if (d.id === 'custoFaltas') {
+                const custoData = d.data();
+                // Mapeia a gravidade para o valor correto (com e sem acentos)
+                if (falta === 'leve') custoFalta = custoData.leve || 0;
+                else if (falta === 'médio' || falta === 'medio') custoFalta = custoData.médio || custoData.medio || 0;
+                else if (falta === 'grave') custoFalta = custoData.grave || 0;
+                else if (falta === 'gravíssimo' || falta === 'gravissimo') custoFalta = custoData.gravíssimo || custoData.gravissimo || 0;
+              }
+            });
 
-          alert('Ocorrência enviada com sucesso.');
+            if (custoFalta > 0) {
+              // Busca o documento do aluno para obter o saldo atual e docId
+              const alunoRef = doc(db, 'alunos', alunoId);
+              const alunoSnap = await getDocs(collection(db, 'alunos'));
+              let alunoData = null;
+              let alunoDocId = null;
+              
+              alunoSnap.forEach(d => {
+                if (d.id === alunoId) {
+                  alunoData = d.data();
+                  alunoDocId = d.id;
+                }
+              });
+
+              if (alunoData && alunoDocId) {
+                const saldoAtual = alunoData.saldo || 0;
+                const novoSaldo = Math.max(0, saldoAtual - custoFalta); // Não permite saldo negativo
+                
+                // Atualiza o saldo do aluno
+                await setDoc(alunoRef, { saldo: novoSaldo }, { merge: true });
+                
+                // Cria entrada no extrato do aluno
+                const extratoCol = collection(db, 'alunos', alunoDocId, 'extrato');
+                await addDoc(extratoCol, {
+                  amount: -custoFalta, // Valor negativo (desconto)
+                  dateTime: serverTimestamp(),
+                  description: `Ocorrência ${falta.charAt(0).toUpperCase() + falta.slice(1)}`,
+                  isEarn: false,
+                  saldoInicial: saldoAtual,
+                  saldoFinal: novoSaldo
+                });
+              }
+            }
+          } catch (e) {
+            console.error('Erro ao aplicar desconto:', e);
+            // Continua mesmo se falhar o desconto
+          }
+
+          let mensagem = 'Ocorrência enviada com sucesso.';
+          if (custoFalta > 0) {
+            mensagem += `\n\nDesconto aplicado: N$ ${custoFalta}\nNovo saldo do aluno: N$ ${novoSaldo}`;
+          }
+          alert(mensagem);
           descricaoEl.value = '';
           datahoraEl.value = '';
           gravidadeEl.value = 'leve';
