@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Extrato • Banco da Neon</title>
+  <style>
+    :root {
+      --primary: #5a039a;
+      --secondary: #b6f902;
+      --secondary-700: #8bb601;
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #5d5d6a;
+      --border: #e8e8ef;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto;
+      background:
+        radial-gradient(800px 600px at 100% -10%, rgba(90,3,154,0.10), rgba(90,3,154,0.0) 60%),
+        var(--bg);
+    }
+    .header { background: var(--primary); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(90,3,154,0.25); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 48px; width: 48px; display: block; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: 0 10px 30px rgba(16, 20, 40, 0.08); }
+    h1 { margin: 0 0 8px 0; font-size: 24px; font-weight: 800; }
+    p.helper { margin: 0 0 16px 0; color: var(--muted); }
+    .list { margin: 0; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #fff; }
+    .item { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    .item:last-child { border-bottom: none; }
+    .left { display: flex; flex-direction: column; gap: 2px; }
+    .desc { font-weight: 700; }
+    .meta { font-size: 12px; color: var(--muted); }
+    .valor { font-weight: 800; }
+    .credito { color: #12805a; }
+    .debito { color: #a20b0b; }
+    .empty { text-align: center; color: var(--muted); padding: 16px; }
+    .unauth { text-align: center; padding: 40px 16px; }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 9999px; padding: 10px 16px; cursor: pointer; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+    a.link { color: #fff; text-decoration: none; background: rgba(255,255,255,0.12); padding: 6px 10px; border-radius: 999px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">
+      <img src="logotipo.svg" alt="Neon" />
+    </div>
+    <div class="actions">
+      <a class="link" href="dashboard.html">Dashboard</a>
+      <a class="link" href="index.html" onclick="localStorage.removeItem('bn.currentUser')">Sair</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="unauth" class="card unauth" style="display: none;">
+      <h1>Acesso não autorizado</h1>
+      <p class="helper">Para ver o extrato, faça login.</p>
+      <button class="btn" onclick="window.location.href='index.html'">Ir para o login</button>
+    </div>
+
+    <div id="content" class="card" style="display: none;">
+      <h1>Extrato</h1>
+      <p class="helper">Veja seus lançamentos mais recentes.</p>
+      <ul id="lista" class="list"></ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, orderBy, getDocs, limit } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+    try { await signInAnonymously(getAuth(app)); } catch {}
+
+    const sessRaw = localStorage.getItem('bn.currentUser');
+    const unauthEl = document.getElementById('unauth');
+    const contentEl = document.getElementById('content');
+    const listaEl = document.getElementById('lista');
+    let sess = null;
+    try { sess = JSON.parse(sessRaw); } catch { sess = null; }
+
+    if (!sess || !sess.user) {
+      unauthEl.style.display = 'block';
+    } else {
+      contentEl.style.display = 'block';
+      const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+      const extratoCol = collection(db, 'extrato'); // Coleção 'extrato', filtrada pelo usuário logado
+      try {
+        const q = query(
+          extratoCol,
+          where('user', '==', sess.user),
+          orderBy('quando', 'desc'),
+          limit(100)
+        );
+        const snap = await getDocs(q);
+        const items = [];
+        snap.forEach(d => {
+          const data = d.data();
+          items.push({
+            id: d.id,
+            descricao: data?.descricao ?? '(sem descrição)',
+            valor: data?.valor ?? 0,
+            tipo: data?.tipo ?? 'movimento',
+            quando: data?.quando?.toDate ? data.quando.toDate() : null
+          });
+        });
+
+        if (!items.length) {
+          const li = document.createElement('li');
+          li.className = 'empty';
+          li.textContent = 'Nenhum lançamento encontrado.';
+          listaEl.appendChild(li);
+        } else {
+          items.forEach(it => {
+            const li = document.createElement('li');
+            li.className = 'item';
+            const left = document.createElement('div');
+            left.className = 'left';
+            const desc = document.createElement('div');
+            desc.className = 'desc';
+            desc.textContent = it.descricao;
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const dt = it.quando ? it.quando.toLocaleString() : 'sem data';
+            meta.textContent = `${dt} • ${it.tipo}`;
+            left.appendChild(desc);
+            left.appendChild(meta);
+            const valor = document.createElement('div');
+            valor.className = 'valor ' + (it.valor >= 0 ? 'credito' : 'debito');
+            valor.textContent = `N$ ${it.valor}`;
+            li.appendChild(left);
+            li.appendChild(valor);
+            listaEl.appendChild(li);
+          });
+        }
+      } catch (e) {
+        const li = document.createElement('li');
+        li.className = 'empty';
+        li.textContent = `Erro ao carregar extrato: ${e?.message || e}`;
+        listaEl.appendChild(li);
+        console.error(e);
+      }
+    }
+  </script>
+</body>
+</html>
+
+
