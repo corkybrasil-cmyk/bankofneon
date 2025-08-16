@@ -345,7 +345,7 @@
             <div class="product-title">${produto.name}</div>
             <div class="product-description">${produto.description || 'Produto da loja Neon'}</div>
             <div class="product-price">N$ ${produto.price?.toFixed(2) || '0.00'}</div>
-            <button class="buy-btn" data-product-id="${doc.id}" data-price="${produto.price}" data-product-name="${produto.name}">
+            <button class="buy-btn" data-product-id="${doc.id}" data-price="${produto.price}" data-product-name="${produto.name}" data-category="${produto.categoryName || ''}" data-subcategory="${produto.subcategoryName || ''}">
               Comprar
             </button>
           `;
@@ -414,6 +414,8 @@
         // Usar a nova estrutura: inventario/{docId}/inventarioAluno
         console.log('📦 Adicionando item ao inventário...');
         console.log('📍 Caminho da coleção: inventario/' + alunoDoc.id + '/inventarioAluno');
+        console.log('🏷️ Categoria do produto:', btn.dataset.category);
+        console.log('🏷️ Subcategoria do produto:', btn.dataset.subcategory);
         
         const inventarioCol = collection(db, 'inventario', alunoDoc.id, 'inventarioAluno');
         console.log('📁 Collection de inventário criada:', inventarioCol);
@@ -433,10 +435,16 @@
           
           console.log('🔄 Item já existe, atualizando quantidade de', existingData.quantity, 'para', newQuantity);
           
+          // Obter categoria e subcategoria do produto
+          const productCategory = btn.dataset.category || 'Geral';
+          const productSubcategory = btn.dataset.subcategory || '';
+          
           await updateDoc(doc(db, 'inventario', alunoDoc.id, 'inventarioAluno', existingItemDoc.id), {
             quantity: newQuantity,
             lastPurchaseDate: serverTimestamp(),
-            totalSpent: (existingData.totalSpent || 0) + price
+            totalSpent: (existingData.totalSpent || 0) + price,
+            category: productCategory,
+            subcategory: productSubcategory
           });
           
           console.log('✅ Quantidade atualizada com sucesso');
@@ -444,12 +452,17 @@
           // Item não existe, criar novo
           console.log('🆕 Criando novo item no inventário');
           
+          // Obter categoria e subcategoria do produto
+          const productCategory = btn.dataset.category || 'Geral';
+          const productSubcategory = btn.dataset.subcategory || '';
+          
           const itemData = {
             productId: productId,
             productName: productName,
             price: price,
             quantity: 1,
-            category: 'Geral', // Categoria padrão
+            category: productCategory,
+            subcategory: productSubcategory,
             description: `Comprado por N$ ${price.toFixed(2)}`,
             firstPurchaseDate: serverTimestamp(),
             lastPurchaseDate: serverTimestamp(),

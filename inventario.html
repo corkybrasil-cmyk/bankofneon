@@ -198,7 +198,199 @@
       flex: 1;
       padding: 8px 16px;
       font-size: 12px;
-      border-radius: 8px;
+    }
+
+    /* Animações de cartas */
+    .card-animation-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card-pack {
+      position: absolute;
+      top: 50%;
+      right: -300px;
+      transform: translateY(-50%);
+      transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      width: 180px;
+      height: 240px;
+    }
+
+    .card-pack img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .card-pack.slide-in {
+      right: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    .card-pack.rip-animation {
+      animation: ripPack 1.2s ease-in-out forwards;
+    }
+
+    .card-pack.rip-animation::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(45deg, transparent 40%, #e74c3c 40%, #e74c3c 60%, transparent 60%);
+      animation: slashEffect 0.6s ease-out 0.3s forwards;
+      opacity: 0;
+    }
+
+    @keyframes ripPack {
+      0% { transform: translate(50%, -50%) scale(1) rotate(0deg); }
+      20% { transform: translate(50%, -50%) scale(1.05) rotate(-1deg); }
+      30% { transform: translate(50%, -50%) scale(1.1) rotate(1deg); }
+      60% { transform: translate(50%, -50%) scale(0.95) rotate(-0.5deg); }
+      80% { transform: translate(50%, -50%) scale(0.9) rotate(0.5deg); }
+      100% { transform: translate(50%, -50%) scale(0.7) rotate(0deg); opacity: 0; }
+    }
+
+    @keyframes slashEffect {
+      0% { opacity: 0; transform: scale(0) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.2) rotate(45deg); }
+      100% { opacity: 1; transform: scale(1) rotate(45deg); }
+    }
+
+    .card-confirmation-popup {
+      position: absolute;
+      top: 65%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      z-index: 1001;
+      opacity: 0;
+      animation: popupFadeIn 0.5s ease-out forwards;
+      min-width: 280px;
+    }
+
+    @keyframes popupFadeIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .popup-content h3 {
+      margin: 0 0 12px 0;
+      color: var(--primary);
+      font-size: 20px;
+    }
+
+    .popup-content p {
+      margin: 0 0 20px 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .cards-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1002;
+    }
+
+        .card-item {
+      position: absolute;
+      width: 120px;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      color: white;
+      font-weight: bold;
+      opacity: 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .card-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-item.current {
+      opacity: 1;
+      z-index: 1003;
+    }
+
+    .card-item.hidden {
+      opacity: 0;
+      z-index: 1002;
+    }
+
+    .card-item.fly-out {
+      animation: flyOut 1.2s ease-out forwards;
+    }
+
+    @keyframes flyOut {
+      0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg); 
+      }
+      20% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+      }
+      100% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+      }
+    }
+
+    .card-navigation {
+      position: absolute;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1004;
+      text-align: center;
+    }
+
+    .card-navigation button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-navigation button:hover {
+      background: var(--secondary-700);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
     }
     
     /* Mensagens */
@@ -381,6 +573,35 @@
     </div>
   </div>
 
+  <!-- Overlay para animação de cartas -->
+  <div id="cardAnimationOverlay" class="card-animation-overlay" style="display: none;">
+    <!-- Pacote de cartas -->
+    <div id="cardPack" class="card-pack">
+      <img src="pacotecarta.svg" alt="Pacote de cartas" width="120" height="160">
+    </div>
+    
+    <!-- Popup de confirmação -->
+    <div id="cardConfirmationPopup" class="card-confirmation-popup" style="display: none;">
+      <div class="popup-content">
+        <h3>🎴 Abrir Pacote de Figurinhas</h3>
+        <p>Você deseja abrir este pacote de figurinhas?</p>
+        <div class="popup-buttons">
+          <button id="btnOpenCards" class="btn success">Sim, abrir!</button>
+          <button id="btnCancelCards" class="btn secondary">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Cartas que saem do pacote -->
+    <div id="cardsContainer" class="cards-container" style="display: none;">
+      <!-- 5 cartas serão criadas dinamicamente -->
+      <div class="card-navigation">
+        <button id="btnNextCard" style="display: none;">Visualizar a próxima carta</button>
+        <button id="btnCloseCards" style="display: none;">Fechar visualização</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     console.log('🚀 inventario.html - Script iniciando...');
     
@@ -441,6 +662,12 @@
       console.error('❌ Erro ao fazer parse da sessão:', error);
       sess = null; 
     }
+    
+    // Variável global para armazenar os itens do inventário
+    let purchases = [];
+    
+    // Variável global para controle das cartas
+    let currentCardIndex = 0;
 
     if (!sess || !sess.user) {
       if (unauthEl) {
@@ -463,6 +690,25 @@
         setupEventListeners();
         setupMenuControls();
         await loadInventory();
+        
+        // Verificar se os elementos de animação estão presentes
+        console.log('🔍 Verificando elementos de animação na inicialização...');
+        const overlay = document.getElementById('cardAnimationOverlay');
+        const cardPack = document.getElementById('cardPack');
+        const popup = document.getElementById('cardConfirmationPopup');
+        const cardsContainer = document.getElementById('cardsContainer');
+        
+        console.log('📱 Overlay de animação:', !!overlay);
+        console.log('📦 Pacote de cartas:', !!cardPack);
+        console.log('💬 Popup de confirmação:', !!popup);
+        console.log('🃏 Container de cartas:', !!cardsContainer);
+        
+        if (!overlay || !cardPack || !popup || !cardsContainer) {
+          console.error('❌ Alguns elementos de animação não foram encontrados!');
+        } else {
+          console.log('✅ Todos os elementos de animação estão presentes');
+        }
+        
       } catch (error) {
         console.error('❌ Erro na inicialização:', error);
         showError('Erro ao inicializar aplicação: ' + error.message);
@@ -557,7 +803,7 @@
 
         
         // Processar itens do inventário
-        const purchases = [];
+        purchases.length = 0; // Limpar array global
         
         snap.forEach((doc, index) => {
           const data = doc.data();
@@ -567,6 +813,7 @@
             price: data.price,
             quantity: data.quantity || 1,
             category: data.category || 'Geral',
+            subcategory: data.subcategory || '',
             description: data.description || 'Item do inventário',
             firstPurchaseDate: data.firstPurchaseDate,
             lastPurchaseDate: data.lastPurchaseDate,
@@ -613,9 +860,9 @@
     // Atualizar estatísticas
     function updateStats(purchases) {
       if (totalItems) {
-        // Contar itens únicos (por productId)
-        const uniqueItems = purchases.length;
-        totalItems.textContent = uniqueItems;
+        // Contar total de itens (quantidade de produtos únicos × quantidade de cada produto)
+        const totalItemsCount = purchases.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        totalItems.textContent = totalItemsCount;
       }
       
       if (totalSpent) {
@@ -641,7 +888,9 @@
           return false;
         });
         
-        recentPurchases.textContent = recent.length;
+        // Contar total de itens comprados nos últimos 30 dias (considerando quantidades)
+        const recentItemsCount = recent.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        recentPurchases.textContent = recentItemsCount;
         
       }
       
@@ -706,7 +955,7 @@
           <div class="item-description">${item.description}</div>
           <div class="item-actions">
             <button class="btn btn-item secondary" onclick="viewDetails('${item.id}')">📋 Detalhes</button>
-            <button class="btn btn-item success" onclick="useItem('${item.id}')">🎯 Usar</button>
+            <button class="btn btn-item success" onclick="useItem('${item.id}')" data-subcategory="${item.subcategory || ''}">🎯 Usar</button>
           </div>
         `;
         
@@ -745,7 +994,27 @@
     };
 
     window.useItem = function(id) {
-      showSuccess('Item usado com sucesso!');
+      console.log('🎴 Função useItem chamada para ID:', id);
+      
+      // Encontrar o item no inventário
+      const item = purchases.find(p => p.id === id);
+      if (!item) {
+        console.error('❌ Item não encontrado no inventário');
+        showError('Item não encontrado');
+        return;
+      }
+      
+      console.log('📦 Item encontrado:', item);
+      console.log('🏷️ Subcategoria do item:', item.subcategory);
+      
+      // Verificar se é uma carta (case-insensitive)
+      if (item.subcategory && item.subcategory.toLowerCase().includes('carta')) {
+        console.log('✅ Item é uma carta! Iniciando animação...');
+        startCardAnimation(item);
+      } else {
+        console.log('ℹ️ Item não é uma carta, usando comportamento padrão');
+        showSuccess('Item usado com sucesso!');
+      }
     };
 
     // Funções auxiliares
@@ -771,6 +1040,231 @@
           errEl.style.display = 'none';
         }, 5000);
       }
+    }
+
+    // Funções de animação de cartas
+    function startCardAnimation(item) {
+      console.log('🚀 Iniciando animação de cartas para:', item.productName);
+      console.log('🔍 Verificando elementos DOM...');
+      
+      const overlay = document.getElementById('cardAnimationOverlay');
+      const cardPack = document.getElementById('cardPack');
+      
+      console.log('📱 Overlay encontrado:', !!overlay);
+      console.log('📦 CardPack encontrado:', !!cardPack);
+      
+      if (!overlay || !cardPack) {
+        console.error('❌ Elementos de animação não encontrados');
+        console.error('❌ Overlay:', overlay);
+        console.error('❌ CardPack:', cardPack);
+        
+        // Tentar encontrar elementos novamente
+        console.log('🔄 Tentando encontrar elementos novamente...');
+        const allElements = document.querySelectorAll('*');
+        console.log('📊 Total de elementos no DOM:', allElements.length);
+        
+        const overlayElements = document.querySelectorAll('[id*="card"]');
+        console.log('🔍 Elementos com ID contendo "card":', overlayElements);
+        
+        // Verificar se o HTML está presente
+        const bodyHTML = document.body.innerHTML;
+        const hasOverlay = bodyHTML.includes('cardAnimationOverlay');
+        const hasCardPack = bodyHTML.includes('cardPack');
+        console.log('🔍 HTML contém overlay:', hasOverlay);
+        console.log('🔍 HTML contém cardPack:', hasCardPack);
+        
+        return;
+      }
+      
+      // Mostrar overlay
+      overlay.style.display = 'flex';
+      console.log('📱 Overlay de animação exibido');
+      
+      // Iniciar animação de deslizamento
+      setTimeout(() => {
+        cardPack.classList.add('slide-in');
+        console.log('📦 Pacote de cartas deslizando para o centro');
+        
+        // Mostrar popup de confirmação após o deslizamento
+        setTimeout(() => {
+          showCardConfirmationPopup();
+        }, 1500);
+      }, 100);
+    }
+
+    function showCardConfirmationPopup() {
+      console.log('💬 Exibindo popup de confirmação');
+      
+      const popup = document.getElementById('cardConfirmationPopup');
+      if (!popup) {
+        console.error('❌ Popup de confirmação não encontrado');
+        return;
+      }
+      
+      popup.style.display = 'block';
+      
+      // Configurar event listeners
+      const btnOpen = document.getElementById('btnOpenCards');
+      const btnCancel = document.getElementById('btnCancelCards');
+      
+      if (btnOpen) {
+        btnOpen.onclick = () => {
+          console.log('✅ Usuário confirmou abertura do pacote');
+          openCardPack();
+        };
+      }
+      
+      if (btnCancel) {
+        btnCancel.onclick = () => {
+          console.log('❌ Usuário cancelou abertura do pacote');
+          closeCardAnimation();
+        };
+      }
+    }
+
+    function openCardPack() {
+      console.log('🎴 Iniciando abertura do pacote de cartas');
+      
+      const popup = document.getElementById('cardConfirmationPopup');
+      const cardPack = document.getElementById('cardPack');
+      
+      // Esconder popup
+      if (popup) popup.style.display = 'none';
+      
+      // Iniciar animação de rasgar
+      if (cardPack) {
+        cardPack.classList.add('rip-animation');
+        console.log('✂️ Animação de rasgar iniciada');
+        
+        // Após a animação de rasgar, mostrar as cartas
+        setTimeout(() => {
+          showFlyingCards();
+        }, 1200);
+      }
+    }
+
+    function showFlyingCards() {
+      console.log('🃏 Exibindo cartas sequencialmente');
+      
+      const cardsContainer = document.getElementById('cardsContainer');
+      if (!cardsContainer) {
+        console.error('❌ Container de cartas não encontrado');
+        return;
+      }
+      
+      cardsContainer.style.display = 'block';
+      cardsContainer.innerHTML = '';
+      
+      // Recriar o container de navegação
+      const navigationDiv = document.createElement('div');
+      navigationDiv.className = 'card-navigation';
+      navigationDiv.innerHTML = `
+        <button id="btnNextCard">Visualizar a próxima carta</button>
+        <button id="btnCloseCards" style="display: none;">Fechar visualização</button>
+      `;
+      cardsContainer.appendChild(navigationDiv);
+      
+      // Criar 5 cartas empilhadas
+      const cardSymbols = ['♠️', '♥️', '♣️', '♦️', '🃏'];
+      let currentCardIndex = 0;
+      
+      for (let i = 0; i < 5; i++) {
+        const card = document.createElement('div');
+        card.className = 'card-item';
+        card.textContent = cardSymbols[i];
+        card.dataset.index = i;
+        
+        // Todas as cartas começam empilhadas no centro
+        card.style.transform = 'translate(-50%, -50%)';
+        
+        if (i === 0) {
+          card.classList.add('current');
+        } else {
+          card.classList.add('hidden');
+        }
+        
+        cardsContainer.appendChild(card);
+      }
+      
+      // Configurar navegação
+      const btnNext = document.getElementById('btnNextCard');
+      const btnClose = document.getElementById('btnCloseCards');
+      
+      if (btnNext) {
+        btnNext.onclick = () => {
+          showNextCard();
+        };
+      }
+      
+      if (btnClose) {
+        btnClose.onclick = () => {
+          closeCardAnimation();
+        };
+      }
+      
+      console.log('🎉 Cartas criadas e empilhadas, mostrando primeira carta');
+    }
+
+    function showNextCard() {
+      console.log('🔄 Mostrando próxima carta');
+      
+      const cards = document.querySelectorAll('.card-item');
+      const btnNext = document.getElementById('btnNextCard');
+      const btnClose = document.getElementById('btnCloseCards');
+      
+      if (!cards || cards.length === 0) return;
+      
+      // Esconder carta atual
+      const currentCard = cards[currentCardIndex];
+      if (currentCard) {
+        currentCard.classList.remove('current');
+        currentCard.classList.add('hidden');
+      }
+      
+      // Mostrar próxima carta
+      currentCardIndex++;
+      
+      if (currentCardIndex < cards.length) {
+        const nextCard = cards[currentCardIndex];
+        if (nextCard) {
+          nextCard.classList.remove('hidden');
+          nextCard.classList.add('current');
+          console.log(`🃏 Mostrando carta ${currentCardIndex + 1} de ${cards.length}`);
+        }
+        
+        // Se for a penúltima carta, mostrar botão de fechar
+        if (currentCardIndex === cards.length - 1) {
+          if (btnNext) btnNext.style.display = 'none';
+          if (btnClose) btnClose.style.display = 'inline-block';
+        }
+      } else {
+        // Última carta, fechar animação
+        closeCardAnimation();
+      }
+    }
+
+    function closeCardAnimation() {
+      console.log('🔚 Fechando animação de cartas');
+      
+      const overlay = document.getElementById('cardAnimationOverlay');
+      const cardPack = document.getElementById('cardPack');
+      const popup = document.getElementById('cardConfirmationPopup');
+      const cardsContainer = document.getElementById('cardsContainer');
+      
+      // Resetar classes
+      if (cardPack) {
+        cardPack.classList.remove('slide-in', 'rip-animation');
+      }
+      
+      // Esconder elementos
+      if (popup) popup.style.display = 'none';
+      if (cardsContainer) cardsContainer.style.display = 'none';
+      if (overlay) overlay.style.display = 'none';
+      
+      // Resetar índice das cartas
+      currentCardIndex = 0;
+      
+      console.log('✅ Animação de cartas fechada com sucesso');
     }
     
   </script>
