@@ -52,11 +52,10 @@
       margin:0 auto; 
       padding:20px; 
       min-height: 100vh;
-      background: rgba(255,0,0,0.1);
     }
     .card{ 
       background:var(--card); 
-      border:2px solid blue; 
+      border:1px solid var(--border); 
       border-radius:20px; 
       padding:18px; 
       box-shadow:0 10px 30px rgba(16,20,40,0.08); 
@@ -76,12 +75,11 @@
       gap: 20px;
       margin-top: 20px;
       min-height: 200px;
-      border: 2px dashed #ccc;
       padding: 20px;
     }
     .product-card {
       background: var(--card);
-      border: 2px solid red;
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 20px;
       text-align: center;
@@ -219,9 +217,6 @@
       
       <div class="products-grid" id="productsGrid">
         <!-- Produtos serão carregados dinamicamente -->
-        <div style="color: red; font-size: 20px; text-align: center; padding: 20px;">
-          TESTE: Este texto deve aparecer se o HTML estiver funcionando
-        </div>
       </div>
       
       <div id="msg" class="ok"></div>
@@ -250,7 +245,6 @@
     try { await signInAnonymously(getAuth(app)); } catch {}
 
     const sessRaw = localStorage.getItem('bn.currentUser');
-    console.log('Sessão raw:', sessRaw);
     
     const unauthEl = document.getElementById('unauth');
     const contentEl = document.getElementById('content');
@@ -258,17 +252,8 @@
     const errEl = document.getElementById('err');
     const productsGrid = document.getElementById('productsGrid');
     
-    console.log('Elementos encontrados:', {
-      unauthEl: !!unauthEl,
-      contentEl: !!contentEl,
-      msgEl: !!msgEl,
-      errEl: !!errEl,
-      productsGrid: !!productsGrid
-    });
-    
     let sess = null;
     try { sess = JSON.parse(sessRaw); } catch { sess = null; }
-    console.log('Sessão parseada:', sess);
 
     // Controles do menu lateral
     const btnMenu = document.getElementById('btnMenu');
@@ -292,113 +277,86 @@
     });
 
     if (!sess || !sess.user) {
-      console.log('Usuário não autenticado');
       unauthEl.style.display = 'block';
     } else {
-      console.log('Usuário autenticado:', sess.user);
       contentEl.style.display = 'block';
-          // Aguarda um pouco para garantir que o DOM esteja pronto
-    setTimeout(() => {
-      console.log('Chamando loadProducts...');
-      try {
-        loadProducts();
-      } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-      }
-    }, 3000);
+      // Aguarda um pouco para garantir que o DOM esteja pronto
+      setTimeout(() => {
+        try {
+          loadProducts();
+        } catch (error) {
+          console.error('Erro ao carregar produtos:', error);
+        }
+      }, 3000);
     }
 
     const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
 
-    console.log('Firebase configurado, db:', db);
-
-    // Produtos de exemplo (em produção, viriam do Firebase)
-    const sampleProducts = [
-      {
-        id: 'prod1',
-        title: 'Camiseta Neon',
-        description: 'Camiseta exclusiva com o logo da Neon',
-        price: 50,
-        icon: '👕'
-      },
-      {
-        id: 'prod2',
-        title: 'Caneca Neon',
-        description: 'Caneca personalizada para suas bebidas',
-        price: 25,
-        icon: '☕'
-      },
-      {
-        id: 'prod3',
-        title: 'Mochila Neon',
-        description: 'Mochila resistente para seus estudos',
-        price: 150,
-        icon: '🎒'
-      },
-      {
-        id: 'prod4',
-        title: 'Boné Neon',
-        description: 'Boné estiloso com o logo da Neon',
-        price: 35,
-        icon: '🧢'
-      }
-    ];
-    
-    console.log('Produtos definidos:', sampleProducts);
-
-    function loadProducts() {
-      console.log('Carregando produtos...');
-      console.log('productsGrid element:', productsGrid);
+    // Função para obter emoji baseado na categoria do produto
+    function getProductEmoji(categoryName) {
+      if (!categoryName) return '📦';
       
+      const category = categoryName.toLowerCase();
+      if (category.includes('roupa') || category.includes('vestuário')) return '👕';
+      if (category.includes('bebida') || category.includes('café')) return '☕';
+      if (category.includes('mochila') || category.includes('bolsa')) return '🎒';
+      if (category.includes('boné') || category.includes('chapéu')) return '🧢';
+      if (category.includes('eletrônico') || category.includes('tech')) return '📱';
+      if (category.includes('livro') || category.includes('papelaria')) return '📚';
+      if (category.includes('esporte') || category.includes('fitness')) return '⚽';
+      if (category.includes('casa') || category.includes('decoração')) return '🏠';
+      
+      return '📦'; // Emoji padrão
+    }
+
+    async function loadProducts() {
       if (!productsGrid) {
         console.error('Elemento productsGrid não encontrado!');
         return;
       }
       
-      console.log('Limpando productsGrid...');
       productsGrid.innerHTML = '';
       
-      // Teste simples primeiro
-      const testCard = document.createElement('div');
-      testCard.className = 'product-card';
-      testCard.innerHTML = `
-        <div class="product-image">👕</div>
-        <div class="product-title">Teste</div>
-        <div class="product-description">Produto de teste</div>
-        <div class="product-price">N$ 10</div>
-        <button class="buy-btn" data-product-id="test" data-price="10">
-          Comprar
-        </button>
-      `;
-      
-      console.log('Adicionando card de teste...');
-      productsGrid.appendChild(testCard);
-      console.log('Card de teste adicionado');
-      
-      // Agora carrega os produtos reais
-      console.log('Carregando produtos reais...');
-      sampleProducts.forEach((product, index) => {
-        console.log(`Criando card para produto ${index + 1}:`, product.title);
+      try {
+        // Buscar produtos da coleção loja/config/produtos
+        const produtosCol = collection(db, 'loja', 'config', 'produtos');
         
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
+        // Buscar apenas produtos ativos
+        const q = query(produtosCol, where('status', '==', 'active'));
         
-        productCard.innerHTML = `
-          <div class="product-image">${product.icon}</div>
-          <div class="product-title">${product.title}</div>
-          <div class="product-description">${product.description}</div>
-          <div class="product-price">N$ ${product.price}</div>
-          <button class="buy-btn" data-product-id="${product.id}" data-price="${product.price}">
-            Comprar
-          </button>
-        `;
+        const snap = await getDocs(q);
         
-        productsGrid.appendChild(productCard);
-        console.log(`Card para ${product.title} adicionado`);
-      });
-      
-      console.log('Produtos carregados:', sampleProducts.length);
-      console.log('Total de cards no grid:', productsGrid.children.length);
+        if (snap.empty) {
+          productsGrid.innerHTML = '<p style="text-align: center; color: var(--muted); font-size: 16px; padding: 40px;">Nenhum produto disponível no momento.</p>';
+          return;
+        }
+
+        snap.docs.forEach(doc => {
+          const produto = doc.data();
+          
+          const productCard = document.createElement('div');
+          productCard.className = 'product-card';
+          
+          // Usar emoji baseado na categoria ou produto padrão
+          const emoji = getProductEmoji(produto.categoryName);
+          
+          productCard.innerHTML = `
+            <div class="product-image">${emoji}</div>
+            <div class="product-title">${produto.name}</div>
+            <div class="product-description">${produto.description || 'Produto da loja Neon'}</div>
+            <div class="product-price">N$ ${produto.price?.toFixed(2) || '0.00'}</div>
+            <button class="buy-btn" data-product-id="${doc.id}" data-price="${produto.price}" data-product-name="${produto.name}">
+              Comprar
+            </button>
+          `;
+          
+          productsGrid.appendChild(productCard);
+        });
+        
+      } catch (error) {
+        console.error('Erro ao carregar produtos do Firebase:', error);
+        productsGrid.innerHTML = '<p style="text-align: center; color: #dc2626; font-size: 16px; padding: 40px;">Erro ao carregar produtos. Tente novamente mais tarde.</p>';
+      }
 
       // Adicionar event listeners para os botões de compra
       document.querySelectorAll('.buy-btn').forEach(btn => {
@@ -442,14 +400,71 @@
 
         // Adicionar ao extrato
         const extratoCol = collection(db, 'alunos', alunoDoc.id, 'extrato');
+        const productName = btn.dataset.productName || 'Produto da loja';
         await addDoc(extratoCol, {
           amount: -price,
           dateTime: serverTimestamp(),
-          description: `Compra: ${sampleProducts.find(p => p.id === productId)?.title}`,
+          description: `Compra na loja: ${productName}`,
           isEarn: false,
           saldoInicial: saldoAtual,
           saldoFinal: novoSaldo
         });
+
+        // Adicionar ao inventário do usuário
+        // Usar a nova estrutura: inventario/{docId}/inventarioAluno
+        console.log('📦 Adicionando item ao inventário...');
+        console.log('📍 Caminho da coleção: inventario/' + alunoDoc.id + '/inventarioAluno');
+        
+        const inventarioCol = collection(db, 'inventario', alunoDoc.id, 'inventarioAluno');
+        console.log('📁 Collection de inventário criada:', inventarioCol);
+        
+        // Buscar se o item já existe para atualizar quantidade
+        const existingItemQuery = query(
+          inventarioCol,
+          where('productId', '==', productId)
+        );
+        const existingItemSnap = await getDocs(existingItemQuery);
+        
+        if (!existingItemSnap.empty) {
+          // Item já existe, atualizar quantidade
+          const existingItemDoc = existingItemSnap.docs[0];
+          const existingData = existingItemDoc.data();
+          const newQuantity = (existingData.quantity || 1) + 1;
+          
+          console.log('🔄 Item já existe, atualizando quantidade de', existingData.quantity, 'para', newQuantity);
+          
+          await updateDoc(doc(db, 'inventario', alunoDoc.id, 'inventarioAluno', existingItemDoc.id), {
+            quantity: newQuantity,
+            lastPurchaseDate: serverTimestamp(),
+            totalSpent: (existingData.totalSpent || 0) + price
+          });
+          
+          console.log('✅ Quantidade atualizada com sucesso');
+        } else {
+          // Item não existe, criar novo
+          console.log('🆕 Criando novo item no inventário');
+          
+          const itemData = {
+            productId: productId,
+            productName: productName,
+            price: price,
+            quantity: 1,
+            category: 'Geral', // Categoria padrão
+            description: `Comprado por N$ ${price.toFixed(2)}`,
+            firstPurchaseDate: serverTimestamp(),
+            lastPurchaseDate: serverTimestamp(),
+            totalSpent: price,
+            status: 'active'
+          };
+          
+          console.log('📋 Dados do item:', itemData);
+          
+          const newItemRef = await addDoc(inventarioCol, itemData);
+          console.log('✅ Novo item criado com ID:', newItemRef.id);
+        }
+        
+        console.log('🎯 Item adicionado ao inventário com sucesso!');
+        console.log('🗄️ INFORMAÇÃO IMPORTANTE: Dados enviados para a coleção bancodaneondb/inventario/' + alunoDoc.id + '/inventarioAluno');
 
         // Atualizar localStorage
         const updatedUser = { ...sess, saldo: novoSaldo };

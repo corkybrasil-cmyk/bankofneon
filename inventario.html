@@ -389,9 +389,7 @@
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
     import { getFirestore, collection, query, where, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-    console.log('📦 Imports carregados com sucesso');
-
-    const firebaseConfig = {
+        const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
       authDomain: "crmdaneon.firebaseapp.com",
       projectId: "crmdaneon",
@@ -401,19 +399,14 @@
       measurementId: "G-D3G4M9F17R"
     };
 
-    console.log('🔥 Firebase config:', firebaseConfig);
-
     const app = initializeApp(firebaseConfig);
-    console.log('✅ Firebase app inicializado:', app);
     
     try { getAnalytics(app); } catch {}
     try { await signInAnonymously(getAuth(app)); } catch {}
 
     const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
-    console.log('🗄️ Firestore db configurado:', db);
     
     // Elementos da interface
-    console.log('🔍 Buscando elementos DOM...');
     const unauthEl = document.getElementById('unauth');
     const contentEl = document.getElementById('content');
     const msgEl = document.getElementById('msg');
@@ -437,42 +430,27 @@
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const btnCloseSidebar = document.getElementById('btnCloseSidebar');
-    
-    console.log('📱 Elementos encontrados:', {
-      unauthEl: !!unauthEl,
-      contentEl: !!contentEl,
-      inventoryGrid: !!inventoryGrid,
-      emptyState: !!emptyState,
-      totalItems: !!totalItems,
-      totalSpent: !!totalSpent,
-      uniqueCategories: !!uniqueCategories,
-      recentPurchases: !!recentPurchases,
-      categoryFilter: !!categoryFilter,
-      sortBy: !!sortBy,
-      searchFilter: !!searchFilter
-    });
 
     // Verificação de sessão
-    console.log('🔐 Verificando sessão...');
     const sessRaw = localStorage.getItem('bn.currentUser');
-    console.log('📦 Sessão raw:', sessRaw);
     
     let sess = null;
-    try { sess = JSON.parse(sessRaw); } catch { sess = null; }
-    console.log('🔓 Sessão parseada:', sess);
+    try { 
+      sess = JSON.parse(sessRaw); 
+    } catch (error) { 
+      console.error('❌ Erro ao fazer parse da sessão:', error);
+      sess = null; 
+    }
 
     if (!sess || !sess.user) {
-      console.log('❌ Acesso negado - Mostrando tela de não autorizado');
       if (unauthEl) {
         unauthEl.style.display = 'block';
       } else {
         console.error('❌ Elemento unauth não encontrado!');
       }
     } else {
-      console.log('✅ Acesso permitido - Inicializando aplicação');
       if (contentEl) {
         contentEl.style.display = 'block';
-        console.log('📱 Conteúdo principal exibido');
         initializeInventario();
       } else {
         console.error('❌ Elemento content não encontrado!');
@@ -481,21 +459,10 @@
 
     // Inicialização da aplicação
     async function initializeInventario() {
-      console.log('🚀 Inicializando inventário...');
       try {
-        console.log('🔗 Configurando event listeners...');
         setupEventListeners();
-        console.log('✅ Event listeners configurados');
-        
-        console.log('🍔 Configurando controles do menu...');
         setupMenuControls();
-        console.log('✅ Menu configurado');
-        
-        console.log('📋 Carregando inventário...');
         await loadInventory();
-        console.log('✅ Inventário carregado');
-        
-        console.log('🎉 Aplicação inicializada com sucesso!');
       } catch (error) {
         console.error('❌ Erro na inicialização:', error);
         showError('Erro ao inicializar aplicação: ' + error.message);
@@ -504,102 +471,122 @@
 
     // Configuração dos controles do menu
     function setupMenuControls() {
-      console.log('🍔 Configurando controles do menu...');
-      
       if (btnMenu && sidebar && sidebarOverlay) {
         btnMenu.addEventListener('click', () => {
-          console.log('🍔 Menu clicado - Abrindo sidebar');
           sidebar.classList.add('open');
           sidebarOverlay.classList.add('open');
         });
-        console.log('✅ Event listener do menu adicionado');
       }
 
       if (btnCloseSidebar && sidebar && sidebarOverlay) {
         btnCloseSidebar.addEventListener('click', () => {
-          console.log('🍔 Botão fechar clicado - Fechando sidebar');
           sidebar.classList.remove('open');
           sidebarOverlay.classList.remove('open');
         });
-        console.log('✅ Event listener do botão fechar adicionado');
       }
 
       if (sidebarOverlay && sidebar) {
         sidebarOverlay.addEventListener('click', () => {
-          console.log('🍔 Overlay clicado - Fechando sidebar');
           sidebar.classList.remove('open');
           sidebarOverlay.classList.remove('open');
         });
-        console.log('✅ Event listener do overlay adicionado');
       }
     }
 
     // Configuração dos event listeners
     function setupEventListeners() {
-      console.log('🔗 Configurando event listeners...');
-      
       if (categoryFilter) {
         categoryFilter.addEventListener('change', () => {
-          console.log('🔄 Filtro de categoria alterado');
           filterInventory();
         });
       }
       
       if (sortBy) {
         sortBy.addEventListener('change', () => {
-          console.log('🔄 Ordenação alterada');
           filterInventory();
         });
       }
       
       if (searchFilter) {
         searchFilter.addEventListener('input', () => {
-          console.log('🔍 Busca alterada');
           filterInventory();
         });
       }
-      
-      console.log('🔗 Event listeners configurados');
     }
 
     // Carregar inventário
     async function loadInventory() {
-      console.log('📋 Carregando inventário do usuário:', sess.user);
+
+      
       try {
-        // Buscar compras do usuário no extrato
-        const extratoCol = collection(db, 'alunos', sess.user, 'extrato');
-        console.log('📁 Collection de extrato criada:', extratoCol);
+        // Primeiro, precisamos encontrar o docId do usuário na coleção 'alunos'
+
+        const alunosCol = collection(db, 'alunos');
+        const userQuery = query(alunosCol, where('user', '==', sess.user));
+        const userSnap = await getDocs(userQuery);
         
-        // Buscar transações de compra (negativas, pois são gastos)
+        if (userSnap.empty) {
+
+          showError('Usuário não encontrado');
+          return;
+        }
+        
+        const userDoc = userSnap.docs[0];
+        const userDocId = userDoc.id;
+        
+        // Agora buscar itens do inventário usando o docId correto
+        const inventarioCol = collection(db, 'inventario', userDocId, 'inventarioAluno');
+        
+        // Buscar todos os documentos (sem filtros) para debug
+        try {
+          const allDocsSnap = await getDocs(inventarioCol);
+          if (allDocsSnap.size > 0) {
+
+          }
+        } catch (testError) {
+          console.error('❌ Erro ao buscar sem filtros:', testError);
+        }
+        
+        // Buscar apenas itens ativos
         const q = query(
-          extratoCol,
-          where('isEarn', '==', false),
-          where('description', 'in', ['Compra na loja', 'Compra de produto']),
-          orderBy('dateTime', 'desc')
+          inventarioCol,
+          where('status', '==', 'active')
         );
         
-        console.log('🔍 Query criada:', q);
         const snap = await getDocs(q);
-        console.log('📄 Snapshot recebido:', snap);
-        console.log('📊 Número de compras:', snap.size);
+
         
+        // Processar itens do inventário
         const purchases = [];
-        snap.forEach(doc => {
+        
+        snap.forEach((doc, index) => {
           const data = doc.data();
-          console.log('🛍️ Compra encontrada:', { id: doc.id, ...data });
-          
-          // Extrair informações do produto da descrição
-          const productInfo = extractProductInfo(data.description);
-          if (productInfo) {
-            purchases.push({
-              id: doc.id,
-              ...data,
-              ...productInfo
-            });
-          }
+          purchases.push({
+            id: doc.id,
+            productName: data.productName,
+            price: data.price,
+            quantity: data.quantity || 1,
+            category: data.category || 'Geral',
+            description: data.description || 'Item do inventário',
+            firstPurchaseDate: data.firstPurchaseDate,
+            lastPurchaseDate: data.lastPurchaseDate,
+            totalSpent: data.totalSpent || data.price,
+            dateTime: data.lastPurchaseDate // Para compatibilidade com o código existente
+          });
         });
         
-        console.log('📋 Total de compras processadas:', purchases.length);
+
+        
+        // Ordenar por data de compra (mais recente primeiro)
+        purchases.sort((a, b) => {
+          if (a.lastPurchaseDate && b.lastPurchaseDate) {
+            if (a.lastPurchaseDate.toDate && b.lastPurchaseDate.toDate) {
+              return b.lastPurchaseDate.toDate() - a.lastPurchaseDate.toDate();
+            }
+            return new Date(b.lastPurchaseDate) - new Date(a.lastPurchaseDate);
+          }
+          return 0;
+        });
         
         // Atualizar estatísticas
         updateStats(purchases);
@@ -609,70 +596,38 @@
         
         // Preencher filtros
         populateFilters(purchases);
+      
         
-        console.log('✅ Inventário carregado com sucesso');
       } catch (error) {
-        console.error('❌ Erro ao carregar inventário:', error);
+        console.error('💥 ===== ERRO AO CARREGAR INVENTÁRIO =====');
+        console.error('❌ Erro completo:', error);
+        console.error('📝 Mensagem de erro:', error.message);
+        console.error('🔍 Stack trace:', error.stack);
+        console.error('📁 Collection tentada: inventario/' + (userDocId || 'N/A') + '/inventarioAluno');
         showError('Erro ao carregar inventário: ' + error.message);
       }
     }
 
-    // Extrair informações do produto da descrição
-    function extractProductInfo(description) {
-      console.log('🔍 Extraindo informações do produto de:', description);
-      
-      // Padrões comuns de descrição de compra
-      const patterns = [
-        /Compra: (.+?) - N\$ (\d+\.?\d*)/,
-        /Compra de (.+?) por N\$ (\d+\.?\d*)/,
-        /(.+?) - N\$ (\d+\.?\d*)/
-      ];
-      
-      for (const pattern of patterns) {
-        const match = description.match(pattern);
-        if (match) {
-          const productName = match[1].trim();
-          const price = parseFloat(match[2]);
-          
-          console.log('✅ Informações extraídas:', { productName, price });
-          
-          return {
-            productName,
-            price,
-            category: 'Geral', // Categoria padrão
-            subcategory: 'Produto',
-            description: `Comprado por N$ ${price.toFixed(2)}`
-          };
-        }
-      }
-      
-      // Se não conseguir extrair, usar a descrição completa
-      console.log('⚠️ Não foi possível extrair informações específicas, usando descrição completa');
-      return {
-        productName: description,
-        price: 0,
-        category: 'Geral',
-        subcategory: 'Produto',
-        description: description
-      };
-    }
+
 
     // Atualizar estatísticas
     function updateStats(purchases) {
-      console.log('📊 Atualizando estatísticas...');
-      
       if (totalItems) {
-        totalItems.textContent = purchases.length;
+        // Contar itens únicos (por productId)
+        const uniqueItems = purchases.length;
+        totalItems.textContent = uniqueItems;
       }
       
       if (totalSpent) {
-        const total = purchases.reduce((sum, item) => sum + (item.price || 0), 0);
+        const total = purchases.reduce((sum, item) => sum + (item.totalSpent || 0), 0);
         totalSpent.textContent = `N$ ${total.toFixed(2)}`;
+
       }
       
       if (uniqueCategories) {
         const categories = new Set(purchases.map(item => item.category));
         uniqueCategories.textContent = categories.size;
+        
       }
       
       if (recentPurchases) {
@@ -680,32 +635,31 @@
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
         const recent = purchases.filter(item => {
-          if (item.dateTime && item.dateTime.toDate) {
-            return item.dateTime.toDate() > thirtyDaysAgo;
+          if (item.lastPurchaseDate && item.lastPurchaseDate.toDate) {
+            return item.lastPurchaseDate.toDate() > thirtyDaysAgo;
           }
           return false;
         });
         
         recentPurchases.textContent = recent.length;
+        
       }
       
-      console.log('✅ Estatísticas atualizadas');
     }
 
     // Renderizar inventário
     function renderInventory(purchases) {
-      console.log('🎨 Renderizando inventário...');
-      
       if (!inventoryGrid) {
-        console.error('❌ inventoryGrid não encontrado');
+        console.error('❌ Elemento inventoryGrid não encontrado no DOM');
         return;
       }
       
       if (purchases.length === 0) {
-        console.log('📭 Nenhuma compra para exibir');
         inventoryGrid.style.display = 'none';
         if (emptyState) {
           emptyState.style.display = 'block';
+        } else {
+          console.error('❌ Elemento emptyState não encontrado');
         }
         return;
       }
@@ -719,32 +673,34 @@
       
       // Renderizar cada item
       purchases.forEach((item, index) => {
-        console.log(`🎒 Renderizando item ${index + 1}:`, item);
-        
         const itemElement = document.createElement('div');
         itemElement.className = 'inventory-item';
         
-        const purchaseDate = item.dateTime && item.dateTime.toDate ? 
-          item.dateTime.toDate().toLocaleDateString('pt-BR') : 
+        const purchaseDate = item.lastPurchaseDate && item.lastPurchaseDate.toDate ? 
+          item.lastPurchaseDate.toDate().toLocaleDateString('pt-BR') : 
           'Data não disponível';
         
-        itemElement.innerHTML = `
+        const itemHTML = `
           <div class="item-header">
             <h3 class="item-name">${item.productName}</h3>
             <span class="item-category">${item.category}</span>
           </div>
           <div class="item-details">
             <div class="item-detail">
-              <span class="detail-label">Preço:</span>
+              <span class="detail-label">Preço unitário:</span>
               <span class="detail-value">N$ ${(item.price || 0).toFixed(2)}</span>
             </div>
             <div class="item-detail">
-              <span class="detail-label">Data de compra:</span>
-              <span class="detail-value">${purchaseDate}</span>
+              <span class="detail-label">Quantidade:</span>
+              <span class="detail-value">${item.quantity || 1}</span>
             </div>
             <div class="item-detail">
-              <span class="detail-label">Categoria:</span>
-              <span class="detail-value">${item.category}</span>
+              <span class="detail-label">Total gasto:</span>
+              <span class="detail-value">N$ ${(item.totalSpent || 0).toFixed(2)}</span>
+            </div>
+            <div class="item-detail">
+              <span class="detail-label">Última compra:</span>
+              <span class="detail-value">${purchaseDate}</span>
             </div>
           </div>
           <div class="item-description">${item.description}</div>
@@ -754,34 +710,30 @@
           </div>
         `;
         
+        itemElement.innerHTML = itemHTML;
         inventoryGrid.appendChild(itemElement);
-        console.log(`✅ Item ${item.productName} renderizado`);
       });
       
-      console.log('✅ Inventário renderizado');
     }
 
     // Preencher filtros
     function populateFilters(purchases) {
-      console.log('🔧 Preenchendo filtros...');
-      
       if (categoryFilter) {
         const categories = ['Todas as categorias'];
         const uniqueCats = new Set(purchases.map(item => item.category));
+        
         uniqueCats.forEach(cat => categories.push(cat));
         
         categoryFilter.innerHTML = categories.map(cat => 
           `<option value="${cat === 'Todas as categorias' ? '' : cat}">${cat}</option>`
         ).join('');
-        
-        console.log('✅ Filtro de categoria preenchido');
+      } else {
+        console.error('❌ Elemento categoryFilter não encontrado');
       }
     }
 
     // Filtrar inventário
     function filterInventory() {
-      console.log('🔍 Filtrando inventário...');
-      
       // Implementar lógica de filtros aqui
       // Por enquanto, apenas recarregar
       loadInventory();
@@ -789,12 +741,10 @@
 
     // Funções globais para os botões de ação
     window.viewDetails = function(id) {
-      console.log('📋 Visualizando detalhes do item:', id);
       showSuccess('Funcionalidade de detalhes em desenvolvimento');
     };
 
     window.useItem = function(id) {
-      console.log('🎯 Usando item:', id);
       showSuccess('Item usado com sucesso!');
     };
 
@@ -823,7 +773,6 @@
       }
     }
     
-    console.log('🎯 inventario.html - Script carregado completamente');
   </script>
 </body>
 </html>
