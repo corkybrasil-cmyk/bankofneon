@@ -33,7 +33,7 @@
     .header-actions { display: flex; align-items: center; gap: 20px; }
     .menu-btn { width: 30px; height: 30px; padding: 0; background: transparent; border: 0; transition: background-color 0.2s ease; display: flex; align-items: center; justify-content: center; }
     .menu-btn:hover { background: rgba(255,255,255,0.1); }
-    .menu-icon { width: 20px; height: 20px; display: block; }
+    .menu-icon { width: 20px; height: 20px; display: block; filter: brightness(0) invert(1); }
     /* Menu lateral */
     .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background: var(--card); border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.1); transition: left 0.3s ease; z-index: 1000; }
     .sidebar.open { left: 0; }
@@ -148,10 +148,8 @@
       <div class="brand">
         <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
       </div>
-      <button id="btnMenu" class="btn menu-btn" title="Menu">
-        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 6H21M3 12H21M3 18H21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <button id="btnMenu" class="menu-btn" title="Menu">
+        <img src="menu.svg" alt="Menu" class="menu-icon" />
       </button>
     </div>
     <div class="header-actions">
@@ -181,6 +179,14 @@
       <a href="loja.html" class="nav-item active">
         <span class="nav-icon">🛍️</span>
         Loja
+      </a>
+      <a href="inventario.html" class="nav-item">
+        <span class="nav-icon">🎒</span>
+        Meu Inventário
+      </a>
+      <a href="lojaconfig.html" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        Config Loja
       </a>
       <a href="ocorrencias.html" class="nav-item">
         <span class="nav-icon">⚠️</span>

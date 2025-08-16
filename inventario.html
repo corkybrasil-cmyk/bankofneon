@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meu Inventário • Banco da Neon</title>
+  <link rel="icon" href="logotipo.svg" type="image/svg+xml" />
+  <style>
+    :root { 
+      --primary:#5a039a; 
+      --secondary:#b6f902; 
+      --secondary-700:#8bb601; 
+      --bg:#f7f7fb; 
+      --card:#fff; 
+      --text:#1a1a1a; 
+      --muted:#5d5d6a; 
+      --border:#e8e8ef; 
+      --success:#12805a;
+      --warning:#f59e0b;
+      --danger:#dc2626;
+    }
+    *{ box-sizing:border-box; }
+    html, body{ 
+      margin:0; 
+      padding: 0;
+      color:var(--text); 
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; 
+      background: var(--bg); 
+      min-height: 100vh;
+    }
+    .header{ background:var(--primary); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 8px 24px rgba(90,3,154,0.25); }
+    #juntinhos { display: flex; align-items: center; gap: 30px; }
+    .brand{ display:flex; align-items:center; gap:12px; }
+    .logo-mask{ width:48px; height:48px; display:block; background-color:#b6f902; -webkit-mask:url('logotipo.svg') center/contain no-repeat; mask:url('logotipo.svg') center/contain no-repeat; }
+    .brand a { display: inline-block; line-height: 0; }
+    .header-actions { display: flex; align-items: center; gap: 20px; }
+    .menu-btn { width: 30px; height: 30px; padding: 0; background: transparent; border: 0; transition: background-color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+    .menu-btn:hover { background: rgba(255,255,255,0.1); }
+    .menu-icon { width: 20px; height: 20px; display: block; filter: brightness(0) invert(1); }
+    
+    /* Menu lateral */
+    .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background: var(--card); border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.1); transition: left 0.3s ease; z-index: 1000; }
+    .sidebar.open { left: 0; }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-header h3 { margin: 0; color: var(--primary); }
+    .btn-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+    .sidebar-nav { padding: 20px 0; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; color: var(--text); text-decoration: none; transition: background-color 0.2s; }
+    .nav-item:hover { background-color: var(--bg); }
+    .nav-item.active { background-color: var(--primary); color: #fff; }
+    .nav-icon { font-size: 20px; }
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 999; }
+    .sidebar-overlay.open { opacity: 1; visibility: visible; }
+    
+    .wrap{ max-width:1400px; margin:0 auto; padding:20px; }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:0 10px 30px rgba(16,20,40,0.08); margin-bottom: 20px; }
+    h1{ margin:0 0 8px 0; font-size:24px; font-weight:800; }
+    p.helper{ margin:0 0 16px 0; color:var(--muted); }
+    .btn{ background:var(--primary); color:#fff; border:none; border-radius:9999px; padding:10px 16px; cursor:pointer; font-size: 14px; }
+    .btn.secondary{ background:var(--muted); }
+    .btn.success{ background:var(--success); }
+    .btn.warning{ background:var(--warning); }
+    .btn.danger{ background:var(--danger); }
+    .btn.small{ padding: 6px 12px; font-size: 12px; }
+    .error{ color:var(--danger); min-height:18px; margin-top:6px; }
+    .ok{ color:var(--success); min-height:18px; margin-top:6px; }
+    
+    /* Layout do inventário */
+    .inventory-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .inventory-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    /* Filtros */
+    .filters {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .filter-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .filter-group select,
+    .filter-group input {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--card);
+      color: var(--text);
+      min-width: 150px;
+    }
+    
+    /* Grid de itens */
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .inventory-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.2s ease;
+    }
+    .inventory-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(16,20,40,0.12);
+    }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .item-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .item-category {
+      background: var(--primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .item-details {
+      margin-bottom: 16px;
+    }
+    .item-detail {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .item-detail:last-child {
+      margin-bottom: 0;
+    }
+    .detail-label {
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .detail-value {
+      color: var(--text);
+      font-weight: 500;
+    }
+    .item-description {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .item-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn-item {
+      flex: 1;
+      padding: 8px 16px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    
+    /* Mensagens */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .empty-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .empty-description {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .inventory-stats {
+        grid-template-columns: 1fr;
+      }
+      .filters {
+        flex-direction: column;
+      }
+      .filter-group select,
+      .filter-group input {
+        min-width: 100%;
+      }
+      .inventory-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div id="juntinhos">
+      <div class="brand">
+        <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
+      </div>
+      <button id="btnMenu" class="menu-btn" title="Menu">
+        <img src="menu.svg" alt="Menu" class="menu-icon" />
+      </button>
+    </div>
+    <div class="header-actions">
+      <a href="dashboard.html" class="btn" style="background:rgba(255,255,255,0.12)">Voltar</a>
+    </div>
+  </div>
+
+  <!-- Menu lateral -->
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h3>Menu</h3>
+      <button id="btnCloseSidebar" class="btn-close">&times;</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon">🏠</span>
+        Dashboard
+      </a>
+      <a href="extrato.html" class="nav-item">
+        <span class="nav-icon">📊</span>
+        Extrato
+      </a>
+      <a href="pix.html" class="nav-item">
+        <span class="nav-icon">💸</span>
+        PIX
+      </a>
+      <a href="loja.html" class="nav-item">
+        <span class="nav-icon">🛍️</span>
+        Loja
+      </a>
+      <a href="inventario.html" class="nav-item active">
+        <span class="nav-icon">🎒</span>
+        Meu Inventário
+      </a>
+      <a href="ocorrencias.html" class="nav-item">
+        <span class="nav-icon">⚠️</span>
+        Ocorrências
+      </a>
+      <a href="adicionarAluno.html" class="nav-item">
+        <span class="nav-icon">👤</span>
+        Adicionar Aluno
+      </a>
+      <a href="dev.html" class="nav-item">
+        <span class="nav-icon">🔧</span>
+        Dev
+      </a>
+    </nav>
+  </div>
+
+  <!-- Overlay para fechar o menu -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="wrap">
+    <div id="unauth" class="card" style="display:none; text-align:center;">
+      <h1>Acesso não autorizado</h1>
+      <p class="helper">Faça login para acessar seu inventário.</p>
+      <a class="btn" href="index.html">Ir para login</a>
+    </div>
+
+    <div id="content" style="display:none;">
+      <div class="card">
+        <div class="inventory-header">
+          <div>
+            <h1>Meu Inventário</h1>
+            <p class="helper">Visualize todos os itens que você comprou na loja.</p>
+          </div>
+          <a href="loja.html" class="btn success">🛍️ Ir para Loja</a>
+        </div>
+      </div>
+
+      <!-- Estatísticas -->
+      <div class="inventory-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="totalItems">0</div>
+          <div class="stat-label">Total de Itens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalSpent">N$ 0.00</div>
+          <div class="stat-label">Total Gasto</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="uniqueCategories">0</div>
+          <div class="stat-label">Categorias</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="recentPurchases">0</div>
+          <div class="stat-label">Últimos 30 dias</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="card">
+        <div class="filters">
+          <div class="filter-group">
+            <label for="categoryFilter">Categoria</label>
+            <select id="categoryFilter">
+              <option value="">Todas as categorias</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="sortBy">Ordenar por</label>
+            <select id="sortBy">
+              <option value="date">Data de compra</option>
+              <option value="name">Nome</option>
+              <option value="price">Preço</option>
+              <option value="category">Categoria</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="searchFilter">Buscar</label>
+            <input type="text" id="searchFilter" placeholder="Nome do item...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de itens -->
+      <div id="inventoryGrid" class="inventory-grid">
+        <!-- Itens serão carregados aqui -->
+      </div>
+
+      <!-- Estado vazio -->
+      <div id="emptyState" class="card empty-state" style="display:none;">
+        <div class="empty-icon">🎒</div>
+        <div class="empty-title">Seu inventário está vazio</div>
+        <div class="empty-description">Você ainda não comprou nenhum item na loja.</div>
+        <a href="loja.html" class="btn success">🛍️ Fazer primeira compra</a>
+      </div>
+
+      <div id="msg" class="ok"></div>
+      <div id="err" class="error"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    console.log('🚀 inventario.html - Script iniciando...');
+    
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    console.log('📦 Imports carregados com sucesso');
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+      authDomain: "crmdaneon.firebaseapp.com",
+      projectId: "crmdaneon",
+      storageBucket: "crmdaneon.firebasestorage.app",
+      messagingSenderId: "564595832938",
+      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+      measurementId: "G-D3G4M9F17R"
+    };
+
+    console.log('🔥 Firebase config:', firebaseConfig);
+
+    const app = initializeApp(firebaseConfig);
+    console.log('✅ Firebase app inicializado:', app);
+    
+    try { getAnalytics(app); } catch {}
+    try { await signInAnonymously(getAuth(app)); } catch {}
+
+    const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+    console.log('🗄️ Firestore db configurado:', db);
+    
+    // Elementos da interface
+    console.log('🔍 Buscando elementos DOM...');
+    const unauthEl = document.getElementById('unauth');
+    const contentEl = document.getElementById('content');
+    const msgEl = document.getElementById('msg');
+    const errEl = document.getElementById('err');
+    const inventoryGrid = document.getElementById('inventoryGrid');
+    const emptyState = document.getElementById('emptyState');
+    
+    // Estatísticas
+    const totalItems = document.getElementById('totalItems');
+    const totalSpent = document.getElementById('totalSpent');
+    const uniqueCategories = document.getElementById('uniqueCategories');
+    const recentPurchases = document.getElementById('recentPurchases');
+    
+    // Filtros
+    const categoryFilter = document.getElementById('categoryFilter');
+    const sortBy = document.getElementById('sortBy');
+    const searchFilter = document.getElementById('searchFilter');
+    
+    // Controles do menu
+    const btnMenu = document.getElementById('btnMenu');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const btnCloseSidebar = document.getElementById('btnCloseSidebar');
+    
+    console.log('📱 Elementos encontrados:', {
+      unauthEl: !!unauthEl,
+      contentEl: !!contentEl,
+      inventoryGrid: !!inventoryGrid,
+      emptyState: !!emptyState,
+      totalItems: !!totalItems,
+      totalSpent: !!totalSpent,
+      uniqueCategories: !!uniqueCategories,
+      recentPurchases: !!recentPurchases,
+      categoryFilter: !!categoryFilter,
+      sortBy: !!sortBy,
+      searchFilter: !!searchFilter
+    });
+
+    // Verificação de sessão
+    console.log('🔐 Verificando sessão...');
+    const sessRaw = localStorage.getItem('bn.currentUser');
+    console.log('📦 Sessão raw:', sessRaw);
+    
+    let sess = null;
+    try { sess = JSON.parse(sessRaw); } catch { sess = null; }
+    console.log('🔓 Sessão parseada:', sess);
+
+    if (!sess || !sess.user) {
+      console.log('❌ Acesso negado - Mostrando tela de não autorizado');
+      if (unauthEl) {
+        unauthEl.style.display = 'block';
+      } else {
+        console.error('❌ Elemento unauth não encontrado!');
+      }
+    } else {
+      console.log('✅ Acesso permitido - Inicializando aplicação');
+      if (contentEl) {
+        contentEl.style.display = 'block';
+        console.log('📱 Conteúdo principal exibido');
+        initializeInventario();
+      } else {
+        console.error('❌ Elemento content não encontrado!');
+      }
+    }
+
+    // Inicialização da aplicação
+    async function initializeInventario() {
+      console.log('🚀 Inicializando inventário...');
+      try {
+        console.log('🔗 Configurando event listeners...');
+        setupEventListeners();
+        console.log('✅ Event listeners configurados');
+        
+        console.log('🍔 Configurando controles do menu...');
+        setupMenuControls();
+        console.log('✅ Menu configurado');
+        
+        console.log('📋 Carregando inventário...');
+        await loadInventory();
+        console.log('✅ Inventário carregado');
+        
+        console.log('🎉 Aplicação inicializada com sucesso!');
+      } catch (error) {
+        console.error('❌ Erro na inicialização:', error);
+        showError('Erro ao inicializar aplicação: ' + error.message);
+      }
+    }
+
+    // Configuração dos controles do menu
+    function setupMenuControls() {
+      console.log('🍔 Configurando controles do menu...');
+      
+      if (btnMenu && sidebar && sidebarOverlay) {
+        btnMenu.addEventListener('click', () => {
+          console.log('🍔 Menu clicado - Abrindo sidebar');
+          sidebar.classList.add('open');
+          sidebarOverlay.classList.add('open');
+        });
+        console.log('✅ Event listener do menu adicionado');
+      }
+
+      if (btnCloseSidebar && sidebar && sidebarOverlay) {
+        btnCloseSidebar.addEventListener('click', () => {
+          console.log('🍔 Botão fechar clicado - Fechando sidebar');
+          sidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('open');
+        });
+        console.log('✅ Event listener do botão fechar adicionado');
+      }
+
+      if (sidebarOverlay && sidebar) {
+        sidebarOverlay.addEventListener('click', () => {
+          console.log('🍔 Overlay clicado - Fechando sidebar');
+          sidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('open');
+        });
+        console.log('✅ Event listener do overlay adicionado');
+      }
+    }
+
+    // Configuração dos event listeners
+    function setupEventListeners() {
+      console.log('🔗 Configurando event listeners...');
+      
+      if (categoryFilter) {
+        categoryFilter.addEventListener('change', () => {
+          console.log('🔄 Filtro de categoria alterado');
+          filterInventory();
+        });
+      }
+      
+      if (sortBy) {
+        sortBy.addEventListener('change', () => {
+          console.log('🔄 Ordenação alterada');
+          filterInventory();
+        });
+      }
+      
+      if (searchFilter) {
+        searchFilter.addEventListener('input', () => {
+          console.log('🔍 Busca alterada');
+          filterInventory();
+        });
+      }
+      
+      console.log('🔗 Event listeners configurados');
+    }
+
+    // Carregar inventário
+    async function loadInventory() {
+      console.log('📋 Carregando inventário do usuário:', sess.user);
+      try {
+        // Buscar compras do usuário no extrato
+        const extratoCol = collection(db, 'alunos', sess.user, 'extrato');
+        console.log('📁 Collection de extrato criada:', extratoCol);
+        
+        // Buscar transações de compra (negativas, pois são gastos)
+        const q = query(
+          extratoCol,
+          where('isEarn', '==', false),
+          where('description', 'in', ['Compra na loja', 'Compra de produto']),
+          orderBy('dateTime', 'desc')
+        );
+        
+        console.log('🔍 Query criada:', q);
+        const snap = await getDocs(q);
+        console.log('📄 Snapshot recebido:', snap);
+        console.log('📊 Número de compras:', snap.size);
+        
+        const purchases = [];
+        snap.forEach(doc => {
+          const data = doc.data();
+          console.log('🛍️ Compra encontrada:', { id: doc.id, ...data });
+          
+          // Extrair informações do produto da descrição
+          const productInfo = extractProductInfo(data.description);
+          if (productInfo) {
+            purchases.push({
+              id: doc.id,
+              ...data,
+              ...productInfo
+            });
+          }
+        });
+        
+        console.log('📋 Total de compras processadas:', purchases.length);
+        
+        // Atualizar estatísticas
+        updateStats(purchases);
+        
+        // Renderizar inventário
+        renderInventory(purchases);
+        
+        // Preencher filtros
+        populateFilters(purchases);
+        
+        console.log('✅ Inventário carregado com sucesso');
+      } catch (error) {
+        console.error('❌ Erro ao carregar inventário:', error);
+        showError('Erro ao carregar inventário: ' + error.message);
+      }
+    }
+
+    // Extrair informações do produto da descrição
+    function extractProductInfo(description) {
+      console.log('🔍 Extraindo informações do produto de:', description);
+      
+      // Padrões comuns de descrição de compra
+      const patterns = [
+        /Compra: (.+?) - N\$ (\d+\.?\d*)/,
+        /Compra de (.+?) por N\$ (\d+\.?\d*)/,
+        /(.+?) - N\$ (\d+\.?\d*)/
+      ];
+      
+      for (const pattern of patterns) {
+        const match = description.match(pattern);
+        if (match) {
+          const productName = match[1].trim();
+          const price = parseFloat(match[2]);
+          
+          console.log('✅ Informações extraídas:', { productName, price });
+          
+          return {
+            productName,
+            price,
+            category: 'Geral', // Categoria padrão
+            subcategory: 'Produto',
+            description: `Comprado por N$ ${price.toFixed(2)}`
+          };
+        }
+      }
+      
+      // Se não conseguir extrair, usar a descrição completa
+      console.log('⚠️ Não foi possível extrair informações específicas, usando descrição completa');
+      return {
+        productName: description,
+        price: 0,
+        category: 'Geral',
+        subcategory: 'Produto',
+        description: description
+      };
+    }
+
+    // Atualizar estatísticas
+    function updateStats(purchases) {
+      console.log('📊 Atualizando estatísticas...');
+      
+      if (totalItems) {
+        totalItems.textContent = purchases.length;
+      }
+      
+      if (totalSpent) {
+        const total = purchases.reduce((sum, item) => sum + (item.price || 0), 0);
+        totalSpent.textContent = `N$ ${total.toFixed(2)}`;
+      }
+      
+      if (uniqueCategories) {
+        const categories = new Set(purchases.map(item => item.category));
+        uniqueCategories.textContent = categories.size;
+      }
+      
+      if (recentPurchases) {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const recent = purchases.filter(item => {
+          if (item.dateTime && item.dateTime.toDate) {
+            return item.dateTime.toDate() > thirtyDaysAgo;
+          }
+          return false;
+        });
+        
+        recentPurchases.textContent = recent.length;
+      }
+      
+      console.log('✅ Estatísticas atualizadas');
+    }
+
+    // Renderizar inventário
+    function renderInventory(purchases) {
+      console.log('🎨 Renderizando inventário...');
+      
+      if (!inventoryGrid) {
+        console.error('❌ inventoryGrid não encontrado');
+        return;
+      }
+      
+      if (purchases.length === 0) {
+        console.log('📭 Nenhuma compra para exibir');
+        inventoryGrid.style.display = 'none';
+        if (emptyState) {
+          emptyState.style.display = 'block';
+        }
+        return;
+      }
+      
+      // Limpar grid
+      inventoryGrid.innerHTML = '';
+      inventoryGrid.style.display = 'grid';
+      if (emptyState) {
+        emptyState.style.display = 'none';
+      }
+      
+      // Renderizar cada item
+      purchases.forEach((item, index) => {
+        console.log(`🎒 Renderizando item ${index + 1}:`, item);
+        
+        const itemElement = document.createElement('div');
+        itemElement.className = 'inventory-item';
+        
+        const purchaseDate = item.dateTime && item.dateTime.toDate ? 
+          item.dateTime.toDate().toLocaleDateString('pt-BR') : 
+          'Data não disponível';
+        
+        itemElement.innerHTML = `
+          <div class="item-header">
+            <h3 class="item-name">${item.productName}</h3>
+            <span class="item-category">${item.category}</span>
+          </div>
+          <div class="item-details">
+            <div class="item-detail">
+              <span class="detail-label">Preço:</span>
+              <span class="detail-value">N$ ${(item.price || 0).toFixed(2)}</span>
+            </div>
+            <div class="item-detail">
+              <span class="detail-label">Data de compra:</span>
+              <span class="detail-value">${purchaseDate}</span>
+            </div>
+            <div class="item-detail">
+              <span class="detail-label">Categoria:</span>
+              <span class="detail-value">${item.category}</span>
+            </div>
+          </div>
+          <div class="item-description">${item.description}</div>
+          <div class="item-actions">
+            <button class="btn btn-item secondary" onclick="viewDetails('${item.id}')">📋 Detalhes</button>
+            <button class="btn btn-item success" onclick="useItem('${item.id}')">🎯 Usar</button>
+          </div>
+        `;
+        
+        inventoryGrid.appendChild(itemElement);
+        console.log(`✅ Item ${item.productName} renderizado`);
+      });
+      
+      console.log('✅ Inventário renderizado');
+    }
+
+    // Preencher filtros
+    function populateFilters(purchases) {
+      console.log('🔧 Preenchendo filtros...');
+      
+      if (categoryFilter) {
+        const categories = ['Todas as categorias'];
+        const uniqueCats = new Set(purchases.map(item => item.category));
+        uniqueCats.forEach(cat => categories.push(cat));
+        
+        categoryFilter.innerHTML = categories.map(cat => 
+          `<option value="${cat === 'Todas as categorias' ? '' : cat}">${cat}</option>`
+        ).join('');
+        
+        console.log('✅ Filtro de categoria preenchido');
+      }
+    }
+
+    // Filtrar inventário
+    function filterInventory() {
+      console.log('🔍 Filtrando inventário...');
+      
+      // Implementar lógica de filtros aqui
+      // Por enquanto, apenas recarregar
+      loadInventory();
+    }
+
+    // Funções globais para os botões de ação
+    window.viewDetails = function(id) {
+      console.log('📋 Visualizando detalhes do item:', id);
+      showSuccess('Funcionalidade de detalhes em desenvolvimento');
+    };
+
+    window.useItem = function(id) {
+      console.log('🎯 Usando item:', id);
+      showSuccess('Item usado com sucesso!');
+    };
+
+    // Funções auxiliares
+    function showSuccess(message) {
+      console.log('✅ Sucesso:', message);
+      if (msgEl) {
+        msgEl.textContent = message;
+        msgEl.style.display = 'block';
+        if (errEl) errEl.style.display = 'none';
+        setTimeout(() => {
+          msgEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    function showError(message) {
+      console.error('❌ Erro:', message);
+      if (errEl) {
+        errEl.textContent = message;
+        errEl.style.display = 'block';
+        if (msgEl) msgEl.style.display = 'none';
+        setTimeout(() => {
+          errEl.style.display = 'none';
+        }, 5000);
+      }
+    }
+    
+    console.log('🎯 inventario.html - Script carregado completamente');
+  </script>
+</body>
+</html>
