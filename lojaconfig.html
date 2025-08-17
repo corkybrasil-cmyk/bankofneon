@@ -157,10 +157,58 @@
       color: white;
     }
     
-    .btn-icon:hover {
-      opacity: 0.8;
-      transform: scale(1.05);
-    }
+         .btn-icon:hover {
+       opacity: 0.8;
+       transform: scale(1.05);
+     }
+     
+     /* Upload de imagem */
+     .image-upload-container {
+       border: 2px dashed var(--border);
+       border-radius: 8px;
+       padding: 20px;
+       text-align: center;
+       transition: border-color 0.3s ease;
+       cursor: pointer;
+     }
+     
+     .image-upload-container:hover {
+       border-color: var(--primary);
+     }
+     
+     .image-input {
+       display: none;
+     }
+     
+     .image-preview {
+       position: relative;
+       min-height: 120px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+     }
+     
+     .image-placeholder {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       gap: 8px;
+       color: var(--muted);
+     }
+     
+     .image-placeholder span {
+       font-size: 32px;
+     }
+     
+     .image-placeholder p {
+       margin: 0;
+       font-size: 14px;
+     }
+     
+     .image-preview img {
+       border: 2px solid var(--border);
+       border-radius: 8px;
+     }
     
     /* Controles de tabela */
     .table-controls {
@@ -229,31 +277,20 @@
       text-align: center;
     }
     
-    /* Layout da configuração */
-    .config-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .config-section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-    }
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--primary);
-    }
+         /* Layout da configuração */
+     .section-header {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       margin-bottom: 16px;
+       padding-bottom: 12px;
+       border-bottom: 1px solid var(--border);
+     }
+     .section-title {
+       font-size: 18px;
+       font-weight: 700;
+       color: var(--primary);
+     }
     
     /* Formulários */
     .form-group {
@@ -342,15 +379,12 @@
       font-size: 16px;
     }
     
-    /* Responsividade */
-    @media (max-width: 768px) {
-      .config-grid {
-        grid-template-columns: 1fr;
-      }
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
+         /* Responsividade */
+     @media (max-width: 768px) {
+       .form-row {
+         grid-template-columns: 1fr;
+       }
+     }
   </style>
 </head>
 <body>
@@ -430,161 +464,74 @@
         <p class="helper">Gerencie categorias, produtos e estoque da loja digital.</p>
       </div>
 
-      <div class="config-grid">
-        <!-- Seção de Categorias -->
-        <div class="config-section">
-          <div class="section-header">
-            <h3 class="section-title">Categorias</h3>
-            <button id="btnAddCategory" class="btn success btn-small">+ Nova Categoria</button>
-          </div>
-          
-          <div class="form-group">
-            <label for="categoryName">Nome da Categoria</label>
-            <input type="text" id="categoryName" placeholder="Ex.: Vestuário">
-          </div>
-          
-          <div class="form-group">
-            <label for="categoryDescription">Descrição</label>
-            <textarea id="categoryDescription" rows="2" placeholder="Descrição da categoria"></textarea>
-          </div>
-          
-          <div class="form-group">
-            <button id="btnSaveCategory" class="btn success">Salvar Categoria</button>
-          </div>
-          
-          <div class="table-container">
-            <div class="table-controls">
-              <div class="search-box">
-                <input type="text" id="categorySearch" placeholder="🔍 Buscar categoria..." class="search-input">
-              </div>
-            </div>
-            <table class="data-table" id="categoriesTable">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>Descrição</th>
-                  <th>Produtos</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="categoriesTableBody">
-                <!-- Categorias serão carregadas aqui -->
-              </tbody>
-            </table>
-          </div>
-        </div>
+             <!-- Seção de Categorias -->
+       <div class="card">
+         <div class="section-header">
+           <h3 class="section-title">Categorias</h3>
+           <button id="btnAddCategory" class="btn success">+ Nova Categoria</button>
+         </div>
+         
+         <div class="table-container">
+           <div class="table-controls">
+             <div class="search-box">
+               <input type="text" id="categorySearch" placeholder="🔍 Buscar categoria..." class="search-input">
+             </div>
+           </div>
+           <table class="data-table" id="categoriesTable">
+             <thead>
+               <tr>
+                 <th>Nome</th>
+                 <th>Descrição</th>
+                 <th>Produtos</th>
+                 <th>Ações</th>
+               </tr>
+             </thead>
+             <tbody id="categoriesTableBody">
+               <!-- Categorias serão carregadas aqui -->
+             </tbody>
+           </table>
+         </div>
+       </div>
 
-        <!-- Seção de Subcategorias -->
-        <div class="config-section">
-          <div class="section-header">
-            <h3 class="section-title">Subcategorias</h3>
-            <button id="btnAddSubcategory" class="btn success btn-small">+ Nova Subcategoria</button>
-          </div>
-          
-          <div class="form-group">
-            <label for="subcategoryCategory">Categoria Pai</label>
-            <select id="subcategoryCategory">
-              <option value="">Selecione uma categoria</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="subcategoryName">Nome da Subcategoria</label>
-            <input type="text" id="subcategoryName" placeholder="Ex.: Camisetas">
-          </div>
-          
-          <div class="form-group">
-            <button id="btnSaveSubcategory" class="btn success">Salvar Subcategoria</button>
-          </div>
-          
-          <div class="table-container">
-            <div class="table-controls">
-              <div class="search-box">
-                <input type="text" id="subcategorySearch" placeholder="🔍 Buscar subcategoria..." class="search-input">
-              </div>
-              <div class="filter-box">
-                <select id="subcategoryCategoryFilter" class="filter-select">
-                  <option value="">Todas as categorias</option>
-                </select>
-              </div>
-            </div>
-            <table class="data-table" id="subcategoriesTable">
-              <thead>
-                <tr>
-                  <th>Categoria</th>
-                  <th>Subcategoria</th>
-                  <th>Produtos</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="subcategoriesTableBody">
-                <!-- Subcategorias serão carregadas aqui -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+       <!-- Seção de Subcategorias -->
+       <div class="card">
+         <div class="section-header">
+           <h3 class="section-title">Subcategorias</h3>
+           <button id="btnAddSubcategory" class="btn success">+ Nova Subcategoria</button>
+         </div>
+         
+                    <div class="table-container">
+             <div class="table-controls">
+               <div class="search-box">
+                 <input type="text" id="subcategorySearch" placeholder="🔍 Buscar subcategoria..." class="search-input">
+               </div>
+               <div class="filter-box">
+                 <select id="subcategoryCategoryFilter" class="filter-select">
+                   <option value="">Todas as categorias</option>
+                 </select>
+               </div>
+             </div>
+             <table class="data-table" id="subcategoriesTable">
+               <thead>
+                 <tr>
+                   <th>Categoria</th>
+                   <th>Subcategoria</th>
+                   <th>Produtos</th>
+                   <th>Ações</th>
+                 </tr>
+               </thead>
+               <tbody id="subcategoriesTableBody">
+                 <!-- Subcategorias serão carregadas aqui -->
+               </tbody>
+             </table>
+           </div>
+       </div>
 
       <!-- Seção de Produtos -->
       <div class="card">
         <div class="section-header">
           <h3 class="section-title">Produtos</h3>
           <button id="btnAddProduct" class="btn success">+ Novo Produto</button>
-        </div>
-        
-        <div class="form-group">
-          <div class="form-row">
-            <div>
-              <label for="productName">Nome do Produto</label>
-              <input type="text" id="productName" placeholder="Ex.: Camiseta Neon">
-            </div>
-            <div>
-              <label for="productCategory">Categoria</label>
-              <select id="productCategory">
-                <option value="">Selecione uma categoria</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <div class="form-row">
-            <div>
-              <label for="productSubcategory">Subcategoria</label>
-              <select id="productSubcategory">
-                <option value="">Selecione uma subcategoria</option>
-              </select>
-            </div>
-            <div>
-              <label for="productPrice">Preço (N$)</label>
-              <input type="number" id="productPrice" min="0" step="0.01" placeholder="0.00">
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <div class="form-row">
-            <div>
-              <label for="productStock">Estoque</label>
-              <input type="number" id="productStock" min="0" placeholder="0">
-            </div>
-            <div>
-              <label for="productStatus">Status</label>
-              <select id="productStatus">
-                <option value="active">Ativo</option>
-                <option value="inactive">Inativo</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="productDescription">Descrição</label>
-          <textarea id="productDescription" rows="3" placeholder="Descrição detalhada do produto"></textarea>
-        </div>
-        
-        <div class="form-group">
-          <button id="btnSaveProduct" class="btn success">Salvar Produto</button>
         </div>
         
         <div class="table-container">
@@ -615,17 +562,18 @@
             </div>
           </div>
           <table class="data-table" id="productsTable">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Subcategoria</th>
-                <th>Preço</th>
-                <th>Estoque</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
+                         <thead>
+               <tr>
+                 <th>Imagem</th>
+                 <th>Nome</th>
+                 <th>Categoria</th>
+                 <th>Subcategoria</th>
+                 <th>Preço</th>
+                 <th>Estoque</th>
+                 <th>Status</th>
+                 <th>Ações</th>
+               </tr>
+             </thead>
             <tbody id="productsTableBody">
               <!-- Produtos serão carregados aqui -->
             </tbody>
@@ -686,21 +634,35 @@
           </div>
         </div>
         
-        <div class="form-group">
-          <div class="form-row">
-            <div>
-              <label for="editProductStatus">Status</label>
-              <select id="editProductStatus">
-                <option value="active">Ativo</option>
-                <option value="inactive">Inativo</option>
-              </select>
-            </div>
-            <div>
-              <label for="editProductDescription">Descrição</label>
-              <textarea id="editProductDescription" rows="3" placeholder="Descrição detalhada do produto"></textarea>
-            </div>
-          </div>
-        </div>
+                 <div class="form-group">
+           <div class="form-row">
+             <div>
+               <label for="editProductStatus">Status</label>
+               <select id="editProductStatus">
+                 <option value="active">Ativo</option>
+                 <option value="inactive">Inativo</option>
+               </select>
+             </div>
+             <div>
+               <label for="editProductDescription">Descrição</label>
+               <textarea id="editProductDescription" rows="3" placeholder="Descrição detalhada do produto"></textarea>
+             </div>
+           </div>
+         </div>
+         
+         <div class="form-group">
+           <label for="editProductImage">Imagem do Produto</label>
+           <div class="image-upload-container">
+             <input type="file" id="editProductImage" accept="image/*" class="image-input">
+             <div class="image-preview" id="editProductImagePreview">
+               <img id="editProductCurrentImage" src="" alt="Imagem atual" style="display: none; max-width: 200px; max-height: 200px; border-radius: 8px;">
+               <div class="image-placeholder" id="editProductImagePlaceholder">
+                 <span>📷</span>
+                 <p>Clique para selecionar uma imagem</p>
+               </div>
+             </div>
+           </div>
+         </div>
       </div>
       <div class="modal-footer">
         <button id="btnCancelEdit" class="btn secondary">Cancelar</button>
@@ -764,6 +726,155 @@
     </div>
   </div>
 
+     <!-- Modal de Nova Categoria -->
+   <div id="newCategoryModal" class="modal" style="display: none;">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h3>Nova Categoria</h3>
+         <button id="btnCloseNewCategoryModal" class="btn-close">&times;</button>
+       </div>
+       <div class="modal-body">
+         <div class="form-group">
+           <label for="newCategoryName">Nome da Categoria</label>
+           <input type="text" id="newCategoryName" placeholder="Ex.: Vestuário">
+         </div>
+         
+         <div class="form-group">
+           <label for="newCategoryDescription">Descrição</label>
+           <textarea id="newCategoryDescription" rows="3" placeholder="Descrição da categoria"></textarea>
+         </div>
+       </div>
+       <div class="modal-footer">
+         <button id="btnCancelNewCategory" class="btn secondary">Cancelar</button>
+         <button id="btnSaveNewCategory" class="btn success">Salvar Categoria</button>
+       </div>
+     </div>
+   </div>
+
+   <!-- Modal de Nova Subcategoria -->
+   <div id="newSubcategoryModal" class="modal" style="display: none;">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h3>Nova Subcategoria</h3>
+         <button id="btnCloseNewSubcategoryModal" class="btn-close">&times;</button>
+       </div>
+       <div class="modal-body">
+         <div class="form-group">
+           <div class="form-row">
+             <div>
+               <label for="newSubcategoryCategory">Categoria Pai</label>
+               <select id="newSubcategoryCategory">
+                 <option value="">Selecione uma categoria</option>
+               </select>
+             </div>
+             <div>
+               <label for="newSubcategoryName">Nome da Subcategoria</label>
+               <input type="text" id="newSubcategoryName" placeholder="Ex.: Camisetas">
+             </div>
+           </div>
+         </div>
+       </div>
+       <div class="modal-footer">
+         <button id="btnCancelNewSubcategory" class="btn secondary">Cancelar</button>
+         <button id="btnSaveNewSubcategory" class="btn success">Salvar Subcategoria</button>
+       </div>
+     </div>
+   </div>
+
+   <!-- Modal de Novo Produto -->
+   <div id="newProductModal" class="modal" style="display: none;">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h3>Novo Produto</h3>
+         <button id="btnCloseNewProductModal" class="btn-close">&times;</button>
+       </div>
+       <div class="modal-body">
+         <div class="form-group">
+           <div class="form-row">
+             <div>
+               <label for="newProductName">Nome do Produto</label>
+               <input type="text" id="newProductName" placeholder="Ex.: Camiseta Neon">
+             </div>
+             <div>
+               <label for="newProductCategory">Categoria</label>
+               <select id="newProductCategory">
+                 <option value="">Selecione uma categoria</option>
+               </select>
+             </div>
+           </div>
+         </div>
+         
+         <div class="form-group">
+           <div class="form-row">
+             <div>
+               <label for="newProductSubcategory">Subcategoria</label>
+               <select id="newProductSubcategory">
+                 <option value="">Selecione uma subcategoria</option>
+               </select>
+             </div>
+             <div>
+               <label for="newProductPrice">Preço (N$)</label>
+               <input type="number" id="newProductPrice" min="0" step="0.01" placeholder="0.00">
+             </div>
+           </div>
+         </div>
+         
+         <div class="form-group">
+           <div class="form-row">
+             <div>
+               <label for="newProductStock">Estoque</label>
+               <input type="number" id="newProductStock" min="0" placeholder="0">
+             </div>
+             <div>
+               <label for="newProductStatus">Status</label>
+               <select id="newProductStatus">
+                 <option value="active">Ativo</option>
+                 <option value="inactive">Inativo</option>
+               </select>
+             </div>
+           </div>
+         </div>
+         
+         <div class="form-group">
+           <div class="form-row">
+             <div>
+               <label for="newProductConsumable">Consumível</label>
+               <select id="newProductConsumable">
+                 <option value="false">Não</option>
+                 <option value="true">Sim</option>
+               </select>
+             </div>
+             <div>
+               <!-- Espaçador para manter o layout -->
+             </div>
+           </div>
+         </div>
+         
+         <div class="form-group">
+           <label for="newProductDescription">Descrição</label>
+           <textarea id="newProductDescription" rows="3" placeholder="Descrição detalhada do produto"></textarea>
+         </div>
+         
+         <div class="form-group">
+           <label for="newProductImage">Imagem do Produto</label>
+           <div class="image-upload-container">
+             <input type="file" id="newProductImage" accept="image/*" class="image-input">
+             <div class="image-preview" id="newProductImagePreview">
+               <div class="image-placeholder" id="newProductImagePlaceholder">
+                 <span>📷</span>
+                 <p>Clique para selecionar uma imagem</p>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+       <div class="modal-footer">
+         <button id="btnCancelNewProduct" class="btn secondary">Cancelar</button>
+         <button id="btnSaveNewProduct" class="btn success">Salvar Produto</button>
+       </div>
+     </div>
+   </div>
+
   <!-- Overlay do Modal -->
   <div id="modalOverlay" class="modal-overlay" style="display: none;"></div>
 
@@ -771,7 +882,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, orderBy, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+         import { getFirestore, collection, query, where, orderBy, getDocs, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+     import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
@@ -783,10 +895,13 @@
       measurementId: "G-D3G4M9F17R"
     };
 
-    const app = initializeApp(firebaseConfig);
-    
-    try { getAnalytics(app); } catch {}
-    try { await signInAnonymously(getAuth(app)); } catch {}
+         const app = initializeApp(firebaseConfig);
+     
+     try { getAnalytics(app); } catch {}
+     try { await signInAnonymously(getAuth(app)); } catch {}
+     
+     // Inicializar Firebase Storage
+     const storage = getStorage(app);
 
     // Estrutura do banco: bancodaneondb/loja/{categorias|subcategorias|produtos}
     const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
@@ -796,34 +911,49 @@
     // Depois criamos subcoleções dentro dele
     
     // Elementos da interface
-    console.log('🔍 Buscando elementos DOM...');
     const unauthEl = document.getElementById('unauth');
     const contentEl = document.getElementById('content');
     const msgEl = document.getElementById('msg');
     const errEl = document.getElementById('err');
     
-    // Formulários de categoria
-    const categoryName = document.getElementById('categoryName');
-    const categoryDescription = document.getElementById('categoryDescription');
-    const btnSaveCategory = document.getElementById('btnSaveCategory');
-    const btnAddCategory = document.getElementById('btnAddCategory');
+         // Botões de ação
+     const btnAddCategory = document.getElementById('btnAddCategory');
+     const btnAddSubcategory = document.getElementById('btnAddSubcategory');
     
-    // Formulários de subcategoria
-    const subcategoryCategory = document.getElementById('subcategoryCategory');
-    const subcategoryName = document.getElementById('subcategoryName');
-    const btnSaveSubcategory = document.getElementById('btnSaveSubcategory');
-    const btnAddSubcategory = document.getElementById('btnAddSubcategory');
-    
-    // Formulários de produto
-    const productName = document.getElementById('productName');
-    const productCategory = document.getElementById('productCategory');
-    const productSubcategory = document.getElementById('productSubcategory');
-    const productPrice = document.getElementById('productPrice');
-    const productStock = document.getElementById('productStock');
-    const productStatus = document.getElementById('productStatus');
-    const productDescription = document.getElementById('productDescription');
-    const btnSaveProduct = document.getElementById('btnSaveProduct');
+    // Formulários de produto (removidos da página principal)
     const btnAddProduct = document.getElementById('btnAddProduct');
+    
+         // Elementos dos modais de nova categoria e subcategoria
+     const newCategoryModal = document.getElementById('newCategoryModal');
+     const newCategoryName = document.getElementById('newCategoryName');
+     const newCategoryDescription = document.getElementById('newCategoryDescription');
+     const btnCloseNewCategoryModal = document.getElementById('btnCloseNewCategoryModal');
+     const btnCancelNewCategory = document.getElementById('btnCancelNewCategory');
+     const btnSaveNewCategory = document.getElementById('btnSaveNewCategory');
+     
+     const newSubcategoryModal = document.getElementById('newSubcategoryModal');
+     const newSubcategoryCategory = document.getElementById('newSubcategoryCategory');
+     const newSubcategoryName = document.getElementById('newSubcategoryName');
+     const btnCloseNewSubcategoryModal = document.getElementById('btnCloseNewSubcategoryModal');
+     const btnCancelNewSubcategory = document.getElementById('btnCancelNewSubcategory');
+     const btnSaveNewSubcategory = document.getElementById('btnSaveNewSubcategory');
+     
+     // Elementos do modal de novo produto
+     const newProductModal = document.getElementById('newProductModal');
+     const newProductName = document.getElementById('newProductName');
+     const newProductCategory = document.getElementById('newProductCategory');
+     const newProductSubcategory = document.getElementById('newProductSubcategory');
+     const newProductPrice = document.getElementById('newProductPrice');
+     const newProductStock = document.getElementById('newProductStock');
+     const newProductStatus = document.getElementById('newProductStatus');
+     const newProductConsumable = document.getElementById('newProductConsumable');
+     const newProductDescription = document.getElementById('newProductDescription');
+     const newProductImage = document.getElementById('newProductImage');
+     const newProductImagePreview = document.getElementById('newProductImagePreview');
+     const newProductImagePlaceholder = document.getElementById('newProductImagePlaceholder');
+     const btnCloseNewProductModal = document.getElementById('btnCloseNewProductModal');
+     const btnCancelNewProduct = document.getElementById('btnCancelNewProduct');
+     const btnSaveNewProduct = document.getElementById('btnSaveNewProduct');
     
     // Elementos do modal de edição
     const editProductModal = document.getElementById('editProductModal');
@@ -833,9 +963,13 @@
     const editProductSubcategory = document.getElementById('editProductSubcategory');
     const editProductPrice = document.getElementById('editProductPrice');
     const editProductStock = document.getElementById('editProductStock');
-    const editProductStatus = document.getElementById('editProductStatus');
-    const editProductDescription = document.getElementById('editProductDescription');
-    const btnCloseEditModal = document.getElementById('btnCloseEditModal');
+         const editProductStatus = document.getElementById('editProductStatus');
+     const editProductDescription = document.getElementById('editProductDescription');
+     const editProductImage = document.getElementById('editProductImage');
+     const editProductImagePreview = document.getElementById('editProductImagePreview');
+     const editProductCurrentImage = document.getElementById('editProductCurrentImage');
+     const editProductImagePlaceholder = document.getElementById('editProductImagePlaceholder');
+     const btnCloseEditModal = document.getElementById('btnCloseEditModal');
     const btnCancelEdit = document.getElementById('btnCancelEdit');
     const btnSaveEdit = document.getElementById('btnSaveEdit');
     
@@ -895,7 +1029,6 @@
     } else {
       if (contentEl) {
         contentEl.style.display = 'block';
-        console.log('📱 Conteúdo principal exibido');
         initializeLojaConfig();
       } else {
         console.error('❌ Elemento content não encontrado!');
@@ -905,8 +1038,17 @@
     // Inicialização da aplicação
     async function initializeLojaConfig() {
       try {
+        // Carregar categorias e subcategorias primeiro
         await loadCategories();
         await loadSubcategories();
+        
+        // Depois carregar produtos para contagem
+        await loadProductsForCounting();
+        
+        // Atualizar contadores após carregar produtos
+        updateProductCounts();
+        
+        // Finalmente carregar produtos para exibição
         await loadProducts();
         
         setupEventListeners();
@@ -919,265 +1061,238 @@
 
     // Configuração dos controles do menu
     function setupMenuControls() {
-      console.log('🍔 Configurando controles do menu...');
-      
       if (btnMenu && sidebar && sidebarOverlay) {
         btnMenu.addEventListener('click', () => {
-          console.log('🍔 Menu clicado - Abrindo sidebar');
           sidebar.classList.add('open');
           sidebarOverlay.classList.add('open');
         });
-        console.log('✅ Event listener do menu adicionado');
       } else {
         console.error('❌ Elementos do menu não encontrados');
       }
 
       if (btnCloseSidebar && sidebar && sidebarOverlay) {
         btnCloseSidebar.addEventListener('click', () => {
-          console.log('🍔 Botão fechar clicado - Fechando sidebar');
           sidebar.classList.remove('open');
           sidebarOverlay.classList.remove('open');
         });
-        console.log('✅ Event listener do botão fechar adicionado');
       } else {
         console.error('❌ Elementos para fechar sidebar não encontrados');
       }
 
       if (sidebarOverlay && sidebar) {
         sidebarOverlay.addEventListener('click', () => {
-          console.log('🍔 Overlay clicado - Fechando sidebar');
           sidebar.classList.remove('open');
           sidebarOverlay.classList.remove('open');
         });
-        console.log('✅ Event listener do overlay adicionado');
       } else {
         console.error('❌ Elementos do overlay não encontrados');
       }
     }
 
-    // Configuração dos event listeners
-    function setupEventListeners() {
-      console.log('🔗 Configurando event listeners...');
-      
-      // Categorias
-      if (btnSaveCategory) {
-        console.log('🔗 Adicionando event listener ao btnSaveCategory...');
-        btnSaveCategory.addEventListener('click', handleSaveCategory);
-        console.log('✅ Event listener do btnSaveCategory adicionado');
-      } else {
-        console.error('❌ btnSaveCategory não encontrado');
-      }
-      
-      if (btnAddCategory) {
-        console.log('🔗 Adicionando event listener ao btnAddCategory...');
-        btnAddCategory.addEventListener('click', () => {
-          console.log('➕ Botão Nova Categoria clicado - Limpando formulário');
-          clearCategoryForm();
-        });
-        console.log('✅ Event listener do btnAddCategory adicionado');
-      } else {
-        console.error('❌ btnAddCategory não encontrado');
-      }
-      
-      // Subcategorias
-      if (btnSaveSubcategory) {
-        console.log('🔗 Adicionando event listener ao btnSaveSubcategory...');
-        btnSaveSubcategory.addEventListener('click', handleSaveSubcategory);
-        console.log('✅ Event listener do btnSaveSubcategory adicionado');
-      } else {
-        console.error('❌ btnSaveSubcategory não encontrado');
-      }
-      
-      if (btnAddSubcategory) {
-        console.log('🔗 Adicionando event listener ao btnAddSubcategory...');
-        btnAddSubcategory.addEventListener('click', () => {
-          console.log('➕ Botão Nova Subcategoria clicado - Limpando formulário');
-          clearSubcategoryForm();
-        });
-        console.log('✅ Event listener do btnAddSubcategory adicionado');
-      } else {
-        console.error('❌ btnAddSubcategory não encontrado');
-      }
+    
+    
+         // Configuração dos event listeners
+     function setupEventListeners() {
+       // Categorias
+       if (btnAddCategory) {
+         btnAddCategory.addEventListener('click', () => {
+           openNewCategoryModal();
+         });
+       } else {
+         console.error('❌ btnAddCategory não encontrado');
+       }
+       
+       // Subcategorias
+       if (btnAddSubcategory) {
+         btnAddSubcategory.addEventListener('click', () => {
+           openNewSubcategoryModal();
+         });
+       } else {
+         console.error('❌ btnAddSubcategory não encontrado');
+       }
       
       // Produtos
-      if (btnSaveProduct) {
-        console.log('🔗 Adicionando event listener ao btnSaveProduct...');
-        btnSaveProduct.addEventListener('click', handleSaveProduct);
-        console.log('✅ Event listener do btnSaveProduct adicionado');
-      } else {
-        console.error('❌ btnSaveProduct não encontrado');
-      }
-      
       if (btnAddProduct) {
-        console.log('🔗 Adicionando event listener ao btnAddProduct...');
         btnAddProduct.addEventListener('click', () => {
-          console.log('➕ Botão Novo Produto clicado - Limpando formulário');
-          clearProductForm();
+          openNewProductModal();
         });
-        console.log('✅ Event listener do btnAddProduct adicionado');
       } else {
         console.error('❌ btnAddProduct não encontrado');
       }
       
-      // Mudanças nos selects
-      if (productCategory) {
-        console.log('🔗 Adicionando event listener ao productCategory...');
-        productCategory.addEventListener('change', (e) => {
-          console.log('🔄 Categoria alterada:', e.target.value);
-          updateSubcategoryOptions();
-        });
-        console.log('✅ Event listener do productCategory adicionado');
-      } else {
-        console.error('❌ productCategory não encontrado');
-      }
       
-      if (subcategoryCategory) {
-        console.log('🔗 Adicionando event listener ao subcategoryCategory...');
-        subcategoryCategory.addEventListener('change', (e) => {
-          console.log('🔄 Subcategoria alterada:', e.target.value);
-          updateSubcategoryOptions();
-        });
-        console.log('✅ Event listener do subcategoryCategory adicionado');
-      } else {
-        console.error('❌ subcategoryCategory não encontrado');
-      }
       
       // Event listeners para o modal de edição
       if (btnCloseEditModal) {
-        console.log('🔗 Adicionando event listener ao btnCloseEditModal...');
         btnCloseEditModal.addEventListener('click', closeEditModal);
-        console.log('✅ Event listener do btnCloseEditModal adicionado');
       } else {
         console.error('❌ btnCloseEditModal não encontrado');
       }
       
       if (btnCancelEdit) {
-        console.log('🔗 Adicionando event listener ao btnCancelEdit...');
         btnCancelEdit.addEventListener('click', closeEditModal);
-        console.log('✅ Event listener do btnCancelEdit adicionado');
       } else {
         console.error('❌ btnCancelEdit não encontrado');
       }
       
       if (btnSaveEdit) {
-        console.log('🔗 Adicionando event listener ao btnSaveEdit...');
         btnSaveEdit.addEventListener('click', handleSaveEdit);
-        console.log('✅ Event listener do btnSaveEdit adicionado');
       } else {
         console.error('❌ btnSaveEdit não encontrado');
       }
       
-      // Event listener para mudança de categoria no modal
-      if (editProductCategory) {
-        console.log('🔗 Adicionando event listener ao editProductCategory...');
-        editProductCategory.addEventListener('change', updateEditSubcategoryOptions);
-        console.log('✅ Event listener do editProductCategory adicionado');
-      } else {
-        console.error('❌ editProductCategory não encontrado');
-      }
+             // Event listener para mudança de categoria no modal
+       if (editProductCategory) {
+         editProductCategory.addEventListener('change', updateEditSubcategoryOptions);
+       } else {
+         console.error('❌ editProductCategory não encontrado');
+       }
+       
+       // Event listeners para upload de imagem
+       if (editProductImage) {
+         editProductImage.addEventListener('change', handleEditProductImageChange);
+       }
+       
+       if (newProductImage) {
+         newProductImage.addEventListener('change', handleNewProductImageChange);
+       }
+       
+       // Event listeners para clicar nos containers de imagem
+       if (editProductImagePreview) {
+         editProductImagePreview.addEventListener('click', () => editProductImage.click());
+       }
+       
+       if (newProductImagePreview) {
+         newProductImagePreview.addEventListener('click', () => newProductImage.click());
+       }
       
-      // Event listener para fechar modal clicando no overlay
-      if (modalOverlay) {
-        console.log('🔗 Adicionando event listener ao modalOverlay...');
-        modalOverlay.addEventListener('click', () => {
-          closeEditModal();
-          closeEditCategoryModal();
-          closeEditSubcategoryModal();
-        });
-        console.log('✅ Event listener do modalOverlay adicionado');
-      } else {
-        console.error('❌ modalOverlay não encontrado');
-      }
+             // Event listener para fechar modal clicando no overlay
+       if (modalOverlay) {
+         modalOverlay.addEventListener('click', () => {
+           closeEditModal();
+           closeEditCategoryModal();
+           closeEditSubcategoryModal();
+           closeNewProductModal();
+           closeNewCategoryModal();
+           closeNewSubcategoryModal();
+         });
+       } else {
+         console.error('❌ modalOverlay não encontrado');
+       }
       
       // Event listeners para modais de categoria e subcategoria
       if (btnCloseEditCategoryModal) {
         btnCloseEditCategoryModal.addEventListener('click', closeEditCategoryModal);
-        console.log('✅ Event listener do btnCloseEditCategoryModal adicionado');
       }
       
       if (btnCancelEditCategory) {
         btnCancelEditCategory.addEventListener('click', closeEditCategoryModal);
-        console.log('✅ Event listener do btnCancelEditCategory adicionado');
       }
       
       if (btnSaveEditCategory) {
         btnSaveEditCategory.addEventListener('click', handleSaveEditCategory);
-        console.log('✅ Event listener do btnSaveEditCategory adicionado');
       }
       
       if (btnCloseEditSubcategoryModal) {
         btnCloseEditSubcategoryModal.addEventListener('click', closeEditSubcategoryModal);
-        console.log('✅ Event listener do btnCloseEditSubcategoryModal adicionado');
       }
       
       if (btnCancelEditSubcategory) {
         btnCancelEditSubcategory.addEventListener('click', closeEditSubcategoryModal);
-        console.log('✅ Event listener do btnCancelEditSubcategory adicionado');
       }
       
       if (btnSaveEditSubcategory) {
         btnSaveEditSubcategory.addEventListener('click', handleSaveEditSubcategory);
-        console.log('✅ Event listener do btnSaveEditSubcategory adicionado');
+      }
+      
+             // Event listeners para os modais de nova categoria e subcategoria
+       if (btnCloseNewCategoryModal) {
+         btnCloseNewCategoryModal.addEventListener('click', closeNewCategoryModal);
+       }
+       
+       if (btnCancelNewCategory) {
+         btnCancelNewCategory.addEventListener('click', closeNewCategoryModal);
+       }
+       
+       if (btnSaveNewCategory) {
+         btnSaveNewCategory.addEventListener('click', handleSaveNewCategory);
+       }
+       
+       if (btnCloseNewSubcategoryModal) {
+         btnCloseNewSubcategoryModal.addEventListener('click', closeNewSubcategoryModal);
+       }
+       
+       if (btnCancelNewSubcategory) {
+         btnCancelNewSubcategory.addEventListener('click', closeNewSubcategoryModal);
+       }
+       
+       if (btnSaveNewSubcategory) {
+         btnSaveNewSubcategory.addEventListener('click', handleSaveNewSubcategory);
+       }
+       
+       // Event listeners para o modal de novo produto
+       if (btnCloseNewProductModal) {
+         btnCloseNewProductModal.addEventListener('click', closeNewProductModal);
+       }
+       
+       if (btnCancelNewProduct) {
+         btnCancelNewProduct.addEventListener('click', closeNewProductModal);
+       }
+       
+       if (btnSaveNewProduct) {
+         btnSaveNewProduct.addEventListener('click', handleSaveNewProduct);
+       }
+      
+      // Event listener para mudança de categoria no modal de novo produto
+      if (newProductCategory) {
+        newProductCategory.addEventListener('change', updateNewProductSubcategoryOptions);
       }
       
       // Event listeners para busca e filtros
       if (categorySearch) {
         categorySearch.addEventListener('input', filterCategories);
-        console.log('✅ Event listener do categorySearch adicionado');
       }
       
       if (subcategorySearch) {
         subcategorySearch.addEventListener('input', filterSubcategories);
-        console.log('✅ Event listener do subcategorySearch adicionado');
       }
       
       if (productSearch) {
         productSearch.addEventListener('input', filterProducts);
-        console.log('✅ Event listener do productSearch adicionado');
       }
       
       if (productCategoryFilter) {
         productCategoryFilter.addEventListener('change', filterProducts);
-        console.log('✅ Event listener do productCategoryFilter adicionado');
       }
       
       if (productSubcategoryFilter) {
         productSubcategoryFilter.addEventListener('change', filterProducts);
-        console.log('✅ Event listener do productSubcategoryFilter adicionado');
       }
       
       if (productStatusFilter) {
         productStatusFilter.addEventListener('change', filterProducts);
-        console.log('✅ Event listener do productStatusFilter adicionado');
       }
       
       if (subcategoryCategoryFilter) {
         subcategoryCategoryFilter.addEventListener('change', filterSubcategories);
-        console.log('✅ Event listener do subcategoryCategoryFilter adicionado');
       }
       
       // Event listeners para paginação
       if (itemsPerPage) {
         itemsPerPage.addEventListener('change', changeItemsPerPage);
-        console.log('✅ Event listener do itemsPerPage adicionado');
       }
       
       if (prevPage) {
         prevPage.addEventListener('click', prevPageProducts);
-        console.log('✅ Event listener do prevPage adicionado');
       }
       
       if (nextPage) {
         nextPage.addEventListener('click', nextPageProducts);
-        console.log('✅ Event listener do nextPage adicionado');
       }
-      
-      console.log('🔗 Event listeners configurados');
     }
 
     // ===== FUNÇÕES DE CATEGORIA =====
     async function loadCategories() {
-      console.log('📋 Carregando categorias do Firestore...');
       try {
         // Primeiro, garantir que o documento 'config' existe
         const configDocRef = doc(db, 'loja', 'config');
@@ -1189,30 +1304,24 @@
         }
         
         const categoriesCol = collection(db, 'loja', 'config', 'categorias');
-        console.log('📁 Collection de categorias criada:', categoriesCol);
         
         const q = query(categoriesCol, orderBy('name'));
-        console.log('🔍 Query criada:', q);
         
         const snap = await getDocs(q);
-        console.log('📄 Snapshot recebido:', snap);
-        console.log('📊 Número de documentos:', snap.size);
         
         const categories = [];
         snap.forEach(doc => {
           const data = doc.data();
-          console.log('📋 Categoria encontrada:', { id: doc.id, ...data });
           categories.push({ id: doc.id, ...data });
         });
-        
-        console.log('📋 Total de categorias:', categories.length);
         
         // Armazenar categorias para filtros
         allCategories = categories;
         
+        
+        
         renderCategoriesTable(categories);
         updateCategorySelects(categories);
-        console.log('✅ Categorias carregadas e renderizadas');
       } catch (error) {
         console.error('❌ Erro ao carregar categorias:', error);
         showError('Erro ao carregar categorias: ' + error.message);
@@ -1220,17 +1329,14 @@
     }
 
     function renderCategoriesTable(categories) {
-      console.log('🎨 Renderizando tabela de categorias...');
       if (!categoriesTableBody) {
         console.error('❌ categoriesTableBody não encontrado');
         return;
       }
       
       categoriesTableBody.innerHTML = '';
-      console.log('🧹 Tabela limpa');
       
       if (categories.length === 0) {
-        console.log('📭 Nenhuma categoria para exibir');
         const row = document.createElement('tr');
         row.innerHTML = '<td colspan="4" style="text-align: center; color: var(--muted);">Nenhuma categoria encontrada</td>';
         categoriesTableBody.appendChild(row);
@@ -1238,7 +1344,6 @@
       }
       
       categories.forEach((category, index) => {
-        console.log(`📋 Renderizando categoria ${index + 1}:`, category);
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${category.name}</td>
@@ -1252,87 +1357,40 @@
           </td>
         `;
         categoriesTableBody.appendChild(row);
-        console.log(`✅ Categoria ${category.name} renderizada`);
       });
-      
-      console.log('✅ Tabela de categorias renderizada');
     }
 
-    async function handleSaveCategory() {
-      console.log('💾 Salvando categoria...');
-      const name = categoryName?.value?.trim();
-      const description = categoryDescription?.value?.trim();
-      
-      console.log('📝 Dados da categoria:', { name, description });
-      
-      if (!name) {
-        console.error('❌ Nome da categoria é obrigatório');
-        showError('Nome da categoria é obrigatório');
-        return;
-      }
-      
-      try {
-        const categoryData = {
-          name,
-          description,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        };
-        
-        console.log('📋 Dados para salvar:', categoryData);
-        
-        const categoriesCol = collection(db, 'loja', 'config', 'categorias');
-        console.log('📁 Collection criada:', categoriesCol);
-        
-        const docRef = await addDoc(categoriesCol, categoryData);
-        console.log('✅ Categoria salva com ID:', docRef.id);
-        
-        showSuccess('Categoria criada com sucesso!');
-        clearCategoryForm();
-        await loadCategories();
-      } catch (error) {
-        console.error('❌ Erro ao salvar categoria:', error);
-        showError('Erro ao salvar categoria: ' + error.message);
-      }
-    }
-
-    function clearCategoryForm() {
-      console.log('🧹 Limpando formulário de categoria...');
-      if (categoryName) categoryName.value = '';
-      if (categoryDescription) categoryDescription.value = '';
-      if (btnSaveCategory) btnSaveCategory.textContent = 'Salvar Categoria';
-      console.log('✅ Formulário limpo');
-    }
+    
 
     // ===== FUNÇÕES DE SUBCATEGORIA =====
+    
+         // Função para atualizar selects de subcategoria
+     function updateSubcategorySelects(subcategories) {
+       // Esta função é chamada quando subcategorias são carregadas
+       // Por enquanto, apenas verifica se o elemento existe
+       // A lógica de atualização será implementada quando necessário
+     }
+    
     async function loadSubcategories() {
-      console.log('📋 Carregando subcategorias do Firestore...');
       try {
         const subcategoriesCol = collection(db, 'loja', 'config', 'subcategorias');
-        console.log('📁 Collection de subcategorias criada:', subcategoriesCol);
         
         const q = query(subcategoriesCol, orderBy('name'));
-        console.log('🔍 Query criada:', q);
         
         const snap = await getDocs(q);
-        console.log('📄 Snapshot recebido:', snap);
-        console.log('📊 Número de documentos:', snap.size);
         
         const subcategories = [];
         snap.forEach(doc => {
           const data = doc.data();
-          console.log('📋 Subcategoria encontrada:', { id: doc.id, ...data });
           subcategories.push({ id: doc.id, ...data });
         });
-        
-        console.log('📋 Total de subcategorias:', subcategories.length);
         
         // Armazenar subcategorias para filtros
         allSubcategories = subcategories;
         
+        
         renderSubcategoriesTable(subcategories);
         updateSubcategorySelects(subcategories);
-        console.log('✅ Subcategorias carregadas e renderizadas');
       } catch (error) {
         console.error('❌ Erro ao carregar subcategorias:', error);
         showError('Erro ao carregar subcategorias: ' + error.message);
@@ -1340,17 +1398,14 @@
     }
 
     function renderSubcategoriesTable(subcategories) {
-      console.log('🎨 Renderizando tabela de subcategorias...');
       if (!subcategoriesTableBody) {
         console.error('❌ subcategoriesTableBody não encontrado');
         return;
       }
       
       subcategoriesTableBody.innerHTML = '';
-      console.log('🧹 Tabela limpa');
       
       if (subcategories.length === 0) {
-        console.log('📭 Nenhuma subcategoria para exibir');
         const row = document.createElement('tr');
         row.innerHTML = '<td colspan="4" style="text-align: center; color: var(--muted);">Nenhuma subcategoria encontrada</td>';
         subcategoriesTableBody.appendChild(row);
@@ -1358,7 +1413,6 @@
       }
       
       subcategories.forEach((subcategory, index) => {
-        console.log(`📋 Renderizando subcategoria ${index + 1}:`, subcategory);
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${subcategory.categoryName || '-'}</td>
@@ -1372,105 +1426,107 @@
           </td>
         `;
         subcategoriesTableBody.appendChild(row);
-        console.log(`✅ Subcategoria ${subcategory.name} renderizada`);
       });
-      
-      console.log('✅ Tabela de subcategorias renderizada');
     }
 
-    async function handleSaveSubcategory() {
-      console.log('💾 Salvando subcategoria...');
-      const categoryId = subcategoryCategory?.value;
-      const name = subcategoryName?.value?.trim();
-      
-      console.log('📝 Dados da subcategoria:', { categoryId, name });
-      
-      if (!categoryId || !name) {
-        console.error('❌ Categoria e nome são obrigatórios');
-        showError('Categoria e nome são obrigatórios');
-        return;
-      }
-      
-      try {
-        // Buscar nome da categoria
-        console.log('🔍 Buscando nome da categoria...');
-        const categoryDoc = await getDocs(collection(db, 'loja', 'config', 'categorias'));
-        let categoryName = '';
-        categoryDoc.forEach(doc => {
-          if (doc.id === categoryId) {
-            categoryName = doc.data().name;
-          }
-        });
-        
-        console.log('📋 Nome da categoria encontrado:', categoryName);
-        
-        const subcategoryData = {
-          categoryId,
-          categoryName,
-          name,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        };
-        
-        console.log('📋 Dados para salvar:', subcategoryData);
-        
-        const subcategoriesCol = collection(db, 'loja', 'config', 'subcategorias');
-        console.log('📁 Collection criada:', subcategoriesCol);
-        
-        const docRef = await addDoc(subcategoriesCol, subcategoryData);
-        console.log('✅ Subcategoria salva com ID:', docRef.id);
-        
-        showSuccess('Subcategoria criada com sucesso!');
-        clearSubcategoryForm();
-        await loadSubcategories();
-      } catch (error) {
-        console.error('❌ Erro ao salvar subcategoria:', error);
-        showError('Erro ao salvar subcategoria: ' + error.message);
-      }
-    }
-
-    function clearSubcategoryForm() {
-      console.log('🧹 Limpando formulário de subcategoria...');
-      if (subcategoryCategory) subcategoryCategory.value = '';
-      if (subcategoryName) subcategoryName.value = '';
-      if (btnSaveSubcategory) btnSaveSubcategory.textContent = 'Salvar Subcategoria';
-      console.log('✅ Formulário limpo');
-    }
+    
 
     // ===== FUNÇÕES DE PRODUTO =====
-    async function loadProducts() {
-      console.log('📋 Carregando produtos do Firestore...');
+    
+    // Função para carregar produtos apenas para contagem (sem renderizar)
+    async function loadProductsForCounting() {
       try {
+        
         const productsCol = collection(db, 'loja', 'config', 'produtos');
-        console.log('📁 Collection de produtos criada:', productsCol);
         
         const q = query(productsCol, orderBy('name'));
-        console.log('🔍 Query criada:', q);
         
         const snap = await getDocs(q);
-        console.log('📄 Snapshot recebido:', snap);
-        console.log('📊 Número de documentos:', snap.size);
         
         const products = [];
         snap.forEach(doc => {
           const data = doc.data();
-          console.log('📋 Produto encontrado:', { id: doc.id, ...data });
           products.push({ id: doc.id, ...data });
         });
         
-        console.log('📋 Total de produtos:', products.length);
+        
+        // Armazenar produtos para contagem
+        allProducts = products;
+        
+      } catch (error) {
+        console.error('❌ Erro ao carregar produtos para contagem:', error);
+      }
+    }
+    
+    // Função para atualizar contadores de produtos em categorias e subcategorias
+    function updateProductCounts() {
+      if (!allProducts || !allCategories || !allSubcategories) {
+        console.error('❌ Dados insuficientes para atualizar contadores:', {
+          produtos: allProducts?.length || 0,
+          categorias: allCategories?.length || 0,
+          subcategorias: allSubcategories?.length || 0
+        });
+        return;
+      }
+      
+      
+      // Contar produtos por categoria
+      allCategories.forEach(category => {
+        const productCount = allProducts.filter(product => 
+          product.categoryId === category.id
+        ).length;
+        
+        category.productCount = productCount;
+      });
+      
+      // Contar produtos por subcategoria
+      allSubcategories.forEach(subcategory => {
+        const productCount = allProducts.filter(product => 
+          product.subcategoryId === subcategory.id
+        ).length;
+        
+        subcategory.productCount = productCount;
+      });
+      
+    }
+    
+    async function loadProducts() {
+      try {
+        const productsCol = collection(db, 'loja', 'config', 'produtos');
+        
+        const q = query(productsCol, orderBy('name'));
+        
+        const snap = await getDocs(q);
+        
+        const products = [];
+        snap.forEach(doc => {
+          const data = doc.data();
+          products.push({ id: doc.id, ...data });
+        });
         
         // Armazenar todos os produtos para filtros
         allProducts = products;
         filteredProducts = products;
         
+        
+        // Console log para mostrar informações dos produtos
+
+        products.forEach((product, index) => {
+
+        });
+        
         // Renderizar com paginação
         renderProductsTablePaginated();
-        console.log('✅ Produtos carregados e renderizados com paginação');
         
         // Popular selects do modal de edição
         await populateEditCategorySelects();
-        console.log('✅ Selects do modal populados');
+        
+        // Atualizar contadores de categorias e subcategorias
+        updateProductCounts();
+        
+        // Re-renderizar tabelas com contadores atualizados
+        renderCategoriesTable(allCategories);
+        renderSubcategoriesTable(allSubcategories);
       } catch (error) {
         console.error('❌ Erro ao carregar produtos:', error);
         showError('Erro ao carregar produtos: ' + error.message);
@@ -1478,188 +1534,74 @@
     }
 
     function renderProductsTable(products) {
-      console.log('🎨 Renderizando tabela de produtos...');
       if (!productsTableBody) {
         console.error('❌ productsTableBody não encontrado');
         return;
       }
       
       productsTableBody.innerHTML = '';
-      console.log('🧹 Tabela limpa');
       
-      if (products.length === 0) {
-        console.log('📭 Nenhum produto para exibir');
-        const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="7" style="text-align: center; color: var(--muted);">Nenhum produto encontrado</td>';
-        productsTableBody.appendChild(row);
-        return;
-      }
+             if (products.length === 0) {
+         const row = document.createElement('tr');
+         row.innerHTML = '<td colspan="8" style="text-align: center; color: var(--muted);">Nenhum produto encontrado</td>';
+         productsTableBody.appendChild(row);
+         return;
+       }
       
-      products.forEach((product, index) => {
-        console.log(`📋 Renderizando produto ${index + 1}:`, product);
-        const row = document.createElement('tr');
-        const stockClass = product.stock <= 5 ? 'status-low' : 'status-active';
-        const statusClass = product.status === 'active' ? 'status-active' : 'status-inactive';
-        
-        row.innerHTML = `
-          <td>${product.name}</td>
-          <td>${product.categoryName || '-'}</td>
-          <td>${product.subcategoryName || '-'}</td>
-          <td>N$ ${product.price?.toFixed(2) || '0.00'}</td>
-          <td><span class="status-badge ${stockClass}">${product.stock || 0}</span></td>
-          <td><span class="status-badge ${statusClass}">${product.status === 'active' ? 'Ativo' : 'Inativo'}</span></td>
-          <td>
-            <div class="action-buttons">
-              <button class="btn btn-icon warning" onclick="editProduct('${product.id}')" title="Editar">✏️</button>
-              <button class="btn btn-icon danger" onclick="deleteProduct('${product.id}')" title="Excluir">🗑️</button>
-            </div>
-          </td>
-        `;
-        productsTableBody.appendChild(row);
-        console.log(`✅ Produto ${product.name} renderizado`);
-      });
-      
-      console.log('✅ Tabela de produtos renderizada');
+             products.forEach((product, index) => {
+         const row = document.createElement('tr');
+         const stockClass = product.stock <= 5 ? 'status-low' : 'status-active';
+         const statusClass = product.status === 'active' ? 'status-active' : 'status-inactive';
+         
+         // Preparar imagem do produto
+         const imageCell = product.imageUrl 
+           ? `<img src="${product.imageUrl}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border);">`
+           : '<span style="color: var(--muted); font-size: 12px;">Sem imagem</span>';
+         
+         row.innerHTML = `
+           <td style="text-align: center;">${imageCell}</td>
+           <td>${product.name}</td>
+           <td>${product.categoryName || '-'}</td>
+           <td>${product.subcategoryName || '-'}</td>
+           <td>N$ ${product.price?.toFixed(2) || '0.00'}</td>
+           <td><span class="status-badge ${stockClass}">${product.stock || 0}</span></td>
+           <td><span class="status-badge ${statusClass}">${product.status === 'active' ? 'Ativo' : 'Inativo'}</span></td>
+           <td>
+             <div class="action-buttons">
+               <button class="btn btn-icon warning" onclick="editProduct('${product.id}')" title="Editar">✏️</button>
+               <button class="btn btn-icon danger" onclick="deleteProduct('${product.id}')" title="Excluir">🗑️</button>
+             </div>
+           </td>
+         `;
+         productsTableBody.appendChild(row);
+       });
     }
 
-    async function handleSaveProduct() {
-      console.log('💾 Salvando produto...');
-      const name = productName?.value?.trim();
-      const categoryId = productCategory?.value;
-      const subcategoryId = productSubcategory?.value;
-      const price = parseFloat(productPrice?.value) || 0;
-      const stock = parseInt(productStock?.value) || 0;
-      const status = productStatus?.value;
-      const description = productDescription?.value?.trim();
-      
-      console.log('📝 Dados do produto:', { name, categoryId, subcategoryId, price, stock, status, description });
-      
-      if (!name || !categoryId) {
-        console.error('❌ Nome e categoria são obrigatórios');
-        showError('Nome e categoria são obrigatórios');
-        return;
-      }
-      
-      try {
-        // Buscar nomes das categorias
-        console.log('🔍 Buscando nomes das categorias...');
-        const categoryDoc = await getDocs(collection(db, 'loja', 'config', 'categorias'));
-        let categoryName = '';
-        categoryDoc.forEach(doc => {
-          if (doc.id === categoryId) {
-            categoryName = doc.data().name;
-          }
-        });
-        
-        const subcategoryDoc = await getDocs(collection(db, 'loja', 'config', 'subcategorias'));
-        let subcategoryName = '';
-        subcategoryDoc.forEach(doc => {
-          if (doc.id === subcategoryId) {
-            subcategoryName = doc.data().name;
-          }
-        });
-        
-        console.log('📋 Nomes encontrados:', { categoryName, subcategoryName });
-        
-        const productData = {
-          name,
-          categoryId,
-          categoryName,
-          subcategoryId,
-          subcategoryName,
-          price,
-          stock,
-          status,
-          description,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        };
-        
-        console.log('📋 Dados para salvar:', productData);
-        
-        const productsCol = collection(db, 'loja', 'config', 'produtos');
-        console.log('📁 Collection criada:', productsCol);
-        
-        const docRef = await addDoc(productsCol, productData);
-        console.log('✅ Produto salvo com ID:', docRef.id);
-        
-        showSuccess('Produto criado com sucesso!');
-        clearProductForm();
-        await loadProducts();
-      } catch (error) {
-        console.error('❌ Erro ao salvar produto:', error);
-        showError('Erro ao salvar produto: ' + error.message);
-      }
-    }
 
-    function clearProductForm() {
-      console.log('🧹 Limpando formulário de produto...');
-      if (productName) productName.value = '';
-      if (productCategory) productCategory.value = '';
-      if (productSubcategory) productSubcategory.value = '';
-      if (productPrice) productPrice.value = '';
-      if (productStock) productStock.value = '';
-      if (productStatus) productStatus.value = 'active';
-      if (productDescription) productDescription.value = '';
-      if (btnSaveProduct) btnSaveProduct.textContent = 'Salvar Produto';
-      console.log('✅ Formulário limpo');
-    }
 
     // ===== FUNÇÕES AUXILIARES =====
-    function updateCategorySelects(categories) {
-      console.log('🔄 Atualizando selects de categoria...');
-      if (!productCategory || !subcategoryCategory) {
-        console.error('❌ Selects de categoria não encontrados');
-        return;
-      }
-      
-      const options = ['<option value="">Selecione uma categoria</option>'];
-      categories.forEach(cat => {
-        options.push(`<option value="${cat.id}">${cat.name}</option>`);
-      });
-      
-      productCategory.innerHTML = options.join('');
-      subcategoryCategory.innerHTML = options.join('');
-      console.log('✅ Selects de categoria atualizados');
-    }
-
-    function updateSubcategoryOptions() {
-      console.log('🔄 Atualizando opções de subcategoria...');
-      const categoryId = productCategory?.value;
-      const subcategorySelect = productSubcategory;
-      
-      if (!subcategorySelect) {
-        console.error('❌ Select de subcategoria não encontrado');
-        return;
-      }
-      
-      if (!categoryId) {
-        subcategorySelect.innerHTML = '<option value="">Selecione uma subcategoria</option>';
-        console.log('✅ Select de subcategoria limpo');
-        return;
-      }
-      
-      console.log('🔍 Buscando subcategorias para categoria:', categoryId);
-      
-              // Buscar subcategorias da categoria selecionada
-        getDocs(collection(db, 'loja', 'config', 'subcategorias')).then(snap => {
-        const options = ['<option value="">Selecione uma subcategoria</option>'];
-        snap.forEach(doc => {
-          const data = doc.data();
-          if (data.categoryId === categoryId) {
-            options.push(`<option value="${doc.id}">${data.name}</option>`);
-          }
-        });
-        subcategorySelect.innerHTML = options.join('');
-        console.log('✅ Opções de subcategoria atualizadas');
-      }).catch(error => {
-        console.error('❌ Erro ao buscar subcategorias:', error);
-      });
-    }
+         function updateCategorySelects(categories) {
+       // Atualizar o select do modal de novo produto
+       if (newProductCategory) {
+         const options = ['<option value="">Selecione uma categoria</option>'];
+         categories.forEach(cat => {
+           options.push(`<option value="${cat.id}">${cat.name}</option>`);
+         });
+         newProductCategory.innerHTML = options.join('');
+       }
+       
+       // Atualizar o select do modal de nova subcategoria
+       if (newSubcategoryCategory) {
+         const options = ['<option value="">Selecione uma categoria</option>'];
+         categories.forEach(cat => {
+           options.push(`<option value="${cat.id}">${cat.name}</option>`);
+         });
+         newSubcategoryCategory.innerHTML = options.join('');
+       }
+     }
 
     // Função para atualizar subcategorias no modal de edição
     async function updateEditSubcategoryOptions() {
-      console.log('🔄 Atualizando opções de subcategoria no modal...');
       const categoryId = editProductCategory?.value;
       const subcategorySelect = editProductSubcategory;
       
@@ -1670,11 +1612,8 @@
       
       if (!categoryId) {
         subcategorySelect.innerHTML = '<option value="">Selecione uma subcategoria</option>';
-        console.log('✅ Select de subcategoria do modal limpo');
         return;
       }
-      
-      console.log('🔍 Buscando subcategorias para categoria:', categoryId);
       
       try {
         const snap = await getDocs(collection(db, 'loja', 'config', 'subcategorias'));
@@ -1686,14 +1625,12 @@
           }
         });
         subcategorySelect.innerHTML = options.join('');
-        console.log('✅ Opções de subcategoria do modal atualizadas');
       } catch (error) {
         console.error('❌ Erro ao buscar subcategorias do modal:', error);
       }
     }
 
     function showSuccess(message) {
-      console.log('✅ Sucesso:', message);
       if (msgEl) {
         msgEl.textContent = message;
         msgEl.style.display = 'block';
@@ -1726,8 +1663,6 @@
     
     // Funções globais para os botões de ação
     window.editCategory = async function(id) {
-      console.log('✏️ Editando categoria:', id);
-      
       try {
         // Buscar dados da categoria no Firestore
         const categoryDoc = await getDocs(collection(db, 'loja', 'config', 'categorias'));
@@ -1755,8 +1690,6 @@
         editCategoryModal.style.display = 'flex';
         modalOverlay.style.display = 'block';
         
-        console.log('✅ Modal de edição de categoria aberto para:', categoryData.name);
-        
       } catch (error) {
         console.error('❌ Erro ao abrir modal de edição de categoria:', error);
         showError('Erro ao abrir modal de edição: ' + error.message);
@@ -1764,13 +1697,18 @@
     };
 
     window.deleteCategory = async function(id) {
-      console.log('🗑️ Excluindo categoria:', id);
       if (confirm('Tem certeza que deseja excluir esta categoria?')) {
         try {
           await deleteDoc(doc(db, 'loja', 'config', 'categorias', id));
-          console.log('✅ Categoria excluída');
           showSuccess('Categoria excluída com sucesso!');
           await loadCategories();
+          
+          // Atualizar contadores após excluir categoria
+          if (allProducts && allProducts.length > 0) {
+            updateProductCounts();
+            renderCategoriesTable(allCategories);
+            renderSubcategoriesTable(allSubcategories);
+          }
         } catch (error) {
           console.error('❌ Erro ao excluir categoria:', error);
           showError('Erro ao excluir categoria: ' + error.message);
@@ -1779,8 +1717,6 @@
     };
 
     window.editSubcategory = async function(id) {
-      console.log('✏️ Editando subcategoria:', id);
-      
       try {
         // Buscar dados da subcategoria no Firestore
         const subcategoryDoc = await getDocs(collection(db, 'loja', 'config', 'subcategorias'));
@@ -1808,8 +1744,6 @@
         editSubcategoryModal.style.display = 'flex';
         modalOverlay.style.display = 'block';
         
-        console.log('✅ Modal de edição de subcategoria aberto para:', subcategoryData.name);
-        
       } catch (error) {
         console.error('❌ Erro ao abrir modal de edição de subcategoria:', error);
         showError('Erro ao abrir modal de edição: ' + error.message);
@@ -1817,13 +1751,18 @@
     };
 
     window.deleteSubcategory = async function(id) {
-      console.log('🗑️ Excluindo subcategoria:', id);
       if (confirm('Tem certeza que deseja excluir esta subcategoria?')) {
         try {
           await deleteDoc(doc(db, 'loja', 'config', 'subcategorias', id));
-          console.log('✅ Subcategoria excluída');
           showSuccess('Subcategoria excluída com sucesso!');
-          await loadCategories();
+          await loadSubcategories();
+          
+          // Atualizar contadores após excluir subcategoria
+          if (allProducts && allProducts.length > 0) {
+            updateProductCounts();
+            renderCategoriesTable(allCategories);
+            renderSubcategoriesTable(allSubcategories);
+          }
         } catch (error) {
           console.error('❌ Erro ao excluir subcategoria:', error);
           showError('Erro ao excluir subcategoria: ' + error.message);
@@ -1835,8 +1774,6 @@
     let currentEditProduct = null;
 
     window.editProduct = async function(id) {
-      console.log('✏️ Editando produto:', id);
-      
       try {
         // Buscar dados do produto no Firestore
         const productDoc = await getDocs(collection(db, 'loja', 'config', 'produtos'));
@@ -1856,14 +1793,24 @@
         // Armazenar produto atual para edição
         currentEditProduct = productData;
         
-        // Preencher formulário de edição
-        editProductName.value = productData.name || '';
-        editProductCategory.value = productData.categoryId || '';
-        editProductSubcategory.value = productData.subcategoryId || '';
-        editProductPrice.value = productData.price || '';
-        editProductStock.value = productData.stock || '';
-        editProductStatus.value = productData.status || 'active';
-        editProductDescription.value = productData.description || '';
+                 // Preencher formulário de edição
+         editProductName.value = productData.name || '';
+         editProductCategory.value = productData.categoryId || '';
+         editProductSubcategory.value = productData.subcategoryId || '';
+         editProductPrice.value = productData.price || '';
+         editProductStock.value = productData.stock || '';
+         editProductStatus.value = productData.status || 'active';
+         editProductDescription.value = productData.description || '';
+         
+         // Preencher imagem atual se existir
+         if (productData.imageUrl) {
+           editProductCurrentImage.src = productData.imageUrl;
+           editProductCurrentImage.style.display = 'block';
+           editProductImagePlaceholder.style.display = 'none';
+         } else {
+           editProductCurrentImage.style.display = 'none';
+           editProductImagePlaceholder.style.display = 'flex';
+         }
         
         // Atualizar opções de subcategoria baseado na categoria selecionada
         await updateEditSubcategoryOptions();
@@ -1872,8 +1819,6 @@
         editProductModal.style.display = 'flex';
         modalOverlay.style.display = 'block';
         
-        console.log('✅ Modal de edição aberto para:', productData.name);
-        
       } catch (error) {
         console.error('❌ Erro ao abrir modal de edição:', error);
         showError('Erro ao abrir modal de edição: ' + error.message);
@@ -1881,14 +1826,16 @@
     };
 
     window.deleteProduct = async function(id) {
-      console.log('🗑️ Excluindo produto:', id);
-      
       if (confirm('Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.')) {
         try {
           await deleteDoc(doc(db, 'loja', 'config', 'produtos', id));
-          console.log('✅ Produto excluído com sucesso');
           showSuccess('Produto excluído com sucesso!');
           await loadProducts(); // Recarregar lista de produtos
+          
+          // Atualizar contadores de categorias e subcategorias
+          updateProductCounts();
+          renderCategoriesTable(allCategories);
+          renderSubcategoriesTable(allSubcategories);
         } catch (error) {
           console.error('❌ Erro ao excluir produto:', error);
           showError('Erro ao excluir produto: ' + error.message);
@@ -1898,37 +1845,34 @@
     
     // ===== FUNÇÕES DO MODAL DE EDIÇÃO =====
     
-    // Função para fechar o modal de produto
-    function closeEditModal() {
-      console.log('🚪 Fechando modal de edição de produto...');
-      editProductModal.style.display = 'none';
-      modalOverlay.style.display = 'none';
-      currentEditProduct = null;
-      console.log('✅ Modal de produto fechado');
-    }
+         // Função para fechar o modal de produto
+     function closeEditModal() {
+       editProductModal.style.display = 'none';
+       modalOverlay.style.display = 'none';
+       currentEditProduct = null;
+       
+       // Limpar campo de imagem
+       if (editProductImage) editProductImage.value = '';
+       if (editProductCurrentImage) editProductCurrentImage.style.display = 'none';
+       if (editProductImagePlaceholder) editProductImagePlaceholder.style.display = 'flex';
+     }
     
     // Função para fechar o modal de categoria
     function closeEditCategoryModal() {
-      console.log('🚪 Fechando modal de edição de categoria...');
       editCategoryModal.style.display = 'none';
       modalOverlay.style.display = 'none';
       currentEditCategory = null;
-      console.log('✅ Modal de categoria fechado');
     }
     
     // Função para fechar o modal de subcategoria
     function closeEditSubcategoryModal() {
-      console.log('🚪 Fechando modal de edição de subcategoria...');
       editSubcategoryModal.style.display = 'none';
       modalOverlay.style.display = 'none';
       currentEditSubcategory = null;
-      console.log('✅ Modal de subcategoria fechado');
     }
     
     // Função para salvar as alterações do produto
     async function handleSaveEdit() {
-      console.log('💾 Salvando alterações do produto...');
-      
       if (!currentEditProduct) {
         console.error('❌ Nenhum produto selecionado para edição');
         showError('Nenhum produto selecionado para edição');
@@ -1943,60 +1887,76 @@
       const status = editProductStatus?.value;
       const description = editProductDescription?.value?.trim();
       
-      console.log('📝 Dados editados:', { name, categoryId, subcategoryId, price, stock, status, description });
-      
       if (!name || !categoryId) {
         console.error('❌ Nome e categoria são obrigatórios');
         showError('Nome e categoria são obrigatórios');
         return;
       }
       
+      // Verificar se já existe um produto com o mesmo nome (excluindo o produto atual)
+      const nameExists = await checkProductNameExists(name, currentEditProduct.id);
+      if (nameExists) {
+        showError('Já existe um produto com este nome. Por favor, escolha um nome único.');
+        return;
+      }
+      
       try {
-        // Buscar nomes das categorias
-        console.log('🔍 Buscando nomes das categorias...');
-        const categoryDoc = await getDocs(collection(db, 'loja', 'config', 'categorias'));
-        let categoryName = '';
-        categoryDoc.forEach(doc => {
-          if (doc.id === categoryId) {
-            categoryName = doc.data().name;
-          }
-        });
-        
-        const subcategoryDoc = await getDocs(collection(db, 'loja', 'config', 'subcategorias'));
-        let subcategoryName = '';
-        subcategoryDoc.forEach(doc => {
-          if (doc.id === subcategoryId) {
-            subcategoryName = doc.data().name;
-          }
-        });
-        
-        console.log('📋 Nomes encontrados:', { categoryName, subcategoryName });
-        
-        const updatedProductData = {
-          name,
-          categoryId,
-          categoryName,
-          subcategoryId,
-          subcategoryName,
-          price,
-          stock,
-          status,
-          description,
-          updatedAt: serverTimestamp()
-        };
-        
-        console.log('📋 Dados para atualizar:', updatedProductData);
+         // Buscar nomes das categorias
+         const categoryDoc = await getDocs(collection(db, 'loja', 'config', 'categorias'));
+         let categoryName = '';
+         categoryDoc.forEach(doc => {
+           if (doc.id === categoryId) {
+             categoryName = doc.data().name;
+           }
+         });
+         
+         const subcategoryDoc = await getDocs(collection(db, 'loja', 'config', 'subcategorias'));
+         let subcategoryName = '';
+         subcategoryDoc.forEach(doc => {
+           if (doc.id === subcategoryId) {
+             subcategoryName = doc.data().name;
+           }
+         });
+         
+         // Verificar se há nova imagem para upload
+         let imageUrl = currentEditProduct.imageUrl || null;
+         if (editProductImage.files && editProductImage.files[0]) {
+           try {
+             imageUrl = await uploadProductImage(editProductImage.files[0], name, currentEditProduct.id);
+           } catch (error) {
+             showError('Erro ao fazer upload da imagem: ' + error.message);
+             return;
+           }
+         }
+         
+         const updatedProductData = {
+           name,
+           categoryId,
+           categoryName,
+           subcategoryId,
+           subcategoryName,
+           price,
+           stock,
+           status,
+           description,
+           imageUrl,
+           updatedAt: serverTimestamp()
+         };
         
         // Atualizar documento no Firestore
         const productDocRef = doc(db, 'loja', 'config', 'produtos', currentEditProduct.id);
         await updateDoc(productDocRef, updatedProductData);
         
-        console.log('✅ Produto atualizado com sucesso');
         showSuccess('Produto atualizado com sucesso!');
         
         // Fechar modal e recarregar produtos
         closeEditModal();
         await loadProducts();
+        
+        // Atualizar contadores de categorias e subcategorias
+        updateProductCounts();
+        renderCategoriesTable(allCategories);
+        renderSubcategoriesTable(allSubcategories);
         
       } catch (error) {
         console.error('❌ Erro ao atualizar produto:', error);
@@ -2004,10 +1964,138 @@
       }
     }
     
-    // Função para popular os selects do modal com categorias
-    async function populateEditCategorySelects() {
-      console.log('🔄 Populando selects de categoria do modal...');
-      
+         // ===== FUNÇÕES DE UPLOAD DE IMAGEM =====
+     // 
+     // ESTRATÉGIA IMPLEMENTADA:
+     // 1. VALIDAÇÃO DE NOMES ÚNICOS: Não permite produtos com nomes duplicados
+     // 2. NOMENCLATURA CONSISTENTE: Imagens salvas como "nome_produto_timestamp.extensao"
+     // 3. BUSCA POR NOME: Funções para encontrar produtos por nome ou ID
+     // 4. COMPATIBILIDADE: As 3 páginas (lojaconfig, loja, inventario) podem buscar pelo mesmo produto
+     // 5. ARMAZENAMENTO: Imagens salvas em gs://crmdaneon.firebasestorage.app/imagemLoja/
+     //
+     
+     // Função para lidar com mudança de imagem no modal de edição
+     function handleEditProductImageChange(event) {
+       const file = event.target.files[0];
+       if (file) {
+         displayImagePreview(file, editProductCurrentImage, editProductImagePlaceholder);
+       }
+     }
+     
+     // Função para lidar com mudança de imagem no modal de novo produto
+     function handleNewProductImageChange(event) {
+       const file = event.target.files[0];
+       if (file) {
+         displayImagePreview(file, null, newProductImagePlaceholder);
+       }
+     }
+     
+     // Função para exibir preview da imagem
+     function displayImagePreview(file, currentImageElement, placeholderElement) {
+       if (!file) return;
+       
+       const reader = new FileReader();
+       reader.onload = function(e) {
+         if (currentImageElement) {
+           currentImageElement.src = e.target.result;
+           currentImageElement.style.display = 'block';
+         }
+         if (placeholderElement) {
+           placeholderElement.style.display = 'none';
+         }
+       };
+       reader.readAsDataURL(file);
+     }
+     
+     // Função para fazer upload da imagem para o Firebase Storage
+     async function uploadProductImage(file, productName, productId) {
+       if (!file) return null;
+       
+       try {
+         // Criar nome único para a imagem baseado no nome do produto
+         const sanitizedName = productName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+         const timestamp = Date.now();
+         const fileExtension = file.name.split('.').pop();
+         
+         // Formato: imagemLoja/nome_produto_timestamp.extensao
+         const storageRef = ref(storage, `imagemLoja/${sanitizedName}_${timestamp}.${fileExtension}`);
+         
+         // Fazer upload do arquivo
+         const snapshot = await uploadBytes(storageRef, file);
+         
+         // Obter URL de download
+         const downloadURL = await getDownloadURL(snapshot.ref);
+         
+         return downloadURL;
+       } catch (error) {
+         console.error('❌ Erro ao fazer upload da imagem:', error);
+         throw error;
+       }
+     }
+     
+     // Função para verificar se já existe um produto com o mesmo nome
+     async function checkProductNameExists(productName, excludeProductId = null) {
+       try {
+         const productsCol = collection(db, 'loja', 'config', 'produtos');
+         const q = query(productsCol, where('name', '==', productName));
+         const snap = await getDocs(q);
+         
+         // Verificar se existe algum produto com o mesmo nome (excluindo o produto atual se estiver editando)
+         let exists = false;
+         snap.forEach(doc => {
+           if (doc.id !== excludeProductId) {
+             exists = true;
+           }
+         });
+         
+         return exists;
+       } catch (error) {
+         console.error('❌ Erro ao verificar nome do produto:', error);
+         return false;
+       }
+     }
+     
+     // Função para buscar produto por nome (útil para outras páginas)
+     async function findProductByName(productName) {
+       try {
+         const productsCol = collection(db, 'loja', 'config', 'produtos');
+         const q = query(productsCol, where('name', '==', productName));
+         const snap = await getDocs(q);
+         
+         if (!snap.empty) {
+           const doc = snap.docs[0];
+           return { id: doc.id, ...doc.data() };
+         }
+         
+         return null;
+       } catch (error) {
+         console.error('❌ Erro ao buscar produto por nome:', error);
+         return null;
+       }
+     }
+     
+     // Função para buscar produto por ID (útil para outras páginas)
+     async function findProductById(productId) {
+       try {
+         const productDoc = doc(db, 'loja', 'config', 'produtos', productId);
+         const productSnap = await getDocs(collection(db, 'loja', 'config', 'produtos'));
+         
+         let productData = null;
+         productSnap.forEach(doc => {
+           if (doc.id === productId) {
+             productData = { id: doc.id, ...doc.data() };
+           }
+         });
+         
+         return productData;
+       } catch (error) {
+         console.error('❌ Erro ao buscar produto por ID:', error);
+         return null;
+       }
+     }
+     
+     // Função para popular os selects do modal com categorias
+     async function populateEditCategorySelects() {
       try {
         const categoriesSnap = await getDocs(collection(db, 'loja', 'config', 'categorias'));
         const options = ['<option value="">Selecione uma categoria</option>'];
@@ -2019,13 +2107,11 @@
         
         if (editProductCategory) {
           editProductCategory.innerHTML = options.join('');
-          console.log('✅ Select de categoria do modal populado');
         }
         
         // Popular também os selects dos outros modais
         if (editSubcategoryCategory) {
           editSubcategoryCategory.innerHTML = options.join('');
-          console.log('✅ Select de categoria do modal de subcategoria populado');
         }
         
         // Popular filtros
@@ -2038,6 +2124,302 @@
         
       } catch (error) {
         console.error('❌ Erro ao popular categorias do modal:', error);
+      }
+    }
+    
+         // ===== FUNÇÕES DOS MODAIS DE NOVA CATEGORIA E SUBCATEGORIA =====
+     
+     // Função para abrir o modal de nova categoria
+     function openNewCategoryModal() {
+       // Limpar formulário
+       clearNewCategoryForm();
+       
+       // Mostrar modal
+       newCategoryModal.style.display = 'flex';
+       modalOverlay.style.display = 'block';
+     }
+     
+     // Função para fechar o modal de nova categoria
+     function closeNewCategoryModal() {
+       newCategoryModal.style.display = 'none';
+       modalOverlay.style.display = 'none';
+     }
+     
+     // Função para limpar o formulário de nova categoria
+     function clearNewCategoryForm() {
+       if (newCategoryName) newCategoryName.value = '';
+       if (newCategoryDescription) newCategoryDescription.value = '';
+     }
+     
+     // Função para abrir o modal de nova subcategoria
+     function openNewSubcategoryModal() {
+       // Limpar formulário
+       clearNewSubcategoryForm();
+       
+       // Mostrar modal
+       newSubcategoryModal.style.display = 'flex';
+       modalOverlay.style.display = 'block';
+     }
+     
+     // Função para fechar o modal de nova subcategoria
+     function closeNewSubcategoryModal() {
+       newSubcategoryModal.style.display = 'none';
+       modalOverlay.style.display = 'none';
+     }
+     
+     // Função para limpar o formulário de nova subcategoria
+     function clearNewSubcategoryForm() {
+       if (newSubcategoryCategory) newSubcategoryCategory.value = '';
+       if (newSubcategoryName) newSubcategoryName.value = '';
+     }
+     
+     // Função para salvar nova categoria
+     async function handleSaveNewCategory() {
+       const name = newCategoryName?.value?.trim();
+       const description = newCategoryDescription?.value?.trim();
+       
+       if (!name) {
+         console.error('❌ Nome da categoria é obrigatório');
+         showError('Nome da categoria é obrigatório');
+         return;
+       }
+       
+       try {
+         const categoryData = {
+           name,
+           description,
+           createdAt: serverTimestamp(),
+           updatedAt: serverTimestamp()
+         };
+         
+         const categoriesCol = collection(db, 'loja', 'config', 'categorias');
+         
+         const docRef = await addDoc(categoriesCol, categoryData);
+         
+         showSuccess('Categoria criada com sucesso!');
+         closeNewCategoryModal();
+         await loadCategories();
+         
+         // Atualizar contadores após criar nova categoria
+         if (allProducts && allProducts.length > 0) {
+           updateProductCounts();
+           renderCategoriesTable(allCategories);
+           renderSubcategoriesTable(allSubcategories);
+         }
+         
+       } catch (error) {
+         console.error('❌ Erro ao criar categoria:', error);
+         showError('Erro ao criar categoria: ' + error.message);
+       }
+     }
+     
+     // Função para salvar nova subcategoria
+     async function handleSaveNewSubcategory() {
+       const categoryId = newSubcategoryCategory?.value;
+       const name = newSubcategoryName?.value?.trim();
+       
+       if (!categoryId || !name) {
+         console.error('❌ Categoria e nome são obrigatórios');
+         showError('Categoria e nome são obrigatórios');
+         return;
+       }
+       
+       try {
+         // Buscar nome da categoria
+         const categoryDoc = await getDocs(collection(db, 'loja', 'config', 'categorias'));
+         let categoryName = '';
+         categoryDoc.forEach(doc => {
+           if (doc.id === categoryId) {
+             categoryName = doc.data().name;
+           }
+         });
+         
+         const subcategoryData = {
+           categoryId,
+           categoryName,
+           name,
+           createdAt: serverTimestamp(),
+           updatedAt: serverTimestamp()
+         };
+         
+         const subcategoriesCol = collection(db, 'loja', 'config', 'subcategorias');
+         
+         const docRef = await addDoc(subcategoriesCol, subcategoryData);
+         
+         showSuccess('Subcategoria criada com sucesso!');
+         closeNewSubcategoryModal();
+         await loadSubcategories();
+         
+         // Atualizar contadores após criar nova subcategoria
+         if (allProducts && allProducts.length > 0) {
+           updateProductCounts();
+           renderCategoriesTable(allCategories);
+           renderSubcategoriesTable(allSubcategories);
+         }
+         
+       } catch (error) {
+         console.error('❌ Erro ao criar subcategoria:', error);
+         showError('Erro ao criar subcategoria: ' + error.message);
+       }
+     }
+     
+     // ===== FUNÇÕES DO MODAL DE NOVO PRODUTO =====
+     
+     // Função para abrir o modal de novo produto
+     function openNewProductModal() {
+       // Limpar formulário
+       clearNewProductForm();
+       
+       // Mostrar modal
+       newProductModal.style.display = 'flex';
+       modalOverlay.style.display = 'block';
+     }
+    
+    // Função para fechar o modal de novo produto
+    function closeNewProductModal() {
+      newProductModal.style.display = 'none';
+      modalOverlay.style.display = 'none';
+    }
+    
+         // Função para limpar o formulário de novo produto
+     function clearNewProductForm() {
+       if (newProductName) newProductName.value = '';
+       if (newProductCategory) newProductCategory.value = '';
+       if (newProductSubcategory) newProductSubcategory.value = '';
+       if (newProductPrice) newProductPrice.value = '';
+       if (newProductStock) newProductStock.value = '';
+       if (newProductStatus) newProductStatus.value = 'active';
+       if (newProductConsumable) newProductConsumable.value = 'false';
+       if (newProductDescription) newProductDescription.value = '';
+       
+       // Limpar campo de imagem
+       if (newProductImage) newProductImage.value = '';
+       if (newProductImagePlaceholder) newProductImagePlaceholder.style.display = 'flex';
+     }
+    
+    // Função para atualizar opções de subcategoria no modal de novo produto
+    async function updateNewProductSubcategoryOptions() {
+      const categoryId = newProductCategory?.value;
+      const subcategorySelect = newProductSubcategory;
+      
+      if (!subcategorySelect) {
+        console.error('❌ Select de subcategoria do modal não encontrado');
+        return;
+      }
+      
+      if (!categoryId) {
+        subcategorySelect.innerHTML = '<option value="">Selecione uma subcategoria</option>';
+        return;
+      }
+      
+      try {
+        const snap = await getDocs(collection(db, 'loja', 'config', 'subcategorias'));
+        const options = ['<option value="">Selecione uma subcategoria</option>'];
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (data.categoryId === categoryId) {
+            options.push(`<option value="${doc.id}">${data.name}</option>`);
+          }
+        });
+        subcategorySelect.innerHTML = options.join('');
+      } catch (error) {
+        console.error('❌ Erro ao buscar subcategorias do modal:', error);
+      }
+    }
+    
+    // Função para salvar novo produto
+    async function handleSaveNewProduct() {
+      const name = newProductName?.value?.trim();
+      const categoryId = newProductCategory?.value;
+      const subcategoryId = newProductSubcategory?.value;
+      const price = parseFloat(newProductPrice?.value) || 0;
+      const stock = parseInt(newProductStock?.value) || 0;
+      const status = newProductStatus?.value;
+      const consumable = newProductConsumable?.value === 'true';
+      const description = newProductDescription?.value?.trim();
+      
+      if (!name || !categoryId) {
+        console.error('❌ Nome e categoria são obrigatórios');
+        showError('Nome e categoria são obrigatórios');
+        return;
+      }
+      
+      // Verificar se já existe um produto com o mesmo nome
+      const nameExists = await checkProductNameExists(name);
+      if (nameExists) {
+        showError('Já existe um produto com este nome. Por favor, escolha um nome único.');
+        return;
+      }
+      
+      try {
+         // Buscar nomes das categorias
+         const categoryDoc = await getDocs(collection(db, 'loja', 'config', 'categorias'));
+         let categoryName = '';
+         categoryDoc.forEach(doc => {
+           if (doc.id === categoryId) {
+             categoryName = doc.data().name;
+           }
+         });
+         
+         const subcategoryDoc = await getDocs(collection(db, 'loja', 'config', 'subcategorias'));
+         let subcategoryName = '';
+         subcategoryDoc.forEach(doc => {
+           if (doc.id === subcategoryId) {
+             subcategoryName = doc.data().name;
+           }
+         });
+         
+         // Criar produto primeiro para obter o ID
+         const productsCol = collection(db, 'loja', 'config', 'produtos');
+         const docRef = await addDoc(productsCol, {
+           name,
+           categoryId,
+           categoryName,
+           subcategoryId,
+           subcategoryName,
+           price,
+           stock,
+           status,
+           consumable,
+           description,
+           createdAt: serverTimestamp(),
+           updatedAt: serverTimestamp()
+         });
+         
+         // Verificar se há imagem para upload
+         let imageUrl = null;
+         if (newProductImage.files && newProductImage.files[0]) {
+           try {
+             imageUrl = await uploadProductImage(newProductImage.files[0], name, docRef.id);
+             
+             // Atualizar produto com a URL da imagem
+             await updateDoc(docRef, { imageUrl });
+           } catch (error) {
+             console.error('❌ Erro ao fazer upload da imagem:', error);
+             // Continuar mesmo se o upload falhar
+           }
+         }
+         
+                  showSuccess('Produto criado com sucesso!');
+         closeNewProductModal();
+         await loadProducts();
+         
+         // Atualizar contadores de categorias e subcategorias
+         updateProductCounts();
+         renderCategoriesTable(allCategories);
+         renderSubcategoriesTable(allSubcategories);
+        
+        showSuccess('Produto criado com sucesso!');
+        closeNewProductModal();
+        await loadProducts();
+        
+        // Atualizar contadores de categorias e subcategorias
+        updateProductCounts();
+        renderCategoriesTable(allCategories);
+        renderSubcategoriesTable(allSubcategories);
+      } catch (error) {
+        console.error('❌ Erro ao salvar produto:', error);
+        showError('Erro ao salvar produto: ' + error.message);
       }
     }
     
@@ -2058,8 +2440,6 @@
       const subcategoryFilter = productSubcategoryFilter?.value || '';
       const statusFilter = productStatusFilter?.value || '';
       
-      console.log('🔍 Filtrando produtos:', { searchTerm, categoryFilter, subcategoryFilter, statusFilter });
-      
       filteredProducts = allProducts.filter(product => {
         const matchesSearch = !searchTerm || 
           product.name.toLowerCase().includes(searchTerm) ||
@@ -2071,8 +2451,6 @@
         
         return matchesSearch && matchesCategory && matchesSubcategory && matchesStatus;
       });
-      
-      console.log('📊 Produtos filtrados:', filteredProducts.length);
       currentPage = 1;
       renderProductsTablePaginated();
     }
@@ -2082,8 +2460,6 @@
       const startIndex = (currentPage - 1) * itemsPerPageValue;
       const endIndex = startIndex + itemsPerPageValue;
       const productsToShow = filteredProducts.slice(startIndex, endIndex);
-      
-      console.log(`📄 Renderizando página ${currentPage}: produtos ${startIndex + 1} a ${endIndex}`);
       
       renderProductsTable(productsToShow);
       updatePagination();
@@ -2104,8 +2480,6 @@
       if (nextPage) {
         nextPage.disabled = currentPage >= totalPages;
       }
-      
-      console.log(`📊 Paginação atualizada: página ${currentPage} de ${totalPages}`);
     }
     
     // Função para ir para próxima página
@@ -2129,14 +2503,12 @@
     function changeItemsPerPage() {
       itemsPerPageValue = parseInt(itemsPerPage?.value || 10);
       currentPage = 1;
-      console.log(`📊 Itens por página alterados para: ${itemsPerPageValue}`);
       renderProductsTablePaginated();
     }
     
     // Função para filtrar categorias
     function filterCategories() {
       const searchTerm = categorySearch?.value?.toLowerCase() || '';
-      console.log('🔍 Filtrando categorias:', searchTerm);
       
       const filteredCategories = allCategories.filter(category => 
         category.name.toLowerCase().includes(searchTerm) ||
@@ -2144,14 +2516,12 @@
       );
       
       renderCategoriesTable(filteredCategories);
-      console.log('📊 Categorias filtradas:', filteredCategories.length);
     }
     
     // Função para filtrar subcategorias
     function filterSubcategories() {
       const searchTerm = subcategorySearch?.value?.toLowerCase() || '';
       const categoryFilter = subcategoryCategoryFilter?.value || '';
-      console.log('🔍 Filtrando subcategorias:', { searchTerm, categoryFilter });
       
       let filteredSubcategories = allSubcategories;
       
@@ -2169,13 +2539,10 @@
       }
       
       renderSubcategoriesTable(filteredSubcategories);
-      console.log('📊 Subcategorias filtradas:', filteredSubcategories.length);
     }
     
     // Função para salvar edição de categoria
     async function handleSaveEditCategory() {
-      console.log('💾 Salvando alterações da categoria...');
-      
       if (!currentEditCategory) {
         console.error('❌ Nenhuma categoria selecionada para edição');
         showError('Nenhuma categoria selecionada para edição');
@@ -2198,18 +2565,21 @@
           updatedAt: serverTimestamp()
         };
         
-        console.log('📋 Dados para atualizar:', updatedCategoryData);
-        
         // Atualizar documento no Firestore
         const categoryDocRef = doc(db, 'loja', 'config', 'categorias', currentEditCategory.id);
         await updateDoc(categoryDocRef, updatedCategoryData);
-        
-        console.log('✅ Categoria atualizada com sucesso');
         showSuccess('Categoria atualizada com sucesso!');
         
         // Fechar modal e recarregar categorias
         closeEditCategoryModal();
         await loadCategories();
+        
+        // Atualizar contadores após editar categoria
+        if (allProducts && allProducts.length > 0) {
+          updateProductCounts();
+          renderCategoriesTable(allCategories);
+          renderSubcategoriesTable(allSubcategories);
+        }
         
       } catch (error) {
         console.error('❌ Erro ao atualizar categoria:', error);
@@ -2219,8 +2589,6 @@
     
     // Função para salvar edição de subcategoria
     async function handleSaveEditSubcategory() {
-      console.log('💾 Salvando alterações da subcategoria...');
-      
       if (!currentEditSubcategory) {
         console.error('❌ Nenhuma subcategoria selecionada para edição');
         showError('Nenhuma subcategoria selecionada para edição');
@@ -2253,18 +2621,22 @@
           updatedAt: serverTimestamp()
         };
         
-        console.log('📋 Dados para atualizar:', updatedSubcategoryData);
-        
         // Atualizar documento no Firestore
         const subcategoryDocRef = doc(db, 'loja', 'config', 'subcategorias', currentEditSubcategory.id);
         await updateDoc(subcategoryDocRef, updatedSubcategoryData);
         
-        console.log('✅ Subcategoria atualizada com sucesso');
         showSuccess('Subcategoria atualizada com sucesso!');
         
         // Fechar modal e recarregar subcategorias
         closeEditSubcategoryModal();
         await loadSubcategories();
+        
+        // Atualizar contadores após editar subcategoria
+        if (allProducts && allProducts.length > 0) {
+          updateProductCounts();
+          renderCategoriesTable(allCategories);
+          renderSubcategoriesTable(allSubcategories);
+        }
         
       } catch (error) {
         console.error('❌ Erro ao atualizar subcategoria:', error);
@@ -2272,7 +2644,6 @@
       }
     }
     
-    console.log('🎯 lojaconfig.html - Script carregado completamente');
   </script>
 </body>
 </html>
