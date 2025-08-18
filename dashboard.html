@@ -481,54 +481,20 @@
         if (!currentDocId) throw new Error('Usuário não resolvido.');
         const f = fileInput.files?.[0];
         if (!f) throw new Error('Selecione uma imagem.');
-        // Caminho base: imagemAlunos/{docId}
+        // Upload direto da nova imagem
         const baseRef = ref(storage, `imagemAlunos/${currentDocId}`);
-        logU('Iniciando upload', { docId: currentDocId, contentType: f.type, size: f.size });
-        // Se já existe uma imagem atual, versiona como {docId}.1/.2/... antes de sobrescrever
-        try {
-          const meta = await getMetadata(baseRef);
-          logU('Imagem base existente. Iniciando versionamento', { contentType: meta?.contentType });
-          // Encontrar próximo sufixo disponível
-          let n = 1;
-          // Tenta até achar um nome livre
-          // Atenção: em cenários com muitas versões isso pode custar algumas chamadas
-          // mas é adequado para uso leve do app
-          // eslint-disable-next-line no-constant-condition
-          while (true) {
-            const candidateRef = ref(storage, `imagemAlunos/${currentDocId}.${n}`);
-            try {
-              await getMetadata(candidateRef);
-              logU('Sufixo ocupado, tentando próximo', n);
-              n++;
-            } catch (e) {
-              // Não existe -> podemos copiar
-              logU('Criando backup em', `${currentDocId}.${n}`);
-              const oldBytes = await getBytes(baseRef);
-              await uploadBytes(candidateRef, oldBytes, { contentType: meta?.contentType || 'application/octet-stream' });
-              logU('Backup criado com sucesso');
-              break;
-            }
-          }
-        } catch (e) {
-          // Se cair aqui, provavelmente a imagem base ainda não existe -> segue
-          logU('Nenhuma imagem anterior encontrada, pulando versionamento');
-        }
-
-        // Agora sobrescreve a imagem base com a nova
         logU('Subindo nova imagem para base');
         await uploadBytes(baseRef, f, { contentType: f.type });
         logU('Upload concluído. Obtendo URL pública');
         const url = await getDownloadURL(baseRef);
         await updateDoc(doc(db, 'alunos', currentDocId), { fotoUrl: url });
         logU('fotoUrl atualizada no Firestore', { url });
-        
         // Atualiza a foto na interface
         avatarImg.src = url;
         avatarEl.classList.remove('hide-photo');
         avatarPlaceholder.style.display = 'none';
         avatarSpinner.style.display = 'none';
         avatarResolved = true;
-        
         overlay.style.display = 'none';
         logU('Processo finalizado com sucesso');
       } catch (e) {
