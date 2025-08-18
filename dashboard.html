@@ -493,6 +493,16 @@
 
         // Upload direto da nova imagem
         const baseRef = ref(storage, `imagemAlunos/${currentDocId}`);
+    const oldPhotoPath = avatarImg.src
+      .split('/o/')[1]
+      .split('?')[0]
+      .replace(/%2F/g, '/');
+    try {
+      await firebase.functions().httpsCallable('versionarFotoAluno')({ path: oldPhotoPath });
+    } catch (error) {
+      console.error('Falha no backup da foto antiga:', error);
+      alert('O backup da foto antiga falhou, mas a nova foto foi salva.');
+    }
         logU('Subindo nova imagem para base');
         await uploadBytes(baseRef, f, { contentType: f.type });
         logU('Upload concluído. Obtendo URL pública');
