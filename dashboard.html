@@ -478,9 +478,19 @@
     });
     btnSave?.addEventListener('click', async () => {
       try {
+        // Mostra spinner no modal imediatamente
+        previewImg.style.opacity = '0.4';
+        btnSave.disabled = true;
+        btnClose.disabled = true;
+        let modalSpinner = document.getElementById('modalSpinner');
+        if (!modalSpinner) {
+          previewImg.parentElement.insertAdjacentHTML('beforeend', '<div id="modalSpinner" class="spinner" style="position:absolute;inset:0;display:grid;place-items:center;"></div>');
+        }
+
         if (!currentDocId) throw new Error('Usuário não resolvido.');
         const f = fileInput.files?.[0];
         if (!f) throw new Error('Selecione uma imagem.');
+
         // Upload direto da nova imagem
         const baseRef = ref(storage, `imagemAlunos/${currentDocId}`);
         logU('Subindo nova imagem para base');
@@ -489,6 +499,7 @@
         const url = await getDownloadURL(baseRef);
         await updateDoc(doc(db, 'alunos', currentDocId), { fotoUrl: url });
         logU('fotoUrl atualizada no Firestore', { url });
+
         // Atualiza a foto na interface
         avatarImg.src = url;
         avatarEl.classList.remove('hide-photo');
@@ -496,8 +507,20 @@
         avatarSpinner.style.display = 'none';
         avatarResolved = true;
         overlay.style.display = 'none';
+
+        // Remove spinner do modal
+        modalSpinner = document.getElementById('modalSpinner');
+        if (modalSpinner) modalSpinner.remove();
+        previewImg.style.opacity = '1';
+        btnSave.disabled = false;
+        btnClose.disabled = false;
         logU('Processo finalizado com sucesso');
       } catch (e) {
+        const modalSpinner = document.getElementById('modalSpinner');
+        if (modalSpinner) modalSpinner.remove();
+        previewImg.style.opacity = '1';
+        btnSave.disabled = false;
+        btnClose.disabled = false;
         logU('Erro no upload', e);
         alert(e?.message || String(e));
       }
