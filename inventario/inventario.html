@@ -22,84 +22,88 @@
           });
       });
     </script>
-    <main class="wrap">
+      <main class="inventario-main">
+        <h1 id="tituloInventario" class="inventario-title">Meu inventário</h1>
+        <section class="inventario-kpis">
+          <div class="kpi-card" id="kpi-total-items">
+            <div class="kpi-label">Total de itens</div>
+            <div class="kpi-value">0</div>
+          </div>
+          <div class="kpi-card" id="kpi-total-value">
+            <div class="kpi-label">Valor total</div>
+            <div class="kpi-value">N$ 0,00</div>
+          </div>
+          <div class="kpi-card" id="kpi-unique-subcats">
+            <div class="kpi-label">Subcategorias únicas</div>
+            <div class="kpi-value">0</div>
+          </div>
+        </section>
+        <section class="inventario-filtros">
+          <select id="filter-category">
+            <option value="">Todas categorias</option>
+          </select>
+          <select id="filter-subcategory">
+            <option value="">Todas subcategorias</option>
+          </select>
+          <select id="order-by">
+            <option value="name">Nome (A-Z)</option>
+            <option value="value">Valor</option>
+          </select>
+        </section>
+        <section class="inventario-grid" id="inventario-grid"></section>
+        <div class="inventario-paginacao">
+          <button id="btn-prev" disabled>Anterior</button>
+          <span id="pagina-atual">1</span>
+          <button id="btn-next" disabled>Próxima</button>
+        </div>
+      </main>
   <div id="unauth" class="empty-state hidden">Sessão inválida. Faça login novamente.</div>
-  <div id="content">
-        <div class="inventory-header">
-          <h1>Meu Inventário</h1>
-          <div class="messages">
-            <div id="msg"></div>
-            <div id="err"></div>
-          </div>
-        </div>
-        <section class="inventory-stats">
-          <div class="stat-card">
-            <div id="totalItems" class="stat-number">0</div>
-            <div class="stat-label">Itens</div>
-          </div>
-          <div class="stat-card">
-            <div id="totalSpent" class="stat-number">N$ 0,00</div>
-            <div class="stat-label">Total Gasto</div>
-          </div>
-          <div class="stat-card">
-            <div id="uniqueCategories" class="stat-number">0</div>
-            <div class="stat-label">Categorias</div>
-          </div>
-          <div class="stat-card">
-            <div id="recentPurchases" class="stat-number">0</div>
-            <div class="stat-label">Últimos 30 dias</div>
-          </div>
-        </section>
-        <section class="filters">
-          <div class="filter-group">
-            <label for="categoryFilter">Categoria</label>
-            <select id="categoryFilter"></select>
-          </div>
-          <div class="filter-group">
-            <label for="sortBy">Ordenar</label>
-            <select id="sortBy">
-              <option value="recent">Mais Recentes</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="searchFilter">Pesquisar</label>
-            <input id="searchFilter" type="text" placeholder="Nome..." />
-          </div>
-        </section>
-        <div id="emptyState" class="empty-state">Nenhum item no inventário.</div>
-        <div id="inventoryGrid" class="inventory-grid"></div>
-      </div>
-    </main>
-    <!-- Pack Overlay -->
-    <div id="packOverlay" aria-hidden="true">
-      <div class="pack-stage">
-        <div class="pack-flare"></div>
-        <div class="pack-rays"></div>
-        <div class="pack-card">
-          <img id="packStageImg" class="pack-card-img" src="../assets/versocarta.svg" alt="Pack" />
-          <div class="pack-card-glow"></div>
-          <div class="pack-flash" id="packFlash"></div>
-          <div class="pack-final" id="packFinal">
-            <div id="packConfirm" class="pack-confirm">
-              <h3>Abrir este Pack?</h3>
-              <div class="pack-confirm-actions">
-                <button id="packConfirmYes">Sim</button>
-                <button id="packConfirmNo">Não</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="packBlocker"></div>
-    <div id="fullFlash"></div>
-    <!-- Card Reveal Overlay -->
-    <div id="cardRevealOverlay">
-      <div class="card-reveal-stage">
-        <div id="cardRevealViewport" class="card-reveal-view"></div>
-      </div>
-    </div>
+
     <!-- O JS está em inventario-scripts.js -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+      import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
+        authDomain: "crmdaneon.firebaseapp.com",
+        projectId: "crmdaneon",
+        storageBucket: "crmdaneon.firebasestorage.app",
+        messagingSenderId: "564595832938",
+        appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
+        measurementId: "G-D3G4M9F17R",
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const sessRaw = localStorage.getItem('bn.currentUser');
+      let sess = null;
+      let alunoData = null;
+      console.log('[INVENTARIO] Conteúdo bruto do localStorage.bn.currentUser:', sessRaw);
+      try {
+        sess = JSON.parse(sessRaw);
+        console.log('[INVENTARIO] Sessão após parse:', sess);
+      } catch (e) {
+        console.log('[INVENTARIO] Erro ao fazer parse da sessão:', e);
+      }
+      const userId = sess?.user;
+      console.log('[INVENTARIO] userId usado para buscar no Firebase:', userId);
+      if (userId) {
+        const alunosCol = collection(db, "alunos");
+        console.log('[INVENTARIO] Referência da coleção alunos:', alunosCol);
+        const userQuery = query(alunosCol, where("user", "==", userId));
+        console.log('[INVENTARIO] Query montada:', userQuery);
+        getDocs(userQuery).then(snap => {
+          console.log('[INVENTARIO] Resultado da busca no Firebase:', snap);
+          if (!snap.empty) {
+            alunoData = snap.docs[0].data();
+            console.log('[INVENTARIO] Dados do aluno do Firebase:', alunoData);
+          } else {
+            console.log('[INVENTARIO] Aluno não encontrado no Firebase para userId:', userId);
+          }
+        });
+      } else {
+        console.log('[INVENTARIO] Usuário não logado ou sessão inválida.');
+      }
+    </script>
     <script type="module" src="scripts/inventario-scripts.js"></script>
     <!-- Os utilitários e funções JS já estão disponíveis via inventario-scripts.js -->
   </body>

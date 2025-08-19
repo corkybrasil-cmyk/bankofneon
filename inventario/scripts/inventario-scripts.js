@@ -1,27 +1,5 @@
-console.log("[INV] inventario-scripts.js carregado");
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("[INV] DOMContentLoaded (scripts)");
-});
-console.log("[INV] Iniciando fluxo principal do inventário");
-console.log("[INV] Chamando initializeInventario");
-console.log("[INV] Entrou em loadInventory");
-// Os logs de userDocId foram movidos para dentro do escopo correto em loadInventory()
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-import {
-  getAuth,
-  signInAnonymously,
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-  addDoc,
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
@@ -33,246 +11,136 @@ const firebaseConfig = {
   measurementId: "G-D3G4M9F17R",
 };
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Estado da página
+
+let paginaAtual = 1;
+let itensPorPagina = 10;
+let inventario = [];
+let categorias = [];
+let subcategorias = [];
+let filtroCategoria = '';
+let filtroSubcategoria = '';
+let ordenacao = 'name';
+let alunoId = null;
+
+// Recupera id do aluno da sessão
 try {
-  getAnalytics(app);
-} catch {}
-const auth = getAuth(app);
-async function anonAuth() {
-  try {
-    await signInAnonymously(auth);
-    console.log("[INV] Autenticado anonimamente UID=", auth.currentUser?.uid);
-  } catch (e) {
-    console.warn("[INV] Falha auth anon:", e.message);
+  const sessRaw = localStorage.getItem('bn.currentUser');
+  if (sessRaw) {
+    const sess = JSON.parse(sessRaw);
+    alunoId = sess.user || null;
   }
-}
-anonAuth();
-let db;
-try {
-  db = getFirestore(app, "bancodaneondb");
-  console.log("[INV] Firestore OK (bancodaneondb)");
-} catch {
-  db = getFirestore(app);
-  console.log("[INV] Firestore fallback (default)");
-}
+} catch {}
 
 // Elementos
-function getRequiredEl(id) {
-  const el = document.getElementById(id);
-  if (!el) {
-    console.error(`[INV] Elemento obrigatório não encontrado: #${id}`);
-    const unauthEl = document.getElementById("unauth");
-    if (unauthEl) {
-      unauthEl.classList.remove("hidden");
-      unauthEl.textContent = `Erro: Elemento obrigatório não encontrado: #${id}`;
-    }
-    throw new Error(`[INV] Elemento obrigatório não encontrado: #${id}`);
-  }
-  return el;
-}
-const unauthEl = document.getElementById("unauth");
-const contentEl = getRequiredEl("content");
-const msgEl = getRequiredEl("msg");
-const errEl = getRequiredEl("err");
-const inventoryGrid = getRequiredEl("inventoryGrid");
-const emptyState = getRequiredEl("emptyState");
-const totalItems = getRequiredEl("totalItems");
-const totalSpent = getRequiredEl("totalSpent");
-const uniqueCategories = getRequiredEl("uniqueCategories");
-const recentPurchases = getRequiredEl("recentPurchases");
-const categoryFilter = getRequiredEl("categoryFilter");
-const sortBy = getRequiredEl("sortBy");
-const searchFilter = getRequiredEl("searchFilter");
-const btnMenu = document.getElementById("btnMenu");
-const sidebar = document.getElementById("sidebar");
-const sidebarOverlay = document.getElementById("sidebarOverlay");
-const btnCloseSidebar = document.getElementById("btnCloseSidebar");
+const kpiTotalItems = document.getElementById('kpi-total-items').querySelector('.kpi-value');
+const kpiTotalValue = document.getElementById('kpi-total-value').querySelector('.kpi-value');
+const kpiUniqueSubcats = document.getElementById('kpi-unique-subcats').querySelector('.kpi-value');
+const grid = document.getElementById('inventario-grid');
+const filterCategory = document.getElementById('filter-category');
+const filterSubcategory = document.getElementById('filter-subcategory');
+const orderBySelect = document.getElementById('order-by');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const paginaAtualEl = document.getElementById('pagina-atual');
 
-// Sessão
-let sessRaw = localStorage.getItem("bn.currentUser");
-if (!sessRaw) {
-  if (unauthEl) {
-    unauthEl.classList.remove("hidden");
-    unauthEl.textContent = "Erro: Nenhuma sessão encontrada. Faça login novamente.";
-  }
-  throw new Error("[INV] Nenhuma sessão encontrada em localStorage.bn.currentUser");
-}
-let sess = null;
-try {
-  sess = JSON.parse(sessRaw);
-} catch {
-  sess = null;
-}
-function setupEventListeners() {
-  if (categoryFilter) categoryFilter.onchange = filterInventory;
-  if (sortBy) sortBy.onchange = filterInventory;
-  if (searchFilter) searchFilter.oninput = filterInventory;
-}
-
-async function loadInventory() {
-  console.log("[INV] Iniciando loadInventory");
-  try {
-    // Buscar docId do aluno pelo campo user
-    const alunosCol = collection(db, "alunos");
-    let userDocId = null;
-    if (sess?.user) {
-      console.log("[INV] Buscando docId do aluno por user:", sess.user);
-      const userQuery = query(alunosCol, where("user", "==", sess.user));
-      const userSnap = await getDocs(userQuery);
-      console.log(
-        '[INV] Query alunos por campo "user" =',
-        sess.user,
-        "docs:",
-        userSnap.size
-      );
-      if (!userSnap.empty) {
-        userDocId = userSnap.docs[0].id;
-      }
-    }
-    if (!userDocId) {
-      showError("Usuário não encontrado.");
-      return;
-    }
-    console.log("[INV] userDocId resolvido:", userDocId);
-    // Buscar itens do inventário do aluno
-    const invCol = collection(db, "inventario", userDocId, "inventarioAluno");
-    let q = query(invCol, where("status", "==", "active"));
-    let snap = await getDocs(q);
-    console.log("[INV] Itens com status=active:", snap.size);
-    purchases = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderInventory();
-    if (uniqueCategories) {
-      const cats = new Set(purchases.map((i) => i.category));
-      uniqueCategories.textContent = cats.size;
-    }
-    if (recentPurchases) {
-      const ref = new Date();
-      ref.setDate(ref.getDate() - 30);
-      const recent = purchases.filter(
-        (i) =>
-          i.lastPurchaseDate &&
-          i.lastPurchaseDate.toDate &&
-          i.lastPurchaseDate.toDate() > ref
-      );
-      const cnt = recent.reduce((s, i) => s + (i.quantity || 1), 0);
-      recentPurchases.textContent = cnt;
-    }
-  } catch (e) {
-    showError("Erro ao carregar inventário: " + e.message);
-    console.error("[INV] loadInventory erro:", e);
-  }
-}
-
-function renderInventory() {
-  if (!inventoryGrid) return;
-  if (purchases.length === 0) {
-    inventoryGrid.classList.add("hidden");
-    emptyState.classList.remove("hidden");
-    console.log("[INV] Nenhum item no inventário, mostrando emptyState.");
+// Busca inventário paginado e filtrado
+async function fetchInventory() {
+  if (!alunoId) {
+    grid.innerHTML = '<div class="inventory-card">Sessão inválida ou usuário não encontrado.</div>';
     return;
   }
-  emptyState.classList.add("hidden");
-  inventoryGrid.classList.remove("hidden");
-  inventoryGrid.innerHTML = "";
-  purchases.forEach((item) => {
-    const cardEl = document.createElement("div");
-    cardEl.className = "inventory-item";
-    // Topo: nome e categoria
-    const topDiv = document.createElement("div");
-    topDiv.className = "item-top";
-    const nameDiv = document.createElement("div");
-    nameDiv.className = "basic-name";
-    nameDiv.textContent = item.productName;
-    const catDiv = document.createElement("div");
-    catDiv.className = "basic-cat";
-    catDiv.textContent = item.category;
-    topDiv.appendChild(nameDiv);
-    topDiv.appendChild(catDiv);
+  // Busca o id do documento do aluno
+  const alunosCol = collection(db, "alunos");
+  const userQuery = query(alunosCol, where("user", "==", alunoId));
+  const userSnap = await getDocs(userQuery);
+  if (userSnap.empty) {
+    grid.innerHTML = '<div class="inventory-card">Aluno não encontrado.</div>';
+    return;
+  }
+  const userDocId = userSnap.docs[0].id;
+  // Busca inventário do aluno
+  let invCol = collection(db, "inventario", userDocId, "inventarioAluno");
+  let filters = [];
+  if (filtroCategoria) filters.push(where("category", "==", filtroCategoria));
+  if (filtroSubcategoria) filters.push(where("subcategory", "==", filtroSubcategoria));
+  filters.push(orderBy(ordenacao));
+  filters.push(limit(itensPorPagina));
+  let q = query(invCol, ...filters);
+  const snap = await getDocs(q);
+  inventario = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  renderKPIs();
+  renderGrid();
+  renderPaginacao();
+  renderFiltros();
+}
 
-    // Meio: imagem
-    const imageDiv = document.createElement("div");
-    imageDiv.className = "item-image-wrapper";
-    let imageEl;
-    if (item.imageUrl) {
-      imageEl = document.createElement("img");
-      imageEl.className = "item-image";
-      imageEl.src = item.imageUrl;
-      imageEl.alt = item.productName;
-    } else {
-      imageEl = document.createElement("div");
-      imageEl.className = "item-image";
-      imageEl.textContent = "📦";
-    }
-    imageDiv.appendChild(imageEl);
-    // Base: subcategoria e quantidade
-    const bottomDiv = document.createElement("div");
-    bottomDiv.className = "item-bottom";
-    const subDiv = document.createElement("div");
-    subDiv.className = "basic-sub";
-    subDiv.textContent = item.subcategory || "";
-    const qtyDiv = document.createElement("div");
-    qtyDiv.className = "basic-qty";
-    qtyDiv.textContent = `Qtd: ${item.quantity || 1}`;
-    bottomDiv.appendChild(subDiv);
-    bottomDiv.appendChild(qtyDiv);
-    // Monta o card
-    cardEl.appendChild(topDiv);
-    cardEl.appendChild(imageDiv);
-    cardEl.appendChild(bottomDiv);
-    cardEl.onclick = () => openItemModal(item);
-    inventoryGrid.appendChild(cardEl);
+function renderKPIs() {
+  kpiTotalItems.textContent = inventario.length;
+  const totalValue = inventario.reduce((sum, item) => sum + (item.value || 0), 0);
+  kpiTotalValue.textContent = `N$ ${totalValue.toFixed(2)}`;
+  const subcats = new Set(inventario.map(i => i.subcategory));
+  kpiUniqueSubcats.textContent = subcats.size;
+}
+
+function renderGrid() {
+  grid.innerHTML = '';
+  inventario.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'inventory-card';
+    card.innerHTML = `
+      <div class="item-name">${item.productName || item.name}</div>
+      <div class="item-category">${item.category || ''}</div>
+      <div class="item-subcategory">${item.subcategory || ''}</div>
+      <div class="item-value">N$ ${(item.value || 0).toFixed(2)}</div>
+    `;
+    grid.appendChild(card);
   });
-  modal.classList.add("open");
-  document.body.classList.add("no-scroll");
-
-function closeItemModal() {
-  const modal = document.getElementById("itemModal");
-  if (!modal) return;
-  modal.classList.remove("open");
-  document.body.classList.remove("no-scroll");
 }
-document.addEventListener("click", (e) => {
-  if (e.target.id === "closeItemModal" || e.target.id === "itemModal") {
-    closeItemModal();
+
+function renderPaginacao() {
+  paginaAtualEl.textContent = paginaAtual;
+  btnPrev.disabled = paginaAtual === 1;
+  btnNext.disabled = inventario.length < itensPorPagina;
+}
+
+function renderFiltros() {
+  // Preenche categorias/subcategorias dos itens atuais
+  categorias = Array.from(new Set(inventario.map(i => i.category))).filter(Boolean);
+  subcategorias = Array.from(new Set(inventario.map(i => i.subcategory))).filter(Boolean);
+  filterCategory.innerHTML = '<option value="">Todas categorias</option>' + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+  filterSubcategory.innerHTML = '<option value="">Todas subcategorias</option>' + subcategorias.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+filterCategory.onchange = () => {
+  filtroCategoria = filterCategory.value;
+  paginaAtual = 1;
+  fetchInventory();
+};
+filterSubcategory.onchange = () => {
+  filtroSubcategoria = filterSubcategory.value;
+  paginaAtual = 1;
+  fetchInventory();
+};
+orderBySelect.onchange = () => {
+  ordenacao = orderBySelect.value;
+  paginaAtual = 1;
+  fetchInventory();
+};
+btnPrev.onclick = () => {
+  if (paginaAtual > 1) {
+    paginaAtual--;
+    fetchInventory();
   }
-});
-
-function openImageModal(src, title) {
-  const modal = document.getElementById("imageModal");
-  const img = document.getElementById("imageModalImg");
-  if (!modal || !img) return;
-  img.src = src;
-  img.alt = title || "Imagem";
-  modal.classList.add("open");
-  document.body.classList.add("no-scroll");
-}
-function closeImageModal() {
-  const modal = document.getElementById("imageModal");
-  if (!modal) return;
-  modal.classList.remove("open");
-  document.body.classList.remove("no-scroll");
-}
-document.addEventListener("click", (e) => {
-  if (e.target.id === "closeImageModal" || e.target.id === "imageModal") {
-    closeImageModal();
+};
+btnNext.onclick = () => {
+  if (inventario.length === itensPorPagina) {
+    paginaAtual++;
+    fetchInventory();
   }
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    closeImageModal();
-    closeItemModal();
-  }
-});
+};
 
-function pickCard(rarity, used) {
-  const pool = Object.values(productCatalog).filter(
-    (c) => c.rarity === rarity && !used.has(c.id)
-  );
-  if (pool.length === 0) return null;
-  const card = pool[Math.floor(Math.random() * pool.length)];
-  used.add(card.id);
-  return card;
-}
-
-
-
-}
+// Inicialização
+fetchInventory();

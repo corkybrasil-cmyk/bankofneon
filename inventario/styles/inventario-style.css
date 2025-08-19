@@ -1,3 +1,116 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  margin: 0;
+}
+.inventario-main {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+.inventario-title {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 32px;
+  color: #1a237e;
+  letter-spacing: 2px;
+}
+.inventario-kpis {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+.kpi-card {
+  background: #e3eafc;
+  border-radius: 10px;
+  padding: 24px 32px;
+  box-shadow: 0 1px 8px rgba(26,35,126,0.08);
+  min-width: 180px;
+  text-align: center;
+}
+.kpi-label {
+  font-size: 1.1rem;
+  color: #3949ab;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #1a237e;
+}
+.inventario-filtros {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.inventario-filtros select {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #bdbdbd;
+}
+.inventario-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.inventory-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 8px rgba(26,35,126,0.07);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.inventory-card .item-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #283593;
+  margin-bottom: 6px;
+}
+.inventory-card .item-category {
+  font-size: 1rem;
+  color: #5c6bc0;
+  margin-bottom: 4px;
+}
+.inventory-card .item-subcategory {
+  font-size: 0.95rem;
+  color: #7986cb;
+  margin-bottom: 8px;
+}
+.inventory-card .item-value {
+  font-size: 1.1rem;
+  color: #1a237e;
+  margin-bottom: 4px;
+}
+.inventario-paginacao {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.inventario-paginacao button {
+  padding: 8px 18px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  background: #3949ab;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.inventario-paginacao button:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
 /* Novo layout dos cards do inventário */
 .item-top {
   display: flex;
