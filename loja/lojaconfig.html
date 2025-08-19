@@ -388,19 +388,20 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <div id="juntinhos">
-      <div class="brand">
-        <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
-      </div>
-      <button id="btnMenu" class="menu-btn" title="Menu">
-        <img src="menu.svg" alt="Menu" class="menu-icon" />
-      </button>
-    </div>
-    <div class="header-actions">
-      <a href="dashboard.html" class="btn" style="background:rgba(255,255,255,0.12)">Voltar</a>
-    </div>
-  </div>
+  <div id="header-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('../components/header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          const script = document.createElement('script');
+          script.src = '../components/header-menu.js';
+          document.body.appendChild(script);
+        });
+    });
+  </script>
+  
 
   <!-- Menu lateral -->
   <div id="sidebar" class="sidebar">
@@ -455,7 +456,7 @@
     <div id="unauth" class="card" style="display:none; text-align:center;">
       <h1>Acesso não autorizado</h1>
       <p class="helper">Apenas administradores podem acessar a configuração da loja.</p>
-      <a class="btn" href="index.html">Ir para login</a>
+      <a class="btn" href="../index.html">Ir para login</a>
     </div>
 
     <div id="content" style="display:none;">

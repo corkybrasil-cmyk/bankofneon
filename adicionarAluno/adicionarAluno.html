@@ -25,9 +25,20 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Adicionar novo aluno</h1>
+  <div id="header-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('../components/header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          const script = document.createElement('script');
+          script.src = '../components/header-menu.js';
+          document.body.appendChild(script);
+        });
+    });
+  </script>
+    <!-- header universal já incluso -->
       <p class="helper">Preencha todos os campos e clique em "Adicionar". Ao salvar: quandoRegistrou = serverTimestamp(), saldo = 1000.</p>
       <div class="form">
         <div>

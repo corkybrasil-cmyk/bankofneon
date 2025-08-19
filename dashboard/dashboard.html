@@ -7,7 +7,7 @@
   <link rel="icon" href="logotipo.svg" type="image/svg+xml" />
   <style>
     :root {
-      --primary: #5a039a;
+          --primary: #5a039a;
       --secondary: #b6f902;
       --secondary-700: #8bb601;
       --bg: #f7f7fb;
@@ -62,6 +62,7 @@
     #ocorrencias { min-height: 75vh; }
     .row { display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px; }
     a { color: var(--primary); text-decoration:none; }
+    
     .big { font-size: 24px; font-weight: 800; }
     .muted { color: var(--muted); }
     .pill { display:inline-flex; align-items:center; gap:8px; background: linear-gradient(180deg, var(--secondary), var(--secondary-700)); color: #202420; padding: 6px 12px; border-radius: 999px; font-weight: 700; border: 1px solid rgba(0,0,0,0.06); }
@@ -107,68 +108,20 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <div id="juntinhos">
-      <div class="brand">
-        <a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a>
-      </div>
-      <button id="btnMenu" class="menu-btn" title="Menu">
-        <img src="menu.svg" alt="Menu" class="menu-icon" />
-      </button>
-    </div>
-    <div class="header-actions">
-      <button id="btnLogout" class="btn" style="background:#dc3545;">Sair</button>
-    </div>
-  </div>
-
-  <!-- Menu lateral -->
-  <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-      <h3>Menu</h3>
-      <button id="btnCloseSidebar" class="btn-close">&times;</button>
-    </div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item active">
-        <span class="nav-icon">🏠</span>
-        Dashboard
-      </a>
-      <a href="extrato.html" class="nav-item">
-        <span class="nav-icon">📊</span>
-        Extrato
-      </a>
-      <a href="pix.html" class="nav-item">
-        <span class="nav-icon">💸</span>
-        PIX
-      </a>
-      <a href="loja.html" class="nav-item">
-        <span class="nav-icon">🛍️</span>
-        Loja
-      </a>
-      <a href="inventario.html" class="nav-item">
-        <span class="nav-icon">🎒</span>
-        Meu Inventário
-      </a>
-      <a href="lojaconfig.html" class="nav-item">
-        <span class="nav-icon">⚙️</span>
-        Config Loja
-      </a>
-      <a href="ocorrencias.html" class="nav-item">
-        <span class="nav-icon">⚠️</span>
-        Ocorrências
-      </a>
-      <a href="adicionarAluno.html" class="nav-item">
-        <span class="nav-icon">👤</span>
-        Adicionar Aluno
-      </a>
-      <a href="dev.html" class="nav-item">
-        <span class="nav-icon">🔧</span>
-        Dev
-      </a>
-    </nav>
-  </div>
-
-  <!-- Overlay para fechar o menu -->
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div id="header-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('../components/header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          // Após inserir o header, carrega o JS do menu
+          const script = document.createElement('script');
+          script.src = '../components/header-menu.js';
+          document.body.appendChild(script);
+        });
+    });
+  </script>
   <div class="wrap">
     <div class="card" id="cardProfile">
       <div id="Moacir">

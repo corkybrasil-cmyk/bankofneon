@@ -9,32 +9,19 @@
   </head>
   <body>
 
-    <div class="header">
-      <button id="btnMenu" class="menu-btn" title="Menu">
-        <img src="../assets/menu.svg" alt="Menu" class="menu-icon" />
-      </button>
-      <div class="brand brand-center">
-        <a href="../dashboard/dashboard.html" title="Início" class="logo-link">
-          <img src="../assets/logotipo.svg" alt="Neon" class="logo-img" />
-        </a>
-      </div>
-      <div class="header-actions">
-        <a href="dashboard.html" class="btn btn-ghost">Voltar</a>
-      </div>
-    </div>
-    <aside id="sidebar" class="sidebar" aria-label="Navegação lateral">
-      <div class="sidebar-header">
-        <h3>Menu</h3>
-        <button id="btnCloseSidebar" class="btn-close" aria-label="Fechar">×</button>
-      </div>
-      <nav class="sidebar-nav">
-        <a class="nav-item" href="inventario.html">Inventário</a>
-        <a class="nav-item" href="loja.html">Loja</a>
-        <a class="nav-item" href="extrato.html">Extrato</a>
-        <a class="nav-item" href="dashboard.html">Dashboard</a>
-      </nav>
-    </aside>
-    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <div id="header-container"></div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        fetch('../components/header.html')
+          .then(res => res.text())
+          .then(html => {
+            document.getElementById('header-container').innerHTML = html;
+            const script = document.createElement('script');
+            script.src = '../components/header-menu.js';
+            document.body.appendChild(script);
+          });
+      });
+    </script>
     <main class="wrap">
   <div id="unauth" class="empty-state hidden">Sessão inválida. Faça login novamente.</div>
   <div id="content">

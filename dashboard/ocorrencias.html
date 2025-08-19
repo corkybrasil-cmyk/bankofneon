@@ -36,19 +36,34 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="brand"><a href="dashboard.html" title="Início"><span class="logo-mask" aria-label="Neon"></span></a></div>
-    <div>
-      <a href="dashboard.html" class="btn" style="background:rgba(255,255,255,0.12)">Voltar</a>
-    </div>
-  </div>
+  <div id="header-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('../components/header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          // Verifica se os elementos do menu existem
+          setTimeout(() => {
+            console.log('btnMenu:', document.getElementById('btnMenu'));
+            console.log('sidebar:', document.getElementById('sidebar'));
+            console.log('sidebarOverlay:', document.getElementById('sidebarOverlay'));
+            console.log('btnCloseSidebar:', document.getElementById('btnCloseSidebar'));
+          }, 300);
+          const script = document.createElement('script');
+          script.src = '../components/header-menu.js';
+          document.body.appendChild(script);
+        });
+    });
+  </script>
+  
 
   <div class="wrap">
     <div id="unauth" class="card overlay" style="display:none; text-align:center;">
       <div>
         <h1>Acesso não autorizado</h1>
         <p class="helper">Para ver as ocorrências, faça login.</p>
-        <button class="btn" onclick="window.location.href='index.html'">Ir para o login</button>
+        <button class="btn" onclick="window.location.href='../index.html'">Ir para o login</button>
       </div>
     </div>
 

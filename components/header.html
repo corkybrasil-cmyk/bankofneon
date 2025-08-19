@@ -1,0 +1,77 @@
+<style>
+	.header { background: #5a039a; color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(90,3,154,0.25); }
+	.brand-center { display: flex; align-items: center; justify-content: center; }
+	.logo-img { height: 40px; }
+	.header-actions { display: flex; align-items: center; gap: 20px; }
+	.menu-btn { width: 30px; height: 30px; padding: 0; background: transparent; border: 0; transition: background-color 0.2s ease; display: flex; align-items: center; justify-content: center; }
+	.menu-btn:hover { background: rgba(255,255,255,0.1); }
+	.menu-icon { width: 20px; height: 20px; display: block; filter: brightness(0) invert(1); }
+	.sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100vh; background: #fff; border-right: 1px solid #eee; box-shadow: 4px 0 20px rgba(0,0,0,0.1); transition: left 0.3s ease; z-index: 1000; }
+	.sidebar.open { left: 0; }
+	.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid #eee; }
+	.sidebar-header h3 { margin: 0; color: #5a039a; }
+	.sidebar-nav { padding: 20px 0; }
+	.nav-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; color: #222; text-decoration: none; transition: background-color 0.2s; }
+	.nav-item:hover { background-color: #f6f6f6; }
+	.nav-item.active { background-color: #5a039a; color: #fff; }
+	.nav-icon { font-size: 20px; }
+	.btn-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #5a039a; }
+	.sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); opacity: 0; visibility: hidden; transition: 0.3s; z-index: 900; }
+	.sidebar-overlay.open { opacity: 1; visibility: visible; }
+	.btn-ghost { background: none; border: 1px solid #fff; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; transition: background 0.2s, color 0.2s; }
+	.btn-ghost:hover { background: #fff; color: #5a039a; }
+</style>
+<div class="header">
+	<button id="btnMenu" class="menu-btn" title="Menu">
+		<img src="../assets/menu.svg" alt="Menu" class="menu-icon" />
+	</button>
+	<div class="brand brand-center">
+		<a href="../dashboard/dashboard.html" title="Início" class="logo-link">
+			<img src="../assets/logotipoverde.svg" alt="Neon" class="logo-img" />
+		</a>
+	</div>
+	<div class="header-actions">
+		<a href="../dashboard/dashboard.html" class="btn btn-ghost">Voltar</a>
+	</div>
+</div>
+<aside id="sidebar" class="sidebar" aria-label="Navegação lateral">
+	<div class="sidebar-header">
+		<h3>Menu</h3>
+		<button id="btnCloseSidebar" class="btn-close" aria-label="Fechar">×</button>
+	</div>
+	<nav class="sidebar-nav">
+		<a href="../dashboard/dashboard.html" class="nav-item">
+			<span class="nav-icon">🏠</span>
+			Dashboard
+		</a>
+		<a href="../dashboard/extrato.html" class="nav-item">
+			<span class="nav-icon">📊</span>
+			Extrato
+		</a>
+		<a href="../dashboard/pix.html" class="nav-item">
+			<span class="nav-icon">💸</span>
+			PIX
+		</a>
+		<a href="../loja/loja.html" class="nav-item">
+			<span class="nav-icon">🛍️</span>
+			Loja
+		</a>
+		<a href="../inventario/inventario.html" class="nav-item">
+			<span class="nav-icon">🎒</span>
+			Meu Inventário
+		</a>
+		<a href="../loja/lojaconfig.html" class="nav-item">
+			<span class="nav-icon">⚙️</span>
+			Config Loja
+		</a>
+		<a href="../dashboard/ocorrencias.html" class="nav-item">
+			<span class="nav-icon">⚠️</span>
+			Ocorrências
+		</a>
+		<a href="../adicionarAluno/adicionarAluno.html" class="nav-item">
+			<span class="nav-icon">👤</span>
+			Adicionar Aluno
+		</a>
+	</nav>
+</aside>
+<div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>

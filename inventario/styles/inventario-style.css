@@ -1,3 +1,23 @@
+/* Novo layout dos cards do inventário */
+.item-top {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.item-image-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.item-bottom {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 8px;
+}
 /* Overlay de informações da carta revelada */
 .card-reveal-info {
   position: absolute;
@@ -69,7 +89,6 @@ body {
 .brand-center {
   margin: 0 auto;
 }
-}
 .brand {
 /* Área da marca/logo */
   display: flex;
@@ -101,8 +120,6 @@ body {
 .logo-img svg,
 .logo-img path {
   fill: var(--secondary) !important;
-}
-}
 }
 
 /* Botão fantasma para voltar */
