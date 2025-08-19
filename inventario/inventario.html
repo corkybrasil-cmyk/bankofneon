@@ -1,41 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Meu Inventário • Banco da Neon</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Meu Inventário • Banco da Neon</title>
   <link rel="icon" href="../assets/logotipo.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles/inventario-style.css" />
-  </head>
-  <body>
+  <link rel="stylesheet" href="styles/inventario-styles.css">
+</head>
+<body>
+  <div id="header-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('../components/header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          // Após inserir o header, carrega o JS do menu
+          const script = document.createElement('script');
+          script.src = '../components/header-menu.js';
+          document.body.appendChild(script);
+        });
+    });
+  </script>
 
-    <div id="header-container"></div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        fetch('../components/header.html')
-          .then(res => res.text())
-          .then(html => {
-            document.getElementById('header-container').innerHTML = html;
-            const script = document.createElement('script');
-            script.src = '../components/header-menu.js';
-            document.body.appendChild(script);
-          });
-      });
-    </script>
-      <main class="inventario-main">
-        <h1 id="tituloInventario" class="inventario-title">Meu inventário</h1>
-        <section class="inventario-kpis">
-          <div class="kpi-card" id="kpi-total-items">
-            <div class="kpi-label">Total de itens</div>
-            <div class="kpi-value">0</div>
+  <div class="wrap">
+    <h1 class="page-title">Meu Inventário</h1>
+    
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Quantidade de Itens</div>
+        <div class="kpi-value" id="kpiQuantidade">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Valor Total Gasto</div>
+        <div class="kpi-value" id="kpiValorTotal">N$ 0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Itens Diferentes</div>
+        <div class="kpi-value" id="kpiItensDiferentes">0</div>
+      </div>
+    </div>
+
+    <!-- Filtros e Ordenação -->
+    <div class="filters-section">
+      <div class="filters-row">
+        <select id="filtroCategoria" class="filter-select">
+          <option value="">Todas as categorias</option>
+        </select>
+        <select id="filtroSubcategoria" class="filter-select">
+          <option value="">Todas as subcategorias</option>
+        </select>
+        <select id="ordenacao" class="filter-select">
+          <option value="nome">Ordenar por Nome</option>
+          <option value="valor">Ordenar por Valor</option>
+          <option value="quantidade">Ordenar por Quantidade</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading">
+      Carregando inventário...
+    </div>
+
+    <!-- Lista de Inventário -->
+    <div id="inventarioGrid" class="inventario-grid" style="display: none;">
+      <!-- Os cards serão inseridos aqui via JavaScript -->
+    </div>
+
+    <!-- Paginação -->
+    <div id="paginacao" class="pagination" style="display: none;">
+      <button id="btnPrevious" class="pagination-btn" disabled>Anterior</button>
+      <span id="paginaInfo" class="pagination-info">Página 1 de 1</span>
+      <button id="btnNext" class="pagination-btn" disabled>Próximo</button>
+    </div>
+  </div>
+
+  <!-- Modal estilo Facebook -->
+  <div id="modalItem" class="fb-modal-overlay">
+    <div class="fb-modal">
+      <!-- Botão de fechar -->
+      <button id="btnCloseModal" class="fb-close-btn">&times;</button>
+      
+      <!-- Container principal -->
+      <div class="fb-modal-content">
+        <!-- Área da imagem (lado esquerdo - 2/3 da tela) -->
+        <div class="fb-image-section">
+          <img id="modalImagem" src="" alt="Imagem do item" />
+        </div>
+        
+        <!-- Área das informações (lado direito - 1/3 da tela) -->
+        <div class="fb-info-section">
+          <div class="fb-info-header">
+            <h2 id="modalNome">Nome do Item</h2>
+            <div class="fb-category" id="modalCategoria">Categoria</div>
           </div>
-          <div class="kpi-card" id="kpi-total-value">
-            <div class="kpi-label">Valor total</div>
-            <div class="kpi-value">N$ 0,00</div>
-          </div>
-          <div class="kpi-card" id="kpi-unique-subcats">
-            <div class="kpi-label">Subcategorias únicas</div>
-            <div class="kpi-value">0</div>
+          
+          <div class="fb-info-content">
+            <div class="fb-info-item">
+              <span class="fb-label">Subcategoria</span>
+              <span class="fb-value" id="modalSubcategoria">-</span>
+            </div>
+            
+            <div class="fb-info-item">
+              <span class="fb-label">Preço</span>
+              <span class="fb-value fb-price" id="modalPreco">-</span>
+            </div>
+            
+            <div class="fb-info-item">
+              <span class="fb-label">Quantidade</span>
+              <span class="fb-value" id="modalQuantidade">-</span>
+            </div>
+            
+            <div class="fb-info-item fb-description">
+              <span class="fb-label">Descrição</span>
+              <p class="fb-description-text" id="modalDescricao">-</p>
+            </div>
+
+            <!-- Botão de ação abaixo das informações -->
+            <button id="usar">Usar</button>
           </div>
         </section>
         <section class="inventario-filtros">
@@ -56,55 +140,11 @@
           <span id="pagina-atual">1</span>
           <button id="btn-next" disabled>Próxima</button>
         </div>
-      </main>
-  <div id="unauth" class="empty-state hidden">Sessão inválida. Faça login novamente.</div>
+      </div>
+    </div>
+  </div>
 
-    <!-- O JS está em inventario-scripts.js -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-      import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-      const firebaseConfig = {
-        apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
-        authDomain: "crmdaneon.firebaseapp.com",
-        projectId: "crmdaneon",
-        storageBucket: "crmdaneon.firebasestorage.app",
-        messagingSenderId: "564595832938",
-        appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
-        measurementId: "G-D3G4M9F17R",
-      };
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const sessRaw = localStorage.getItem('bn.currentUser');
-      let sess = null;
-      let alunoData = null;
-      console.log('[INVENTARIO] Conteúdo bruto do localStorage.bn.currentUser:', sessRaw);
-      try {
-        sess = JSON.parse(sessRaw);
-        console.log('[INVENTARIO] Sessão após parse:', sess);
-      } catch (e) {
-        console.log('[INVENTARIO] Erro ao fazer parse da sessão:', e);
-      }
-      const userId = sess?.user;
-      console.log('[INVENTARIO] userId usado para buscar no Firebase:', userId);
-      if (userId) {
-        const alunosCol = collection(db, "alunos");
-        console.log('[INVENTARIO] Referência da coleção alunos:', alunosCol);
-        const userQuery = query(alunosCol, where("user", "==", userId));
-        console.log('[INVENTARIO] Query montada:', userQuery);
-        getDocs(userQuery).then(snap => {
-          console.log('[INVENTARIO] Resultado da busca no Firebase:', snap);
-          if (!snap.empty) {
-            alunoData = snap.docs[0].data();
-            console.log('[INVENTARIO] Dados do aluno do Firebase:', alunoData);
-          } else {
-            console.log('[INVENTARIO] Aluno não encontrado no Firebase para userId:', userId);
-          }
-        });
-      } else {
-        console.log('[INVENTARIO] Usuário não logado ou sessão inválida.');
-      }
-    </script>
-    <script type="module" src="scripts/inventario-scripts.js"></script>
-    <!-- Os utilitários e funções JS já estão disponíveis via inventario-scripts.js -->
-  </body>
+  <!-- Scripts -->
+  <script src="scripts/inventario-scripts.js"></script>
+</body>
 </html>

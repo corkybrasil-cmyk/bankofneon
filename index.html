@@ -169,14 +169,25 @@
         }
         // OK -> guarda sessão simples no localStorage e redireciona
         try {
-          localStorage.setItem("bn.currentUser", JSON.stringify({
-            user: userDoc.user,
-            firstName: userDoc.firstName || null,
-            lastName: userDoc.lastName || null,
-            saldo: userDoc.saldo ?? null,
-            classe: userDoc.classe || null,
-            idAluno: userDoc.idAluno || null
-          }));
+          // Atualiza o localStorage com a função do inventário
+          if (typeof atualizarUsuarioLogado === 'function') {
+            atualizarUsuarioLogado(userDoc.user, {
+              firstName: userDoc.firstName || null,
+              lastName: userDoc.lastName || null,
+              saldo: userDoc.saldo ?? null,
+              classe: userDoc.classe || null,
+              idAluno: userDoc.idAluno || null
+            });
+          } else {
+            localStorage.setItem("bn.currentUser", JSON.stringify({
+              user: userDoc.user,
+              firstName: userDoc.firstName || null,
+              lastName: userDoc.lastName || null,
+              saldo: userDoc.saldo ?? null,
+              classe: userDoc.classe || null,
+              idAluno: userDoc.idAluno || null
+            }));
+          }
         } catch {}
         // Redireciona sempre para dashboard.html conforme solicitado
         window.location.href = "/dashboard/dashboard.html";
