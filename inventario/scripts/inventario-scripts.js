@@ -30,6 +30,9 @@ class InventarioManager {
       // Inicializar Firebase
       await this.initFirebase();
       
+      // Inicializar Pack Opening Manager
+      await this.loadPackOpeningManager();
+      
       // Carregar dados
       await this.loadData();
       
@@ -40,6 +43,36 @@ class InventarioManager {
       console.error('Erro na inicialização:', error);
       this.showError('Erro ao carregar o inventário. Tente novamente.');
     }
+  }
+
+  async loadPackOpeningManager() {
+    return new Promise((resolve) => {
+      // Verificar se o PackOpeningManager já foi carregado
+      if (window.PackOpeningManager) {
+        this.packOpeningManager = new window.PackOpeningManager(this);
+        console.log('[InventarioManager] PackOpeningManager carregado');
+        resolve();
+      } else {
+        // Aguardar carregamento com timeout
+        let attempts = 0;
+        const maxAttempts = 50; // 5 segundos
+        
+        const checkLoaded = () => {
+          attempts++;
+          if (window.PackOpeningManager) {
+            this.packOpeningManager = new window.PackOpeningManager(this);
+            console.log('[InventarioManager] PackOpeningManager carregado');
+            resolve();
+          } else if (attempts < maxAttempts) {
+            setTimeout(checkLoaded, 100);
+          } else {
+            console.warn('[InventarioManager] PackOpeningManager não carregado - funcionalidade de packs não disponível');
+            resolve();
+          }
+        };
+        checkLoaded();
+      }
+    });
   }
 
   async initFirebase() {
@@ -426,11 +459,22 @@ class InventarioManager {
     
     if (subcategoria.toLowerCase() === 'pack de cartas') {
       console.log('[Inventario] Abrindo pack de cartas');
-      // Aqui será chamada a função de pack opening
-      // PackOpeningManager.openPack(item);
+      
+      // Verificar se o PackOpeningManager está disponível
+      if (this.packOpeningManager) {
+        // Fechar modal antes de abrir pack
+        this.closeModal();
+        
+        // Abrir pack com animação
+        this.packOpeningManager.openPack(item);
+      } else {
+        console.error('[Inventario] PackOpeningManager não disponível');
+        this.showError('Sistema de abertura de packs não disponível. Tente recarregar a página.');
+      }
     } else {
       console.log('[Inventario] Item usado (não é pack de cartas)');
       // Lógica para outros consumíveis
+      this.showSuccess(`Item "${item.productName || item.nome}" usado com sucesso!`);
     }
   }
 
@@ -499,6 +543,52 @@ class InventarioManager {
     `;
     container.style.display = 'block';
     this.showLoading(false);
+  }
+
+  showSuccess(message) {
+    // Criar toast de sucesso
+    const toast = document.createElement('div');
+    toast.className = 'success-toast';
+    toast.innerHTML = `
+      <div class="toast-content">
+        <div class="toast-icon">✅</div>
+        <div class="toast-message">${message}</div>
+      </div>
+    `;
+    
+    // Estilos inline para o toast
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
+      z-index: 10000;
+      animation: toastSlideIn 0.3s ease-out;
+      max-width: 300px;
+    `;
+    
+    const toastContent = toast.querySelector('.toast-content');
+    toastContent.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+      toast.style.animation = 'toastSlideOut 0.3s ease-in forwards';
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
   }
 }
 

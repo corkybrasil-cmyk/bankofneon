@@ -1,0 +1,368 @@
+/* Pack Opening Animation Styles */
+
+/* Popup de Confirmação */
+.pack-confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+}
+
+.pack-confirmation-modal {
+  background: linear-gradient(135deg, #5a039a, #7209b7);
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  border: 2px solid #b6f902;
+  animation: confirmationPopIn 0.3s ease-out;
+}
+
+@keyframes confirmationPopIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pack-confirmation-modal h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  color: #b6f902;
+}
+
+.pack-confirmation-modal p {
+  margin: 10px 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.confirmation-buttons button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirmation-buttons #confirmYes {
+  background: #b6f902;
+  color: #2d0a4e;
+}
+
+.confirmation-buttons #confirmYes:hover {
+  background: #9ed602;
+  transform: translateY(-2px);
+}
+
+.confirmation-buttons #confirmNo {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.confirmation-buttons #confirmNo:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Animação de Abertura do Pack */
+.pack-animation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+}
+
+.pack-animation-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Feixes de Luz */
+.light-beams {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, 
+    rgba(182, 249, 2, 0.3) 0%, 
+    rgba(182, 249, 2, 0.1) 30%, 
+    transparent 70%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  animation: lightPulse 2s ease-in-out infinite;
+}
+
+.light-beams.active {
+  opacity: 1;
+}
+
+.light-beams.flash {
+  animation: lightFlash 0.5s ease-out;
+  background: radial-gradient(circle, 
+    rgba(255, 255, 255, 0.9) 0%, 
+    rgba(182, 249, 2, 0.6) 20%, 
+    transparent 50%
+  );
+}
+
+@keyframes lightPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+@keyframes lightFlash {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
+
+/* Imagem do Pack */
+.pack-image {
+  position: relative;
+  z-index: 2;
+}
+
+.pack-image img {
+  width: 200px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 3px solid #b6f902;
+}
+
+.pack-image.shaking {
+  animation: packShake 0.1s ease-in-out infinite;
+}
+
+@keyframes packShake {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+  75% {
+    transform: translateX(3px) rotate(1deg);
+  }
+}
+
+/* Revelação das Cartas */
+.cards-reveal {
+  position: absolute;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.5s ease-out;
+}
+
+.cards-reveal.revealed {
+  opacity: 1;
+  transform: scale(1);
+  animation: cardsReveal 0.8s ease-out;
+}
+
+@keyframes cardsReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotateY(180deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1) rotateY(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+}
+
+/* Carta Individual */
+.revealed-card {
+  background: linear-gradient(135deg, #2d0a4e, #5a039a);
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  border: 2px solid #b6f902;
+  min-width: 150px;
+  animation: cardFloat 2s ease-in-out infinite;
+}
+
+.revealed-card:nth-child(odd) {
+  animation-delay: 0.2s;
+}
+
+.revealed-card:nth-child(even) {
+  animation-delay: 0.4s;
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.revealed-card img {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(182, 249, 2, 0.3);
+}
+
+.card-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #b6f902;
+}
+
+.card-rarity {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.card-rarity.comum {
+  background: #6c757d;
+  color: white;
+}
+
+.card-rarity.rara {
+  background: #007bff;
+  color: white;
+}
+
+.card-rarity.épica {
+  background: #6f42c1;
+  color: white;
+}
+
+.card-rarity.lendária {
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  color: white;
+  animation: legendaryGlow 2s ease-in-out infinite;
+}
+
+@keyframes legendaryGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .pack-confirmation-modal {
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .confirmation-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .confirmation-buttons button {
+    width: 100%;
+  }
+  
+  .light-beams {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .pack-image img {
+    width: 150px;
+    height: 225px;
+  }
+  
+  .cards-reveal {
+    gap: 10px;
+    padding: 20px;
+  }
+  
+  .revealed-card {
+    min-width: 120px;
+    padding: 10px;
+  }
+  
+  .revealed-card img {
+    width: 80px;
+    height: 112px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cards-reveal {
+    flex-direction: column;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .revealed-card {
+    width: 200px;
+  }
+}

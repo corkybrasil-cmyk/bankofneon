@@ -97,6 +97,26 @@
         </div>
       </div>
     </section>
+
+    <section class="card">
+      <h2>Sistema de Cartas Colecionáveis</h2>
+      <div class="actions">
+        <button id="btnPopularCartas">Popular Loja com 30 Cartas</button>
+        <span style="color:#9fb3c8; font-size:12px;">1 Lendária, 2 Épicas, 3 Raras, 24 Comuns</span>
+      </div>
+      
+      <h3 style="margin:16px 0 8px 0; font-size:16px;">Configurações de Pack Opening</h3>
+      <form style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+        <label>Chance Carta Rara na posição 4 (%)<input type="number" id="chanceRaraCarta4" min="0" max="100" step="1" value="30" /></label>
+        <label>Chance Carta Épica na posição 5 (%)<input type="number" id="chanceEpicaCarta5" min="0" max="100" step="1" value="15" /></label>
+        <label>Chance Carta Lendária na posição 5 (%)<input type="number" id="chanceLendariaCarta5" min="0" max="100" step="1" value="5" /></label>
+      </form>
+      <div class="actions">
+        <button id="btnSalvarConfigCartas">Salvar Configurações</button>
+        <button id="btnCarregarConfigCartas">Carregar Configurações</button>
+      </div>
+      <span id="msgConfigCartas" style="color:var(--muted); font-size:13px; margin-top:8px; display:block;"></span>
+    </section>
   </main>
 
   <div class="modal-overlay" id="modalOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:20;">
@@ -114,6 +134,7 @@
   
 
   <script type="module">
+document.addEventListener('DOMContentLoaded', async () => {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -376,6 +397,220 @@ console.log('[DEV] Script ES module iniciado');
         });
       } else {
         console.log('[DEV] Botão btnReverterInventario não encontrado');
+      }
+
+      // Sistema de Cartas Colecionáveis
+      const btnPopularCartas = document.getElementById('btnPopularCartas');
+      const btnSalvarConfigCartas = document.getElementById('btnSalvarConfigCartas');
+      const btnCarregarConfigCartas = document.getElementById('btnCarregarConfigCartas');
+      const msgConfigCartas = document.getElementById('msgConfigCartas');
+
+      console.log('[DEV-INIT] 🔍 Elementos encontrados:', {
+        btnPopularCartas: btnPopularCartas ? '✅ Encontrado' : '❌ Não encontrado',
+        btnSalvarConfigCartas: btnSalvarConfigCartas ? '✅ Encontrado' : '❌ Não encontrado',
+        btnCarregarConfigCartas: btnCarregarConfigCartas ? '✅ Encontrado' : '❌ Não encontrado',
+        msgConfigCartas: msgConfigCartas ? '✅ Encontrado' : '❌ Não encontrado'
+      });
+
+      // Popular loja com 30 cartas aleatórias
+      if (btnPopularCartas) {
+        console.log('[DEV-INIT] 🎮 Configurando listener para btnPopularCartas...');
+        btnPopularCartas.addEventListener('click', async () => {
+          console.log('[DEV-CARDS] 🚀 Botão popular cartas clicado!');
+          console.log('[DEV-CARDS] 🔄 Chamando popularLojaComCartas...');
+          msgConfigCartas.textContent = 'Populando loja...';
+          try {
+            await popularLojaComCartas(db);
+            console.log('[DEV-CARDS] ✅ popularLojaComCartas executado com sucesso!');
+            msgConfigCartas.textContent = 'Loja populada com 30 cartas!';
+          } catch (error) {
+            console.error('[DEV-CARDS] ❌ Erro ao executar popularLojaComCartas:', error);
+            msgConfigCartas.textContent = 'Erro ao popular loja. Veja console.';
+          }
+        });
+      } else {
+        console.error('[DEV-INIT] ❌ btnPopularCartas não encontrado!');
+      }
+
+      // Salvar configurações de pack opening
+      if (btnSalvarConfigCartas) {
+        console.log('[DEV-INIT] 💾 Configurando listener para btnSalvarConfigCartas...');
+        btnSalvarConfigCartas.addEventListener('click', async () => {
+          console.log('[DEV-PROB] 💾 Iniciando salvamento de probabilidades...');
+          
+          const config = {
+            chanceRaraCarta4: parseInt(document.getElementById('chanceRaraCarta4').value),
+            chanceEpicaCarta5: parseInt(document.getElementById('chanceEpicaCarta5').value),
+            chanceLendariaCarta5: parseInt(document.getElementById('chanceLendariaCarta5').value),
+            ultimaAtualizacao: new Date()
+          };
+          
+          console.log('[DEV-PROB] 📊 Configurações a serem salvas:', config);
+          console.log('[DEV-PROB] 🎯 Validação dos valores:', {
+            chanceRaraCarta4: typeof config.chanceRaraCarta4,
+            chanceEpicaCarta5: typeof config.chanceEpicaCarta5,
+            chanceLendariaCarta5: typeof config.chanceLendariaCarta5,
+            valoresValidos: !isNaN(config.chanceRaraCarta4) && !isNaN(config.chanceEpicaCarta5) && !isNaN(config.chanceLendariaCarta5)
+          });
+          
+          const docPath = 'loja/config/packOpeningConfig/probabilidades';
+          console.log('[DEV-PROB] 📍 Caminho do documento:', docPath);
+          
+          try {
+            const docRef = doc(db, 'loja', 'config', 'packOpeningConfig', 'probabilidades');
+            console.log('[DEV-PROB] 🔗 Document reference criada:', docRef);
+            
+            await setDoc(docRef, config);
+            console.log('[DEV-PROB] ✅ Configurações salvas com sucesso no Firebase!');
+            
+            msgConfigCartas.textContent = 'Configurações salvas com sucesso!';
+            console.log('[DEV-PROB] 🎉 Configurações de pack opening salvas:', config);
+            
+            // Verificar se realmente foi salvo
+            setTimeout(async () => {
+              console.log('[DEV-PROB] 🔍 Verificando se foi salvo...');
+              const verificacao = await getDoc(docRef);
+              if (verificacao.exists()) {
+                console.log('[DEV-PROB] ✅ Verificação: documento existe no Firebase');
+                console.log('[DEV-PROB] 📄 Dados salvos:', verificacao.data());
+              } else {
+                console.log('[DEV-PROB] ❌ Verificação: documento NÃO existe no Firebase');
+              }
+            }, 1000);
+            
+          } catch (error) {
+            console.error('[DEV-PROB] ❌ Erro ao salvar configurações:', error);
+            console.error('[DEV-PROB] 🔍 Detalhes do erro:', {
+              code: error.code,
+              message: error.message,
+              stack: error.stack
+            });
+            msgConfigCartas.textContent = 'Erro ao salvar configurações.';
+          }
+        });
+      } else {
+        console.error('[DEV-INIT] ❌ btnSalvarConfigCartas não encontrado!');
+      }
+
+      // Carregar configurações de pack opening
+      if (btnCarregarConfigCartas) {
+        console.log('[DEV-INIT] 📂 Configurando listener para btnCarregarConfigCartas...');
+        btnCarregarConfigCartas.addEventListener('click', async () => {
+          console.log('[DEV-PROB] 📂 Iniciando carregamento de probabilidades...');
+          
+          const docPath = 'loja/config/packOpeningConfig/probabilidades';
+          console.log('[DEV-PROB] 📍 Caminho do documento:', docPath);
+          
+          try {
+            const docRef = doc(db, 'loja', 'config', 'packOpeningConfig', 'probabilidades');
+            console.log('[DEV-PROB] 🔗 Document reference criada:', docRef);
+            
+            const configDoc = await getDoc(docRef);
+            console.log('[DEV-PROB] 📊 Documento obtido:', configDoc);
+            console.log('[DEV-PROB] 🔍 Documento existe?', configDoc.exists());
+            
+            if (configDoc.exists()) {
+              const config = configDoc.data();
+              console.log('[DEV-PROB] 📄 Dados carregados do Firebase:', config);
+              
+              document.getElementById('chanceRaraCarta4').value = config.chanceRaraCarta4 || 30;
+              document.getElementById('chanceEpicaCarta5').value = config.chanceEpicaCarta5 || 15;
+              document.getElementById('chanceLendariaCarta5').value = config.chanceLendariaCarta5 || 5;
+              
+              console.log('[DEV-PROB] ✅ Valores aplicados aos inputs:', {
+                chanceRaraCarta4: document.getElementById('chanceRaraCarta4').value,
+                chanceEpicaCarta5: document.getElementById('chanceEpicaCarta5').value,
+                chanceLendariaCarta5: document.getElementById('chanceLendariaCarta5').value
+              });
+              
+              msgConfigCartas.textContent = 'Configurações carregadas!';
+              console.log('[DEV-PROB] 🎉 Configurações carregadas com sucesso:', config);
+            } else {
+              console.log('[DEV-PROB] ⚠️ Nenhuma configuração encontrada no Firebase');
+              msgConfigCartas.textContent = 'Nenhuma configuração encontrada.';
+              
+              // Mostrar valores padrão que estão sendo usados
+              console.log('[DEV-PROB] 🔧 Usando valores padrão:', {
+                chanceRaraCarta4: 30,
+                chanceEpicaCarta5: 15,
+                chanceLendariaCarta5: 5
+              });
+            }
+          } catch (error) {
+            console.error('[DEV-PROB] ❌ Erro ao carregar configurações:', error);
+            console.error('[DEV-PROB] 🔍 Detalhes do erro:', {
+              code: error.code,
+              message: error.message,
+              stack: error.stack
+            });
+            msgConfigCartas.textContent = 'Erro ao carregar configurações.';
+          }
+        });
+      } else {
+        console.error('[DEV-INIT] ❌ btnCarregarConfigCartas não encontrado!');
+      }
+
+      // Função para popular a loja com cartas
+      async function popularLojaComCartas(db) {
+        console.log('[DEV-CARDS] 🎮 Iniciando população da loja com cartas...');
+        console.log('[DEV-CARDS] 📊 Database object:', db);
+        
+        const raridades = ['Comum', 'Rara', 'Épica', 'Lendária'];
+        const quantidades = [24, 3, 2, 1]; // 24 comuns, 3 raras, 2 épicas, 1 lendária
+        
+        console.log('[DEV-CARDS] 🎯 Configuração:', { raridades, quantidades });
+        
+        let cartaId = 1;
+        let cartasCriadas = 0;
+        let cartasComErro = 0;
+        
+        for (let i = 0; i < raridades.length; i++) {
+          const raridade = raridades[i];
+          const quantidade = quantidades[i];
+          
+          console.log(`[DEV-CARDS] 🃏 Processando raridade: ${raridade} (${quantidade} cartas)`);
+          
+          for (let j = 0; j < quantidade; j++) {
+            const carta = {
+              nome: `Carta ${raridade} ${j + 1}`,
+              categoria: 'Colecionáveis',
+              subcategoria: `Cartas ${raridade}s`,
+              raridade: raridade,
+              preco: raridade === 'Comum' ? 100 : raridade === 'Rara' ? 500 : raridade === 'Épica' ? 1000 : 2000,
+              descricao: `Uma carta ${raridade.toLowerCase()} da coleção especial.`,
+              imagem: `https://via.placeholder.com/300x400/333/fff?text=Carta+${raridade}+${j + 1}`,
+              ativo: true,
+              criadoEm: new Date()
+            };
+            
+            const docPath = `loja/config/produtos/carta_${cartaId}`;
+            console.log(`[DEV-CARDS] 📝 Tentando criar carta ID ${cartaId}: ${carta.nome}`);
+            console.log(`[DEV-CARDS] 📍 Caminho do documento: ${docPath}`);
+            console.log(`[DEV-CARDS] 📄 Dados da carta:`, carta);
+            
+            try {
+              const docRef = doc(db, 'loja', 'config', 'produtos', `carta_${cartaId}`);
+              console.log(`[DEV-CARDS] 🔗 Document reference criada:`, docRef);
+              
+              await setDoc(docRef, carta);
+              console.log(`[DEV-CARDS] ✅ Carta criada com sucesso: ${carta.nome} (ID: carta_${cartaId})`);
+              cartasCriadas++;
+              cartaId++;
+            } catch (error) {
+              console.error(`[DEV-CARDS] ❌ Erro ao criar carta ${carta.nome}:`, error);
+              console.error(`[DEV-CARDS] 🔍 Detalhes do erro:`, {
+                code: error.code,
+                message: error.message,
+                stack: error.stack
+              });
+              cartasComErro++;
+            }
+          }
+        }
+        
+        console.log(`[DEV-CARDS] 🏁 Processo finalizado!`);
+        console.log(`[DEV-CARDS] 📊 Resumo: ${cartasCriadas} criadas, ${cartasComErro} com erro`);
+        alert(`Cartas criadas: ${cartasCriadas}\nErros: ${cartasComErro}\nVeja o console para detalhes.`);
       }
     });
   } catch (e) {
