@@ -55,10 +55,24 @@
     </section>
 
     <section class="card" id="q4">
-      <h2>Debug Firebase</h2>
-      <div class="grid-compact" id="debugButtons"></div>
+      <h2>Debug Site</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button id="btnBackupInventario" style="margin:8px 0;background:#ffe8b3;color:#0b0f14;font-weight:bold;border:2px solid #223042;border-radius:10px;padding:10px 18px;">Backup Inventário (localStorage)</button>
+        <button id="btnMigrarInventario" style="margin:8px 0;background:#1ee1a8;color:#0b0f14;font-weight:bold;border:2px solid #223042;border-radius:10px;padding:10px 18px;">Migrar Inventário (novo formato)</button>
+        <button id="btnReverterInventario" style="margin:8px 0;background:#ff6b6b;color:#fff;font-weight:bold;border:2px solid #223042;border-radius:10px;padding:10px 18px;">Reverter Inventário (restaurar backup)</button>
+      </div>
     </section>
-    <section class="card" id="card-ocorrencias-config">
+    <section class="card" id="card-raridades-config">
+      <h2>Config • Probabilidades de Cartas</h2>
+      <form id="formRaridades" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+        <label>Comum (%)<input type="number" id="probComum" min="0" max="100" step="1" value="50" /></label>
+        <label>Rara (%)<input type="number" id="probRara" min="0" max="100" step="1" value="30" /></label>
+        <label>Épica (%)<input type="number" id="probEpica" min="0" max="100" step="1" value="15" /></label>
+        <label>Lendária (%)<input type="number" id="probLendaria" min="0" max="100" step="1" value="5" /></label>
+      </form>
+      <button id="btnSalvarRaridades">Salvar Probabilidades</button>
+      <span id="msgRaridades" style="color:var(--muted); font-size:13px; margin-top:8px; display:block;"></span>
+    </section>
       <h2>Config • Ocorrências (custoFaltas)</h2>
       <div id="ocorrencias-config" style="display:grid; grid-template-columns: 1fr; gap:10px;">
         <div id="cfg-leve" style="display:flex; align-items:center; gap:10px;">
@@ -100,11 +114,15 @@
   
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, deleteDoc, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, deleteDoc, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+console.log('[DEV] Script ES module iniciado');
+
+(async () => {
+  try {
     const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
       authDomain: "crmdaneon.firebaseapp.com",
@@ -114,13 +132,12 @@
       appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
       measurementId: "G-D3G4M9F17R"
     };
-
     const app = initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch {}
     try { await signInAnonymously(getAuth(app)); } catch {}
-
     let db; try { db = getFirestore(app, "bancodaneondb"); } catch { db = getFirestore(app); }
     const alunosCol = collection(db, "alunos");
+    console.log('[DEV] Firebase inicializado');
 
     // Reuso de lógica essencialmente igual ao app original (Q2 a Q4)
     const $ = (s) => document.querySelector(s);
@@ -181,19 +198,67 @@
       finally { btnRefreshDelete.disabled = false; hideSpinner(); }
     });
 
-    // Debug essencial (subset)
-    const debugArea = $("#debugButtons");
-    const debugActions = [
-      { id: "dbg1", label: "Conectividade", hint: "Checa online e ping API", fn: async () => { console.log("navigator.onLine=", navigator.onLine); try { const r = await fetch("https://firestore.googleapis.com/.well-known/apikey", { method: "HEAD" }); console.log("Ping status:", r.status); } catch (e) { console.log("Ping falhou:", e?.message || e); } } },
-      { id: "dbg2", label: "Listar alunos", hint: "Obtém e lista alunos", fn: async () => { try { const arr = await fetchAlunos(); console.log(arr); } catch (e) { console.error(e); } } },
-      { id: "dbg3", label: "Estado auth", hint: "Mostra auth anônima", fn: () => { console.log("Auth anônima em uso."); } },
-      { id: "dbg4", label: "Usuário logado", hint: "Exibe bn.currentUser do localStorage", fn: () => { try { console.log("bn.currentUser:", JSON.parse(localStorage.getItem("bn.currentUser")||"null")); } catch(e) { console.log("Erro lendo sessão:", e); } } }
-    ];
-    debugActions.forEach(({ id, label, hint, fn }) => { const b = document.createElement("button"); b.id = id; b.textContent = label; b.title = hint || label; b.setAttribute("aria-label", hint || label); b.addEventListener("click", fn); debugArea.appendChild(b); });
-
-    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
-    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
-
+    // MIGRAÇÃO DE ITENS DO INVENTÁRIO PARA NOVO FORMATO
+    async function migrateInventario(userDocId) {
+      console.log('[MIGRAÇÃO] Iniciando migração para usuário:', userDocId);
+      const invCol = collection(db, 'inventario', userDocId, 'inventarioAluno');
+      const snap = await getDocs(invCol);
+      let migrados = 0, falhas = 0;
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        const productName = data.productName;
+        if (!productName) { falhas++; console.log(`[MIGRAÇÃO] Falha: item sem productName (id: ${docSnap.id})`); continue; }
+        try {
+          await setDoc(doc(invCol, productName), data);
+          await deleteDoc(doc(invCol, docSnap.id));
+          migrados++;
+          console.log(`[MIGRAÇÃO] Sucesso: ${docSnap.id} -> ${productName}`);
+        } catch (e) {
+          falhas++;
+          console.log(`[MIGRAÇÃO] Erro ao migrar ${docSnap.id}:`, e);
+        }
+      }
+      console.log(`[MIGRAÇÃO] Concluída! Itens migrados: ${migrados}, falhas: ${falhas}`);
+      alert(`Migração concluída! Itens migrados: ${migrados}, falhas: ${falhas}`);
+    }
+    // BACKUP DO INVENTÁRIO NO LOCALSTORAGE
+    async function backupInventario(userDocId) {
+      try {
+        console.log('[BACKUP] Iniciando backup para usuário:', userDocId);
+        const invCol = collection(db, 'inventario', userDocId, 'inventarioAluno');
+        const snap = await getDocs(invCol);
+        const backup = [];
+        for (const docSnap of snap.docs) {
+          backup.push({ id: docSnap.id, data: docSnap.data() });
+        }
+        localStorage.setItem('backupInventario_' + userDocId, JSON.stringify(backup));
+        console.log(`[BACKUP] Backup salvo para ${userDocId} (${backup.length} itens)`);
+        alert(`Backup salvo no localStorage! (${backup.length} itens)`);
+      } catch (e) {
+        console.error('[BACKUP] Falha ao fazer backup:', e);
+        alert('Falha ao fazer backup: ' + (e?.message || e));
+      }
+    }
+    // REVERTER INVENTÁRIO USANDO BACKUP DO LOCALSTORAGE
+    async function reverterInventario(userDocId) {
+      console.log('[REVERTER] Iniciando restauração para usuário:', userDocId);
+      const raw = localStorage.getItem('backupInventario_' + userDocId);
+      if (!raw) { console.log(`[REVERTER] Nenhum backup encontrado para ${userDocId}`); alert('Nenhum backup encontrado para este usuário!'); return; }
+      const backup = JSON.parse(raw);
+      let restaurados = 0, falhas = 0;
+      for (const item of backup) {
+        try {
+          await setDoc(doc(collection(db, 'inventario', userDocId, 'inventarioAluno'), item.id), item.data);
+          restaurados++;
+          console.log(`[REVERTER] Sucesso: ${item.id}`);
+        } catch (e) {
+          falhas++;
+          console.log(`[REVERTER] Erro ao restaurar ${item.id}:`, e);
+        }
+      }
+      console.log(`[REVERTER] Concluída! Itens restaurados: ${restaurados}, falhas: ${falhas}`);
+      alert(`Inventário restaurado! (${restaurados} itens, falhas: ${falhas})`);
+    }
     // Card Ocorrências: carregar e atualizar custoFaltas
     try {
       const custoRef = doc(db, 'ocorrencias', 'custoFaltas');
@@ -227,6 +292,96 @@
     } catch (e) {
       console.error('Erro custoFaltas:', e);
     }
+    // Configuração de probabilidades de cartas
+    const probComum = document.getElementById('probComum');
+    const probRara = document.getElementById('probRara');
+    const probEpica = document.getElementById('probEpica');
+    const probLendaria = document.getElementById('probLendaria');
+    const btnSalvarRaridades = document.getElementById('btnSalvarRaridades');
+    const msgRaridades = document.getElementById('msgRaridades');
+    async function carregarRaridades() {
+      try {
+        const rarRef = doc(db, 'config', 'raridades');
+        const snap = await getDoc(rarRef);
+        if (snap.exists()) {
+          const cfg = snap.data().ultimaCarta || {};
+          probComum.value = cfg.comum ?? 50;
+          probRara.value = cfg.rara ?? 30;
+          probEpica.value = cfg.epica ?? 15;
+          probLendaria.value = cfg.lendaria ?? 5;
+        }
+      } catch (e) { msgRaridades.textContent = 'Erro ao carregar: ' + e.message; }
+    }
+    carregarRaridades();
+    btnSalvarRaridades.onclick = async () => {
+      const comum = Number(probComum.value||0);
+      const rara = Number(probRara.value||0);
+      const epica = Number(probEpica.value||0);
+      const lendaria = Number(probLendaria.value||0);
+      try {
+        const rarRef = doc(db, 'config', 'raridades');
+        await setDoc(rarRef, { ultimaCarta: { comum, rara, epica, lendaria } }, { merge:true });
+        msgRaridades.textContent = 'Probabilidades salvas com sucesso!';
+      } catch (e) {
+        msgRaridades.textContent = 'Erro ao salvar: ' + e.message;
+      }
+    };
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('[DEV] DOMContentLoaded disparado');
+      const cardDebug = document.getElementById('q4');
+      console.log('[DEV] Card Debug Site encontrado:', !!cardDebug);
+      const btnBackup = document.getElementById('btnBackupInventario');
+      const btnMigrar = document.getElementById('btnMigrarInventario');
+      const btnReverter = document.getElementById('btnReverterInventario');
+      console.log('[DEV] Botões encontrados:', {
+        btnBackup: !!btnBackup,
+        btnMigrar: !!btnMigrar,
+        btnReverter: !!btnReverter
+      });
+      if (btnBackup) {
+        btnBackup.addEventListener('click', async () => {
+          console.log('[DEV] Clique em btnBackupInventario');
+          const userDocId = prompt('Informe o ID do usuário para backup do inventário:');
+          console.log('[DEV] userDocId informado:', userDocId);
+          if (userDocId) {
+            await backupInventario(userDocId);
+            // Exibe o conteúdo do backup em JSON no console
+            const raw = localStorage.getItem('backupInventario_' + userDocId);
+            if (raw) {
+              console.log('[DEV] Backup JSON:', raw);
+            } else {
+              console.log('[DEV] Nenhum backup encontrado no localStorage para', userDocId);
+            }
+          }
+        });
+      } else {
+        console.log('[DEV] Botão btnBackupInventario não encontrado');
+      }
+      if (btnMigrar) {
+        btnMigrar.addEventListener('click', async () => {
+          console.log('[DEV] Clique em btnMigrarInventario');
+          const userDocId = prompt('Informe o ID do usuário para migrar o inventário:');
+          console.log('[DEV] userDocId informado:', userDocId);
+          if (userDocId) await migrateInventario(userDocId);
+        });
+      } else {
+        console.log('[DEV] Botão btnMigrarInventario não encontrado');
+      }
+      if (btnReverter) {
+        btnReverter.addEventListener('click', async () => {
+          console.log('[DEV] Clique em btnReverterInventario');
+          const userDocId = prompt('Informe o ID do usuário para restaurar o inventário:');
+          console.log('[DEV] userDocId informado:', userDocId);
+          if (userDocId) await reverterInventario(userDocId);
+        });
+      } else {
+        console.log('[DEV] Botão btnReverterInventario não encontrado');
+      }
+    });
+  } catch (e) {
+    console.error('[DEV] Erro global no script:', e);
+  }
+})();
   </script>
 </body>
 </html>

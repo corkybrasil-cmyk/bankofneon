@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Meu Inventário • Banco da Neon</title>
+  <link rel="icon" href="../assets/logotipo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles/inventario-style.css" />
+  </head>
+  <body>
+
+    <div class="header">
+      <button id="btnMenu" class="menu-btn" title="Menu">
+        <img src="../assets/menu.svg" alt="Menu" class="menu-icon" />
+      </button>
+      <div class="brand brand-center">
+        <a href="../dashboard/dashboard.html" title="Início" class="logo-link">
+          <img src="../assets/logotipo.svg" alt="Neon" class="logo-img" />
+        </a>
+      </div>
+      <div class="header-actions">
+        <a href="dashboard.html" class="btn btn-ghost">Voltar</a>
+      </div>
+    </div>
+    <aside id="sidebar" class="sidebar" aria-label="Navegação lateral">
+      <div class="sidebar-header">
+        <h3>Menu</h3>
+        <button id="btnCloseSidebar" class="btn-close" aria-label="Fechar">×</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-item" href="inventario.html">Inventário</a>
+        <a class="nav-item" href="loja.html">Loja</a>
+        <a class="nav-item" href="extrato.html">Extrato</a>
+        <a class="nav-item" href="dashboard.html">Dashboard</a>
+      </nav>
+    </aside>
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <main class="wrap">
+  <div id="unauth" class="empty-state hidden">Sessão inválida. Faça login novamente.</div>
+  <div id="content">
+        <div class="inventory-header">
+          <h1>Meu Inventário</h1>
+          <div class="messages">
+            <div id="msg"></div>
+            <div id="err"></div>
+          </div>
+        </div>
+        <section class="inventory-stats">
+          <div class="stat-card">
+            <div id="totalItems" class="stat-number">0</div>
+            <div class="stat-label">Itens</div>
+          </div>
+          <div class="stat-card">
+            <div id="totalSpent" class="stat-number">N$ 0,00</div>
+            <div class="stat-label">Total Gasto</div>
+          </div>
+          <div class="stat-card">
+            <div id="uniqueCategories" class="stat-number">0</div>
+            <div class="stat-label">Categorias</div>
+          </div>
+          <div class="stat-card">
+            <div id="recentPurchases" class="stat-number">0</div>
+            <div class="stat-label">Últimos 30 dias</div>
+          </div>
+        </section>
+        <section class="filters">
+          <div class="filter-group">
+            <label for="categoryFilter">Categoria</label>
+            <select id="categoryFilter"></select>
+          </div>
+          <div class="filter-group">
+            <label for="sortBy">Ordenar</label>
+            <select id="sortBy">
+              <option value="recent">Mais Recentes</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="searchFilter">Pesquisar</label>
+            <input id="searchFilter" type="text" placeholder="Nome..." />
+          </div>
+        </section>
+        <div id="emptyState" class="empty-state">Nenhum item no inventário.</div>
+        <div id="inventoryGrid" class="inventory-grid"></div>
+      </div>
+    </main>
+    <!-- Pack Overlay -->
+    <div id="packOverlay" aria-hidden="true">
+      <div class="pack-stage">
+        <div class="pack-flare"></div>
+        <div class="pack-rays"></div>
+        <div class="pack-card">
+          <img id="packStageImg" class="pack-card-img" src="../assets/versocarta.svg" alt="Pack" />
+          <div class="pack-card-glow"></div>
+          <div class="pack-flash" id="packFlash"></div>
+          <div class="pack-final" id="packFinal">
+            <div id="packConfirm" class="pack-confirm">
+              <h3>Abrir este Pack?</h3>
+              <div class="pack-confirm-actions">
+                <button id="packConfirmYes">Sim</button>
+                <button id="packConfirmNo">Não</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="packBlocker"></div>
+    <div id="fullFlash"></div>
+    <!-- Card Reveal Overlay -->
+    <div id="cardRevealOverlay">
+      <div class="card-reveal-stage">
+        <div id="cardRevealViewport" class="card-reveal-view"></div>
+      </div>
+    </div>
+    <!-- O JS está em inventario-scripts.js -->
+    <script type="module" src="scripts/inventario-scripts.js"></script>
+    <!-- Os utilitários e funções JS já estão disponíveis via inventario-scripts.js -->
+  </body>
+</html>

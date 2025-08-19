@@ -91,15 +91,14 @@
       box-shadow: 0 12px 32px rgba(16,20,40,0.12);
     }
     .product-image {
-      width: 120px;
-      height: 120px;
-      background: var(--bg);
+      max-width: 250px !important;
+      max-height: 400px !important;
+      width: 100%;
+      height: auto;
       border-radius: 12px;
       margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
+      display: block;
+      object-fit: contain;
     }
     .product-title {
       font-size: 18px;
@@ -228,7 +227,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, limit, getDocs, addDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getFirestore, collection, query, where, limit, getDocs, addDoc, doc, updateDoc, serverTimestamp, orderBy, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
@@ -291,6 +291,7 @@
     }
 
     const db = (() => { try { return getFirestore(app, 'bancodaneondb'); } catch { return getFirestore(app); } })();
+    const storage = getStorage(app);
 
     // Função para obter emoji baseado na categoria do produto
     function getProductEmoji(categoryName) {
@@ -331,17 +332,27 @@
           return;
         }
 
-        snap.docs.forEach(doc => {
+        snap.docs.forEach(async doc => {
           const produto = doc.data();
-          
+          let imgTag = '';
+          if (produto.imageUrl) {
+            let imgSrc = produto.imageUrl;
+            if (imgSrc.startsWith('gs://')) {
+              const path = imgSrc.replace('gs://crmdaneon.firebasestorage.app/', '');
+              try {
+                imgSrc = await getDownloadURL(ref(storage, path));
+              } catch (e) {
+                imgSrc = 'semfoto.png';
+              }
+            }
+            imgTag = `<img src="${imgSrc}" class="product-image" alt="${produto.name}" style="max-width:250px;max-height:250px;border-radius:8px;object-fit:contain;">`;
+          } else {
+            imgTag = `<div class="product-image">📦</div>`;
+          }
           const productCard = document.createElement('div');
           productCard.className = 'product-card';
-          
-          // Usar emoji baseado na categoria ou produto padrão
-          const emoji = getProductEmoji(produto.categoryName);
-          
           productCard.innerHTML = `
-            <div class="product-image">${emoji}</div>
+            ${imgTag}
             <div class="product-title">${produto.name}</div>
             <div class="product-description">${produto.description || 'Produto da loja Neon'}</div>
             <div class="product-price">N$ ${produto.price?.toFixed(2) || '0.00'}</div>
@@ -418,44 +429,41 @@
         console.log('🏷️ Subcategoria do produto:', btn.dataset.subcategory);
         
         const inventarioCol = collection(db, 'inventario', alunoDoc.id, 'inventarioAluno');
-        console.log('📁 Collection de inventário criada:', inventarioCol);
-        
+
+        // Buscar dados do produto na loja/config/produtos
+        const produtoRef = doc(db, 'loja', 'config', 'produtos', productId);
+        const produtoSnap = await getDoc(produtoRef);
+        let imageUrl = '';
+        if (produtoSnap.exists()) {
+          const produtoData = produtoSnap.data();
+          imageUrl = produtoData.imageUrl || '';
+        }
+
+        // Definir categoria e subcategoria corretamente
+        const productCategory = btn.dataset.category || 'Geral';
+        const productSubcategory = btn.dataset.subcategory || '';
+
         // Buscar se o item já existe para atualizar quantidade
         const existingItemQuery = query(
           inventarioCol,
           where('productId', '==', productId)
         );
         const existingItemSnap = await getDocs(existingItemQuery);
-        
+
         if (!existingItemSnap.empty) {
           // Item já existe, atualizar quantidade
           const existingItemDoc = existingItemSnap.docs[0];
           const existingData = existingItemDoc.data();
           const newQuantity = (existingData.quantity || 1) + 1;
           
-          console.log('🔄 Item já existe, atualizando quantidade de', existingData.quantity, 'para', newQuantity);
-          
-          // Obter categoria e subcategoria do produto
-          const productCategory = btn.dataset.category || 'Geral';
-          const productSubcategory = btn.dataset.subcategory || '';
-          
           await updateDoc(doc(db, 'inventario', alunoDoc.id, 'inventarioAluno', existingItemDoc.id), {
             quantity: newQuantity,
             lastPurchaseDate: serverTimestamp(),
             totalSpent: (existingData.totalSpent || 0) + price,
-            category: productCategory,
-            subcategory: productSubcategory
+            imageUrl: imageUrl // Atualiza imagem se necessário
           });
-          
-          console.log('✅ Quantidade atualizada com sucesso');
         } else {
-          // Item não existe, criar novo
-          console.log('🆕 Criando novo item no inventário');
-          
-          // Obter categoria e subcategoria do produto
-          const productCategory = btn.dataset.category || 'Geral';
-          const productSubcategory = btn.dataset.subcategory || '';
-          
+          // Item não existe, criar novo com o mesmo nome/id do produto
           const itemData = {
             productId: productId,
             productName: productName,
@@ -467,13 +475,12 @@
             firstPurchaseDate: serverTimestamp(),
             lastPurchaseDate: serverTimestamp(),
             totalSpent: price,
-            status: 'active'
+            status: 'active',
+            imageUrl: imageUrl // Salva imagem do produto
           };
-          
-          console.log('📋 Dados do item:', itemData);
-          
-          const newItemRef = await addDoc(inventarioCol, itemData);
-          console.log('✅ Novo item criado com ID:', newItemRef.id);
+
+          // Usa setDoc para que o nome do documento seja igual ao nome do produto
+          await setDoc(doc(db, 'inventario', alunoDoc.id, 'inventarioAluno', productName), itemData);
         }
         
         console.log('🎯 Item adicionado ao inventário com sucesso!');
@@ -504,6 +511,51 @@
         }, 5000);
       }
     }
+
+    // Novo código para buscar produtos e exibir imagem correta
+    async function loadAllProducts() {
+      const productsCol = collection(db, 'loja', 'config', 'produtos');
+      const q = query(productsCol, orderBy('name'));
+      const snap = await getDocs(q);
+      const products = [];
+      for (const doc of snap.docs) {
+        const data = doc.data();
+        let imgSrc = 'semfoto.png';
+        if (data.imageUrl) {
+          if (data.imageUrl.startsWith('gs://')) {
+            // Extrai o caminho relativo do Storage
+            const path = data.imageUrl.replace('gs://crmdaneon.firebasestorage.app/', '');
+            try {
+              imgSrc = await getDownloadURL(ref(storage, path));
+            } catch (e) {
+              imgSrc = 'semfoto.png';
+            }
+          } else {
+            imgSrc = data.imageUrl;
+          }
+        }
+        products.push({ id: doc.id, ...data, imgSrc });
+      }
+      renderProducts(products);
+    }
+
+    function renderProducts(products) {
+      const container = document.getElementById('productsGrid');
+      container.innerHTML = '';
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${product.imgSrc}" alt="${product.name}" class="product-image" style="width:120px;height:120px;object-fit:cover;border-radius:8px;">
+          <h3>${product.name}</h3>
+          <p>${product.description || ''}</p>
+          <span>Preço: N$ ${product.price?.toFixed(2) || '0.00'}</span>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', loadAllProducts);
   </script>
 </body>
 </html>

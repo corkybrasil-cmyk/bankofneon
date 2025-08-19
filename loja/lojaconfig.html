@@ -1966,6 +1966,7 @@
     
          // ===== FUNÇÕES DE UPLOAD DE IMAGEM =====
      // 
+     
      // ESTRATÉGIA IMPLEMENTADA:
      // 1. VALIDAÇÃO DE NOMES ÚNICOS: Não permite produtos com nomes duplicados
      // 2. NOMENCLATURA CONSISTENTE: Imagens salvas como "nome_produto_timestamp.extensao"
@@ -2371,7 +2372,8 @@
          
          // Criar produto primeiro para obter o ID
          const productsCol = collection(db, 'loja', 'config', 'produtos');
-         const docRef = await addDoc(productsCol, {
+         const productDocRef = doc(productsCol, name); // Usa o nome do produto como ID
+         await setDoc(productDocRef, {
            name,
            categoryId,
            categoryName,
@@ -2385,15 +2387,13 @@
            createdAt: serverTimestamp(),
            updatedAt: serverTimestamp()
          });
-         
          // Verificar se há imagem para upload
          let imageUrl = null;
          if (newProductImage.files && newProductImage.files[0]) {
            try {
-             imageUrl = await uploadProductImage(newProductImage.files[0], name, docRef.id);
-             
+             imageUrl = await uploadProductImage(newProductImage.files[0], name, name);
              // Atualizar produto com a URL da imagem
-             await updateDoc(docRef, { imageUrl });
+             await updateDoc(productDocRef, { imageUrl });
            } catch (error) {
              console.error('❌ Erro ao fazer upload da imagem:', error);
              // Continuar mesmo se o upload falhar
