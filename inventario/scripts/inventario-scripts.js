@@ -374,14 +374,22 @@ class InventarioManager {
     };
 
     // Exibir botão apenas se categoria for Consumíveis
-    const actionBtn = document.getElementById('modalActionBtn');
+    const actionBtn = document.getElementById('usar');
+    console.log('[Inventario] Categoria detectada:', categoria);
+    console.log('[Inventario] Categoria normalizada:', categoria.toLowerCase().trim());
+    
     if (actionBtn) {
-      if (categoria.toLowerCase() === 'consumíveis') {
-        actionBtn.style.display = '';
+      const categoriaNormalizada = categoria.toLowerCase().trim();
+      const isConsumivel = categoriaNormalizada === 'consumíveis';
+      
+      console.log('[Inventario] É consumível?', isConsumivel);
+      
+      if (isConsumivel) {
+        actionBtn.style.display = 'block';
         console.log('[Inventario] Botão de ação exibido (consumível)');
       } else {
         actionBtn.style.display = 'none';
-        console.log('[Inventario] Botão de ação oculto (não consumível)');
+        console.log('[Inventario] Botão de ação oculto (categoria:', categoriaNormalizada, ')');
       }
     } else {
       console.log('[Inventario] Botão de ação não encontrado no DOM');
@@ -399,10 +407,31 @@ class InventarioManager {
         this.closeModal();
       }
     });
+    
+    // Adicionar event listener para o botão "usar" se for consumível
+    if (actionBtn && categoriaNormalizada === 'consumíveis') {
+      actionBtn.onclick = () => {
+        this.handleUseItem(item);
+      };
+    }
   }
 
   closeModal() {
     document.getElementById('modalItem').classList.remove('open');
+  }
+
+  handleUseItem(item) {
+    console.log('[Inventario] Usando item:', item);
+    const subcategoria = item.subcategory || item.subcategoriaNome || item.subcategoria || '';
+    
+    if (subcategoria.toLowerCase() === 'pack de cartas') {
+      console.log('[Inventario] Abrindo pack de cartas');
+      // Aqui será chamada a função de pack opening
+      // PackOpeningManager.openPack(item);
+    } else {
+      console.log('[Inventario] Item usado (não é pack de cartas)');
+      // Lógica para outros consumíveis
+    }
   }
 
   setupEventListeners() {

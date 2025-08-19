@@ -1,0 +1,31 @@
+/* Estilos para o sistema de abertura de packs de cartas */
+
+/* Animações de abertura do pack */
+.pack-opening-overlay {
+  /* Overlay para a animação de abertura */
+}
+
+.pack-animation {
+  /* Container principal da animação */
+}
+
+.pack-reveal {
+  /* Animação de revelação das cartas */
+}
+
+.card-reveal {
+  /* Estilos individuais para cada carta revelada */
+}
+
+/* Animações e transições */
+@keyframes packOpen {
+  /* Animação de abertura do pack */
+}
+
+@keyframes cardFlip {
+  /* Animação de flip das cartas */
+}
+
+@keyframes cardSlide {
+  /* Animação de entrada das cartas */
+}
