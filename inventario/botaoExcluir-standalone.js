@@ -5,7 +5,7 @@ console.log('[ExclusaoStandalone] Carregando sistema standalone...');
 
 class ExclusaoStandalone {
   constructor() {
-    this.app = null;
+    this.firebaseManager = null;
     this.db = null;
     this.currentUser = null;
     this.inventarioItems = [];
@@ -26,7 +26,7 @@ class ExclusaoStandalone {
       // Verificar sessão
       await this.loadUserSession();
       
-      // Inicializar Firebase
+      // Inicializar Firebase usando FirebaseManager
       await this.initFirebase();
       
       // Configurar eventos
@@ -54,43 +54,49 @@ class ExclusaoStandalone {
   }
 
   async initFirebase() {
-    console.log('[ExclusaoStandalone] Inicializando Firebase...');
-    
-    // Usar EXATAMENTE a mesma lógica do inventario-scripts.js
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js");
-    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js");
-    const { getFirestore } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
-      authDomain: "crmdaneon.firebaseapp.com",
-      projectId: "crmdaneon",
-      storageBucket: "crmdaneon.firebasestorage.app",
-      messagingSenderId: "564595832938",
-      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
-      measurementId: "G-D3G4M9F17R"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    console.log('[ExclusaoStandalone] App inicializado');
-    
     try {
-      await signInAnonymously(getAuth(app));
-      console.log('[ExclusaoStandalone] Auth anônimo OK');
+      console.log('[ExclusaoStandalone] Inicializando Firebase usando FirebaseManager...');
+      
+      // Aguardar o FirebaseManager estar disponível
+      if (typeof window.FirebaseManager === 'undefined') {
+        console.log('[ExclusaoStandalone] Aguardando FirebaseManager ser carregado...');
+        await new Promise(resolve => {
+          const checkManager = () => {
+            if (typeof window.FirebaseManager !== 'undefined') {
+              resolve();
+            } else {
+              setTimeout(checkManager, 100);
+            }
+          };
+          checkManager();
+        });
+      }
+      
+      // Usar a instância global ou criar uma nova
+      if (window.firebaseManager && window.firebaseManager.isInitialized) {
+        console.log('[ExclusaoStandalone] Usando instância global já inicializada');
+        this.firebaseManager = window.firebaseManager;
+      } else {
+        console.log('[ExclusaoStandalone] Criando nova instância do FirebaseManager');
+        this.firebaseManager = new window.FirebaseManager();
+        await this.firebaseManager.initialize();
+      }
+      
+      // Verificar se foi inicializado corretamente
+      if (!this.firebaseManager.isInitialized) {
+        throw new Error('FirebaseManager não foi inicializado corretamente');
+      }
+      
+      // Obter referências do Firebase
+      this.db = this.firebaseManager.getFirestore();
+      
+      console.log('[ExclusaoStandalone] ✅ Firebase inicializado via FirebaseManager');
+      console.log('[ExclusaoStandalone] Database:', this.db);
+      
     } catch (error) {
-      console.warn('[ExclusaoStandalone] Auth anônimo falhou:', error);
+      console.error('[ExclusaoStandalone] ❌ Erro ao inicializar Firebase:', error);
+      throw error;
     }
-
-    try {
-      this.db = getFirestore(app, "bancodaneondb");
-      console.log('[ExclusaoStandalone] Firestore OK (bancodaneondb)');
-    } catch {
-      this.db = getFirestore(app);
-      console.log('[ExclusaoStandalone] Firestore OK (default)');
-    }
-    
-    // Armazenar app para usar depois se necessário
-    this.app = app;
   }
 
   setupEventListeners() {
@@ -136,8 +142,23 @@ class ExclusaoStandalone {
       
       deleteTestButton.addEventListener('click', () => this.testDirectDelete());
       
+      // Adicionar botão para listar documentos
+      const listDocsButton = document.createElement('button');
+      listDocsButton.id = 'btn-list-docs';
+      listDocsButton.textContent = 'LISTAR: Documentos no Firestore';
+      listDocsButton.style.marginLeft = '10px';
+      listDocsButton.style.backgroundColor = '#007bff';
+      listDocsButton.style.color = 'white';
+      listDocsButton.style.border = 'none';
+      listDocsButton.style.padding = '8px 12px';
+      listDocsButton.style.borderRadius = '4px';
+      listDocsButton.style.cursor = 'pointer';
+      
+      listDocsButton.addEventListener('click', () => this.listFirestoreDocuments());
+      
       btnExcluir.parentNode.insertBefore(testButton, btnExcluir.nextSibling);
       btnExcluir.parentNode.insertBefore(deleteTestButton, testButton.nextSibling);
+      btnExcluir.parentNode.insertBefore(listDocsButton, deleteTestButton.nextSibling);
     }
   }
 
@@ -156,23 +177,59 @@ class ExclusaoStandalone {
       // Pegar o primeiro item
       const firstItem = this.inventarioItems[0];
       console.log('[ExclusaoStandalone] Item a ser excluído:', firstItem);
+      console.log('[ExclusaoStandalone] DocumentId para exclusão:', firstItem.documentId);
+      console.log('[ExclusaoStandalone] ID interno (NÃO usado para exclusão):', firstItem.id);
       
-      const confirmDelete = confirm(`TESTE: Excluir diretamente o item "${firstItem.nome}"?\n\nEsta é uma exclusão real, não um teste!`);
+      const confirmDelete = confirm(`TESTE: Excluir diretamente o item "${firstItem.nome}"?\n\nDocument ID: ${firstItem.documentId}\n\nEsta é uma exclusão real, não um teste!`);
       
       if (!confirmDelete) {
         console.log('[ExclusaoStandalone] Usuário cancelou teste de exclusão direta');
         return;
       }
       
-      // Forçar exclusão direta
-      this.selectedItems = [firstItem.id];
-      console.log('[ExclusaoStandalone] selectedItems forçado para:', this.selectedItems);
+      // CORRIGIDO: Usar documentId em vez de id
+      this.selectedItems = [firstItem.documentId];
+      console.log('[ExclusaoStandalone] selectedItems forçado para (documentId):', this.selectedItems);
       
       await this.deleteSelectedItems();
       
     } catch (error) {
       console.error('[ExclusaoStandalone] Erro no teste de exclusão direta:', error);
       alert(`Erro no teste: ${error.message}`);
+    }
+  }
+
+  async listFirestoreDocuments() {
+    try {
+      console.log('[ExclusaoStandalone] === LISTANDO DOCUMENTOS NO FIRESTORE ===');
+      
+      const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
+      
+      const inventarioRef = collection(this.db, 'inventario', this.currentUser.user, 'inventarioAluno');
+      const snapshot = await getDocs(inventarioRef);
+      
+      console.log(`[ExclusaoStandalone] 📋 Total de documentos encontrados: ${snapshot.size}`);
+      
+      const documents = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        documents.push({
+          documentId: doc.id,  // Nome do documento no Firestore
+          data: data
+        });
+        console.log(`[ExclusaoStandalone] 📄 Documento: "${doc.id}" | Nome: "${data.nome}" | ID interno: "${data.id}"`);
+      });
+      
+      // Mostrar resumo
+      const resumo = documents.map(doc => `• ${doc.documentId} (${doc.data.nome})`).join('\n');
+      
+      alert(`Documentos no Firestore:\n\n${resumo}\n\nTotal: ${documents.length} documentos\n\nVerifique o console para detalhes completos.`);
+      
+      return documents;
+      
+    } catch (error) {
+      console.error('[ExclusaoStandalone] Erro ao listar documentos:', error);
+      alert(`Erro ao listar documentos: ${error.message}`);
     }
   }
 
@@ -722,6 +779,14 @@ class ExclusaoStandalone {
       popup.remove();
     }
   }
+
+  // Método helper para obter o ID do usuário atual
+  getCurrentUserId() {
+    if (this.currentUser && this.currentUser.user) {
+      return this.currentUser.user;
+    }
+    throw new Error('Usuário não autenticado');
+  }
 }
 
 // CSS inline para garantir que funcione
@@ -814,3 +879,6 @@ document.head.insertAdjacentHTML('beforeend', styles);
 // Criar instância
 console.log('[ExclusaoStandalone] Criando instância...');
 window.exclusaoStandalone = new ExclusaoStandalone();
+window.ExclusaoStandalone = ExclusaoStandalone; // Disponibilizar classe também
+
+console.log('[ExclusaoStandalone] ✅ Sistema standalone carregado e disponível globalmente');

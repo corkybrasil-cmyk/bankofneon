@@ -1,6 +1,7 @@
 // Inventário Scripts - Banco da Neon
 class InventarioManager {
   constructor() {
+    this.firebaseManager = null;
     this.db = null;
     this.currentUser = null;
     this.inventarioData = [];
@@ -27,7 +28,7 @@ class InventarioManager {
         return;
       }
 
-      // Inicializar Firebase
+      // Inicializar Firebase usando o FirebaseManager
       await this.initFirebase();
       
       // Inicializar Pack Opening Manager
@@ -76,32 +77,48 @@ class InventarioManager {
   }
 
   async initFirebase() {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js");
-    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js");
-    const { getFirestore } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
-      authDomain: "crmdaneon.firebaseapp.com",
-      projectId: "crmdaneon",
-      storageBucket: "crmdaneon.firebasestorage.app",
-      messagingSenderId: "564595832938",
-      appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
-      measurementId: "G-D3G4M9F17R"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    
     try {
-      await signInAnonymously(getAuth(app));
+      console.log('[InventarioManager] Inicializando Firebase usando FirebaseManager...');
+      
+      // Aguardar o FirebaseManager estar disponível
+      if (typeof window.FirebaseManager === 'undefined') {
+        console.log('[InventarioManager] Aguardando FirebaseManager ser carregado...');
+        await new Promise(resolve => {
+          const checkManager = () => {
+            if (typeof window.FirebaseManager !== 'undefined') {
+              resolve();
+            } else {
+              setTimeout(checkManager, 100);
+            }
+          };
+          checkManager();
+        });
+      }
+      
+      // Usar a instância global ou criar uma nova
+      if (window.firebaseManager && window.firebaseManager.isInitialized) {
+        console.log('[InventarioManager] Usando instância global já inicializada');
+        this.firebaseManager = window.firebaseManager;
+      } else {
+        console.log('[InventarioManager] Criando nova instância do FirebaseManager');
+        this.firebaseManager = new window.FirebaseManager();
+        await this.firebaseManager.initialize();
+      }
+      
+      // Verificar se foi inicializado corretamente
+      if (!this.firebaseManager.isInitialized) {
+        throw new Error('FirebaseManager não foi inicializado corretamente');
+      }
+      
+      // Obter referências do Firebase
+      this.db = this.firebaseManager.getFirestore();
+      
+      console.log('[InventarioManager] ✅ Firebase inicializado via FirebaseManager');
+      console.log('[InventarioManager] Database:', this.db);
+      
     } catch (error) {
-      console.warn('Auth anônimo falhou:', error);
-    }
-
-    try {
-      this.db = getFirestore(app, "bancodaneondb");
-    } catch {
-      this.db = getFirestore(app);
+      console.error('[InventarioManager] ❌ Erro ao inicializar Firebase:', error);
+      throw error;
     }
   }
 
@@ -636,8 +653,10 @@ class InventarioManager {
     }, 3000);
   }
 }
+// Disponibilizar a classe globalmente
+window.InventarioManager = InventarioManager;
 
 // Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
-  new InventarioManager();
+  window.inventarioManager = new InventarioManager();
 });
