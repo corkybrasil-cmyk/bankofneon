@@ -229,19 +229,6 @@ class PackOpeningManager {
     }
 
     console.log('[PackOpening] ✅ Cartas sorteadas:', cartasSorteadas.map(c => c.nome));
-    console.log('[PackOpening] 🔍 DEBUG - Dados completos das cartas:', cartasSorteadas);
-    console.log('[PackOpening] 📊 Total de cartas retornadas:', cartasSorteadas.length);
-    
-    // Verificar se todas as cartas têm dados válidos
-    cartasSorteadas.forEach((carta, index) => {
-      console.log(`[PackOpening] 🎴 Carta ${index + 1}:`, {
-        nome: carta.nome,
-        raridade: carta.raridade,
-        categoria: carta.categoria,
-        imagem: carta.imagem
-      });
-    });
-    
     return cartasSorteadas;
   }
 
@@ -496,69 +483,40 @@ class PackOpeningManager {
               @keyframes lightBeams {
                 0% { 
                   transform: rotate(0deg); 
-                  margin-top: -50vh;
-                  margin-left: -50vw;
+                  margin-top: -250vh;
+                  margin-left: -250vw;
                   opacity: 0.7; 
                 }
                 25% { 
                   transform: rotate(90deg); 
-                  margin-top: -50vh;
-                  margin-left: -50vw;
+                  margin-top: -250vh;
+                  margin-left: -250vw;
                   opacity: 1; 
                 }
                 50% { 
                   transform: rotate(180deg); 
-                  margin-top: -50vh;
-                  margin-left: -50vw;
+                  margin-top: -250vh;
+                  margin-left: -250vw;
                   opacity: 0.7; 
                 }
                 75% { 
                   transform: rotate(270deg); 
-                  margin-top: -50vh;
-                  margin-left: -50vw;
+                  margin-top: -250vh;
+                  margin-left: -250vw;
                   opacity: 1; 
                 }
                 100% { 
                   transform: rotate(360deg); 
-                  margin-top: -50vh;
-                  margin-left: -50vw;
+                  margin-top: -250vh;
+                  margin-left: -250vw;
                   opacity: 0.7; 
                 }
               }
               
               @keyframes flash {
-                0% { 
-                  opacity: 0; 
-                  transform: scale(0.1); 
-                  background: rgba(255,255,255,0.9);
-                }
-                50% { 
-                  opacity: 1; 
-                  transform: scale(1); 
-                  background: rgba(255,255,255,1);
-                }
-                100% { 
-                  opacity: 0; 
-                  transform: scale(1.2); 
-                  background: rgba(255,255,255,0.9);
-                }
-              }
-              
-              @keyframes fullScreenFlash {
-                0% { opacity: 0; }
-                20% { opacity: 1; }
-                100% { opacity: 0; }
-              }
-              
-              @keyframes slideInCard {
-                0% { 
-                  opacity: 0; 
-                  transform: translateY(50px) scale(0.8); 
-                }
-                100% { 
-                  opacity: 1; 
-                  transform: translateY(0) scale(1); 
-                }
+                0% { opacity: 0; transform: scale(0.5); }
+                50% { opacity: 1; transform: scale(1.2); }
+                100% { opacity: 0; transform: scale(1.5); }
               }
             </style>
             <div class="pack-opening-animation" style="
@@ -570,13 +528,13 @@ class PackOpeningManager {
               flex-direction: column;
               position: relative;
             ">
-              <!-- Raios de sol girando - CENTRO em 50% 50% -->
+              <!-- Raios de sol girando - CENTRO em 50% 50% (5x maior) -->
               <div class="light-beams" style="
                 position: fixed !important;
                 top: 50% !important;
                 left: 50% !important;
-                width: 100vw !important;
-                height: 100vh !important;
+                width: 500vw !important;
+                height: 500vh !important;
                 background: 
                   linear-gradient(0deg, transparent 49%, rgba(255, 255, 255, 0.1) 50%, transparent 51%),
                   linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.08) 50%, transparent 51%),
@@ -621,21 +579,8 @@ class PackOpeningManager {
                 z-index: 3;
               ">Abrindo pack...</div>
               
-              <!-- Flash de clarão - tela inteira -->
+              <!-- Flash de clarão -->
               <div class="flash-overlay" style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: linear-gradient(45deg, #ffffff, #f0f0f0, #ffffff);
-                z-index: 9999;
-                opacity: 0;
-                pointer-events: none;
-              "></div>
-              
-              <!-- Flash interno do pack -->
-              <div class="pack-flash" style="
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -652,7 +597,6 @@ class PackOpeningManager {
           const packImg = overlay.querySelector('.pack-shaking');
           const lightBeams = overlay.querySelector('.light-beams');
           const flashOverlay = overlay.querySelector('.flash-overlay');
-          const packFlash = overlay.querySelector('.pack-flash');
           
           // Sequência da animação
           setTimeout(() => {
@@ -669,19 +613,12 @@ class PackOpeningManager {
             // Pack desaparece
             packImg.style.opacity = '0';
             packImg.style.transform = 'scale(0.8)';
-          }, 2300);
-          
-          setTimeout(() => {
-            // Flash interno do pack
-            if (packFlash) {
-              packFlash.style.animation = 'flash 0.6s ease-out';
-            }
-          }, 2500);
-          
-          setTimeout(() => {
-            // Clarão final que ocupa toda a tela
-            flashOverlay.style.animation = 'fullScreenFlash 1s ease-out';
           }, 2800);
+          
+          setTimeout(() => {
+            // Clarão final
+            flashOverlay.style.animation = 'flash 0.8s ease-out';
+          }, 3000);
           
           // Após 3.5 segundos total (reduzido de 5s), mostrar cartas
           setTimeout(() => {

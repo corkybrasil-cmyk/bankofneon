@@ -32,7 +32,11 @@ class InventarioManager {
       await this.initFirebase();
       
       // Inicializar Pack Opening Manager
+      console.log('[InventarioManager] 🔍 Verificando disponibilidade do PackOpeningManager...');
+      console.log('[InventarioManager] window.packOpeningManager:', !!window.packOpeningManager);
+      console.log('[InventarioManager] window.PackOpeningManager:', !!window.PackOpeningManager);
       await this.loadPackOpeningManager();
+      console.log('[InventarioManager] this.packOpeningManager após carregamento:', !!this.packOpeningManager);
       
       // Carregar dados
       await this.loadData();
@@ -48,10 +52,10 @@ class InventarioManager {
 
   async loadPackOpeningManager() {
     return new Promise((resolve) => {
-      // Verificar se o PackOpeningManager já foi carregado
-      if (window.PackOpeningManager) {
-        this.packOpeningManager = new window.PackOpeningManager(this);
-        console.log('[InventarioManager] PackOpeningManager carregado');
+      // Verificar se a instância global do PackOpeningManager já foi carregada
+      if (window.packOpeningManager) {
+        this.packOpeningManager = window.packOpeningManager;
+        console.log('[InventarioManager] PackOpeningManager carregado da instância global');
         resolve();
       } else {
         // Aguardar carregamento com timeout
@@ -60,9 +64,9 @@ class InventarioManager {
         
         const checkLoaded = () => {
           attempts++;
-          if (window.PackOpeningManager) {
-            this.packOpeningManager = new window.PackOpeningManager(this);
-            console.log('[InventarioManager] PackOpeningManager carregado');
+          if (window.packOpeningManager) {
+            this.packOpeningManager = window.packOpeningManager;
+            console.log('[InventarioManager] PackOpeningManager carregado da instância global');
             resolve();
           } else if (attempts < maxAttempts) {
             setTimeout(checkLoaded, 100);
@@ -516,7 +520,16 @@ class InventarioManager {
         this.packOpeningManager.openPack(item);
       } else {
         console.error('❌ [Inventario] PackOpeningManager não disponível');
-        this.showError('Sistema de abertura de packs não disponível. Tente recarregar a página.');
+        console.log('🔍 [Inventario] Tentando usar instância global...');
+        
+        // Tentar usar instância global diretamente
+        if (window.packOpeningManager) {
+          console.log('✅ [Inventario] Instância global encontrada!');
+          this.closeModal();
+          window.packOpeningManager.openPack(item);
+        } else {
+          this.showError('Sistema de abertura de packs não disponível. Tente recarregar a página.');
+        }
       }
     } else {
       console.log('ℹ️ [Inventario] Item não é pack de cartas (subcategoria:', subcategoria, ')');
