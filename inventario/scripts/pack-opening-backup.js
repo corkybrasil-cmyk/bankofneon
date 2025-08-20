@@ -1,106 +1,10 @@
 // Sistema de abertura de packs - Versão corrigida
+import { db, auth } from './firebase-config.js';
 
 class PackOpeningManager {
   constructor() {
-    this.db = null;
+    this.db = db;
     this.currentUser = null;
-    this.initFirebase();
-  }
-
-  async initFirebase() {
-    try {
-      // Importar Firebase modules
-      const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js");
-      const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js");
-      const { getFirestore } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
-        authDomain: "crmdaneon.firebaseapp.com",
-        projectId: "crmdaneon",
-        storageBucket: "crmdaneon.firebasestorage.app",
-        messagingSenderId: "564595832938",
-        appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
-        measurementId: "G-D3G4M9F17R"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      
-      try {
-        await signInAnonymously(getAuth(app));
-      } catch (error) {
-        console.warn('Auth anônimo falhou:', error);
-      }
-
-      this.db = getFirestore(app, 'bancodaneondb');
-      console.log('[PackOpening] Firebase inicializado');
-      console.log('[PackOpening] Projeto Firebase:', app.options.projectId);
-      console.log('[PackOpening] Database ID:', this.db._delegate?._databaseId?.database || 'default');
-      console.log('[PackOpening] Database path completo:', this.db._delegate?._databaseId);
-    } catch (error) {
-      console.error('[PackOpening] Erro ao inicializar Firebase:', error);
-    }
-  }
-
-  // Debug: Listar todos os produtos
-  async debugListarTodosProdutos() {
-    const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
-    
-    try {
-      console.log('[PackOpening] 🔍 DEBUG: Listando todos os produtos...');
-      
-      // Verificar múltiplas localizações possíveis
-      const localizacoes = [
-        'loja/config/produtos',
-        'produtos',
-        'cartas',
-        'loja/produtos'
-      ];
-      
-      for (const path of localizacoes) {
-        console.log(`[PackOpening] 🔍 Verificando localização: ${path}`);
-        try {
-          const ref = collection(this.db, ...path.split('/'));
-          const querySnapshot = await getDocs(ref);
-          console.log(`[PackOpening] 📊 ${path}: ${querySnapshot.size} documentos encontrados`);
-          
-          if (querySnapshot.size > 0) {
-            console.log(`[PackOpening] ✅ ENCONTRADA COLEÇÃO COM DADOS: ${path}`);
-            querySnapshot.forEach((doc) => {
-              const data = doc.data();
-              console.log(`[PackOpening] 📄 Documento em ${path}:`, {
-                id: doc.id,
-                nome: data.nome || data.productName,
-                type: data.type,
-                raridade: data.raridade,
-                categoria: data.categoria || data.category
-              });
-            });
-            break; // Parar no primeiro local com dados
-          }
-        } catch (error) {
-          console.log(`[PackOpening] ❌ Erro ao acessar ${path}:`, error.message);
-        }
-      }
-    } catch (error) {
-      console.error('[PackOpening] ❌ Erro geral ao listar produtos:', error);
-    }
-  }
-
-
-  // Aguardar inicialização do Firebase
-  async waitForFirebase() {
-    let attempts = 0;
-    const maxAttempts = 50; // 5 segundos
-    
-    while (!this.db && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      attempts++;
-    }
-    
-    if (!this.db) {
-      throw new Error('Firebase não foi inicializado');
-    }
   }
 
   // Mostrar popup de confirmação
@@ -150,7 +54,6 @@ class PackOpeningManager {
     
     console.log('[PackOpening] Sorteando cartas...');
     
-    
     // Buscar configurações de probabilidade
     const configDoc = await this.getPackConfig();
     const chanceRaraCarta4 = configDoc?.chanceRaraCarta4 || 90;
@@ -163,10 +66,6 @@ class PackOpeningManager {
     const cartasRaras = await this.buscarCartasPorRaridade('Rara');
     const cartasEpicas = await this.buscarCartasPorRaridade('Épica');
     const cartasLendarias = await this.buscarCartasPorRaridade('Lendária');
-
-    // DEBUG: Ver o que está sendo retornado
-    console.log('[PackOpening] DEBUG - Primeira carta comum:', cartasComuns[0]);
-    console.log('[PackOpening] DEBUG - Primeira carta rara:', cartasRaras[0]);
 
     console.log('[PackOpening] Cartas disponíveis:', {
       comuns: cartasComuns.length,
@@ -237,55 +136,25 @@ class PackOpeningManager {
     const { collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
     
     try {
-      console.log(`[DEBUG] Buscando raridade: "${raridade}"`);
-      
-      // PRIMEIRO: Listar TODOS os documentos da coleção
-      if (raridade === 'Comum') { // Só fazer uma vez
-        const todosRef = collection(this.db, 'loja', 'config', 'produtos');
-        const todosSnapshot = await getDocs(todosRef);
-        console.log(`[DEBUG] TOTAL de documentos na coleção produtos: ${todosSnapshot.size}`);
-        
-        todosSnapshot.forEach((doc) => {
-          const data = doc.data();
-          console.log(`[DEBUG] DOCUMENTO:`, {
-            id: doc.id,
-            nome: data.nome,
-            raridade: data.raridade,
-            categoria: data.categoria,
-            subcategoria: data.subcategoria
-          });
-        });
-      }
-      
       const cartasRef = collection(this.db, 'loja', 'config', 'produtos');
       const q = query(cartasRef, where('raridade', '==', raridade));
       const querySnapshot = await getDocs(q);
-      
-      console.log(`[DEBUG] Documentos encontrados para ${raridade}: ${querySnapshot.size}`);
       
       const cartas = [];
       
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          console.log(`[DEBUG] Doc encontrado:`, { id: doc.id, raridade: data.raridade, categoria: data.categoria });
-          // Verificar se é carta pela presença dos campos de carta ou categoria
-          if (data.categoria === 'Colecionáveis' || data.raridade) {
+          if (data.type === 'carta') {
             cartas.push({
               id: doc.id,
               raridade: raridade,
               ...data
             });
-            console.log(`[DEBUG] Carta adicionada: ${data.nome}`);
-          } else {
-            console.log(`[DEBUG] Documento rejeitado - não é carta`);
           }
         });
-      } else {
-        console.log(`[DEBUG] Nenhum documento encontrado para raridade ${raridade}`);
       }
       
-      console.log(`[DEBUG] Total de cartas ${raridade}: ${cartas.length}`);
       return cartas;
     } catch (error) {
       console.error(`❌ [PackOpening] Erro ao buscar cartas ${raridade}:`, error);
@@ -716,20 +585,11 @@ class PackOpeningManager {
   // Abrir pack
   async openPack(item) {
     try {
-      // Aguardar inicialização do Firebase se necessário
-      if (!this.db) {
-        console.log('[PackOpening] Aguardando inicialização do Firebase...');
-        await this.waitForFirebase();
-      }
-
-      this.currentUser = JSON.parse(localStorage.getItem('bn.currentUser'));
+      this.currentUser = JSON.parse(localStorage.getItem('user'));
       if (!this.currentUser || !this.currentUser.user) {
-        console.log('[PackOpening] Dados do usuário:', this.currentUser);
         alert('❌ Usuário não autenticado. Faça login novamente.');
         return;
       }
-
-      console.log('[PackOpening] Usuário autenticado:', this.currentUser.user);
 
       // Mostrar popup de confirmação
       const confirmed = await this.showConfirmationPopup(item);
@@ -738,7 +598,17 @@ class PackOpeningManager {
       // Criar overlay preto imediatamente
       const blackOverlay = this.createBlackOverlay();
 
+      // Sortear cartas
+      const cartas = await this.sortearCartasPack();
       
+      if (cartas.length === 0) {
+        console.error('❌ Nenhuma carta foi sorteada!');
+        if (blackOverlay && blackOverlay.parentNode) {
+          document.body.removeChild(blackOverlay);
+        }
+        return;
+      }
+
       // Decrementar pack do inventário
       await this.decrementarPackInventario(item);
 
@@ -802,8 +672,7 @@ class PackOpeningManager {
 }
 
 // Instanciar e exportar
-console.log('[PackOpening] Criando instância do PackOpeningManager...');
 const packOpeningManager = new PackOpeningManager();
 window.packOpeningManager = packOpeningManager;
-window.PackOpeningManager = PackOpeningManager;
-console.log('[PackOpening] PackOpeningManager disponível no window:', !!window.PackOpeningManager);
+
+export { packOpeningManager };
