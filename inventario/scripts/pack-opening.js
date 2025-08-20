@@ -481,11 +481,36 @@ class PackOpeningManager {
               }
               
               @keyframes lightBeams {
-                0% { transform: rotate(0deg); opacity: 0.7; }
-                25% { opacity: 1; }
-                50% { opacity: 0.7; }
-                75% { opacity: 1; }
-                100% { transform: rotate(360deg); opacity: 0.7; }
+                0% { 
+                  transform: rotate(0deg); 
+                  margin-top: -250vh;
+                  margin-left: -250vw;
+                  opacity: 0.7; 
+                }
+                25% { 
+                  transform: rotate(90deg); 
+                  margin-top: -250vh;
+                  margin-left: -250vw;
+                  opacity: 1; 
+                }
+                50% { 
+                  transform: rotate(180deg); 
+                  margin-top: -250vh;
+                  margin-left: -250vw;
+                  opacity: 0.7; 
+                }
+                75% { 
+                  transform: rotate(270deg); 
+                  margin-top: -250vh;
+                  margin-left: -250vw;
+                  opacity: 1; 
+                }
+                100% { 
+                  transform: rotate(360deg); 
+                  margin-top: -250vh;
+                  margin-left: -250vw;
+                  opacity: 0.7; 
+                }
               }
               
               @keyframes flash {
@@ -503,19 +528,31 @@ class PackOpeningManager {
               flex-direction: column;
               position: relative;
             ">
-              <!-- Feixes de luz rotacionando -->
+              <!-- Raios de sol girando - CENTRO em 50% 50% (5x maior) -->
               <div class="light-beams" style="
-                position: absolute;
-                width: 400px;
-                height: 400px;
-                background: radial-gradient(circle, transparent 40%, rgba(255,255,255,0.1) 45%, transparent 50%),
-                           radial-gradient(circle, transparent 40%, rgba(255,255,255,0.15) 45%, transparent 50%);
-                background-size: 100% 100%, 70% 70%;
-                background-position: center, center;
-                border-radius: 50%;
-                animation: lightBeams 2s linear infinite;
-                z-index: 1;
-                opacity: 0;
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                width: 500vw !important;
+                height: 500vh !important;
+                background: 
+                  linear-gradient(0deg, transparent 49%, rgba(255, 255, 255, 0.1) 50%, transparent 51%),
+                  linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.08) 50%, transparent 51%),
+                  linear-gradient(90deg, transparent 49%, rgba(255, 255, 255, 0.1) 50%, transparent 51%),
+                  linear-gradient(135deg, transparent 49%, rgba(255, 255, 255, 0.08) 50%, transparent 51%),
+                  linear-gradient(22.5deg, transparent 49%, rgba(255, 255, 255, 0.06) 50%, transparent 51%),
+                  linear-gradient(67.5deg, transparent 49%, rgba(255, 255, 255, 0.06) 50%, transparent 51%),
+                  linear-gradient(112.5deg, transparent 49%, rgba(255, 255, 255, 0.06) 50%, transparent 51%),
+                  linear-gradient(157.5deg, transparent 49%, rgba(255, 255, 255, 0.06) 50%, transparent 51%),
+                  radial-gradient(circle at center, transparent 20%, rgba(255, 255, 255, 0.05) 40%, transparent 60%);
+                background-position: center center !important;
+                background-repeat: no-repeat !important;
+                background-size: 100% 100% !important;
+                transform-origin: 50% 50% !important;
+                animation: lightBeams 4s linear infinite !important;
+                z-index: 1 !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
               "></div>
               
               <!-- Pack tremendo -->
@@ -583,130 +620,162 @@ class PackOpeningManager {
             flashOverlay.style.animation = 'flash 0.8s ease-out';
           }, 3000);
           
-          // Após 5 segundos total, mostrar cartas
+          // Após 3.5 segundos total (reduzido de 5s), mostrar cartas
           setTimeout(() => {
             
-            overlay.innerHTML = `
-              <div class="pack-animation" style="
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 20px;
-                padding: 20px;
-                box-sizing: border-box;
-                overflow-y: auto;
-              ">
-                <div class="pack-reveal active" style="
-                  display: flex;
-                  align-items: flex-start;
-                  justify-content: center;
-                  flex-wrap: wrap;
-                  gap: 30px;
-                  opacity: 1;
-                  transform: scale(1);
-                  transition: all 0.8s ease;
-                  max-width: 100%;
-                  padding: 20px 0;
-                ">
-                  ${cartas.map((carta, index) => {
-                    // Fallback para imagem - usar URL do Firebase se não tiver imagem válida
-                    let imagemUrl = carta.imagem;
-                    if (!imagemUrl || imagemUrl.includes('via.placeholder.com')) {
-                      imagemUrl = "https://firebasestorage.googleapis.com/v0/b/crmdaneon.firebasestorage.app/o/imagemLoja%2Fcarta_teste_1755543322647.svg?alt=media&token=dc319a7e-c6e0-438a-bccf-0a9258b4622d";
-                    }
-                    
-                    // Cores das bordas por raridade
-                    const rarityColors = {
-                      'comum': '#888',
-                      'rara': '#4a9eff', 
-                      'épica': '#a335ee',
-                      'lendária': '#ff8000'
-                    };
-                    
-                    const borderColor = rarityColors[carta.raridade.toLowerCase()] || '#888';
-                    
-                    return `
-                      <div class="card-container" style="
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 15px;
-                        animation-delay: ${index * 0.2}s;
-                      ">
-                        <div class="card-reveal ${carta.raridade.toLowerCase()}" style="
-                          width: 280px;
-                          height: 390px;
-                          background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-                          border-radius: 15px;
-                          border: 4px solid ${borderColor};
-                          position: relative;
-                          cursor: pointer;
-                          transition: all 0.4s ease;
-                          overflow: hidden;
-                          box-shadow: 0 0 25px ${borderColor}60, 0 0 50px ${borderColor}30;
-                        ">
-                          <img src="${imagemUrl}" alt="${carta.nome}" onerror="this.src='../assets/semfoto.png'" style="
-                            width: 100%;
-                            height: 100%;
-                            object-fit: contain;
-                            border-radius: 11px;
-                          " />
-                          ${carta.raridade.toLowerCase() === 'lendária' ? '<div class="legendary-particles"></div>' : ''}
-                        </div>
-                        <div class="card-info" style="
-                          text-align: center;
-                          color: white;
-                          max-width: 280px;
-                        ">
-                          <div class="card-name" style="
-                            font-size: 18px;
-                            font-weight: 600;
-                            margin-bottom: 8px;
-                            color: ${borderColor};
-                            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-                          ">${carta.nome}</div>
-                          <div class="card-rarity" style="
-                            font-size: 14px;
-                            text-transform: uppercase;
-                            font-weight: 500;
-                            opacity: 0.9;
-                            color: ${borderColor};
-                          ">${carta.raridade}</div>
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-                <button class="pack-return-btn" style="
-                  position: absolute;
-                  bottom: 40px;
-                  left: 50%;
-                  transform: translateX(-50%);
-                  background: linear-gradient(135deg, #5a039a, #7c4dff);
-                  color: white;
-                  border: none;
-                  padding: 15px 30px;
-                  border-radius: 25px;
-                  font-size: 16px;
-                  font-weight: 600;
-                  cursor: pointer;
-                  transition: all 0.3s ease;
-                  z-index: 100;
-                  box-shadow: 0 5px 15px rgba(90, 3, 154, 0.3);
-                ">Voltar ao Inventário</button>
-              </div>
+            // DEBUG: Verificar dados das cartas antes de exibir
+            console.log('[PackOpening] 🎴 DEBUG - Cartas recebidas para exibição:', cartas);
+            console.log('[PackOpening] 🎴 DEBUG - Número de cartas:', cartas?.length);
+            
+            // Se não houver cartas, criar cartas de teste
+            if (!cartas || cartas.length === 0) {
+              console.warn('[PackOpening] ⚠️ Nenhuma carta encontrada, criando cartas de teste...');
+              cartas = [
+                { nome: 'Carta Teste 1', raridade: 'Comum', imagem: '../assets/semfoto.png' },
+                { nome: 'Carta Teste 2', raridade: 'Rara', imagem: '../assets/semfoto.png' },
+                { nome: 'Carta Teste 3', raridade: 'Épica', imagem: '../assets/semfoto.png' },
+                { nome: 'Carta Teste 4', raridade: 'Lendária', imagem: '../assets/semfoto.png' },
+                { nome: 'Carta Teste 5', raridade: 'Comum', imagem: '../assets/semfoto.png' }
+              ];
+            }
+            
+            // FORÇAR REMOÇÃO DO OVERLAY ORIGINAL E CRIAR UM NOVO
+            console.log('[PackOpening] 🔥 REMOVENDO OVERLAY ORIGINAL E CRIANDO NOVO...');
+            
+            // Remover overlay original
+            if (overlay && overlay.parentNode) {
+              overlay.parentNode.removeChild(overlay);
+            }
+            
+            // Criar overlay completamente novo
+            const newOverlay = document.createElement('div');
+            newOverlay.style.cssText = `
+              position: fixed !important;
+              top: 0 !important;
+              left: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              background: rgba(0, 0, 0, 0.95) !important;
+              z-index: 99999 !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              flex-direction: column !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              border: none !important;
+              outline: none !important;
+              overflow: hidden !important;
             `;
             
-            const returnBtn = overlay.querySelector('.pack-return-btn');
-            returnBtn.onclick = () => {
-              document.body.removeChild(overlay);
-              resolve();
-            };
+            // HTML das cartas com posicionamento absoluto forçado
+            newOverlay.innerHTML = `
+              <div style="
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 30px !important;
+                justify-content: center !important;
+                align-items: center !important;
+                max-width: 90vw !important;
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+                z-index: 100000 !important;
+              ">
+                ${cartas.map((carta, index) => {
+                  const nomeCartaVal = carta.nome || 'Carta Teste';
+                  const raridadeVal = carta.raridade || 'comum';
+                  const imagemUrl = carta.imagem || '../assets/semfoto.png';
+                  
+                  const rarityColors = {
+                    'comum': '#888',
+                    'rara': '#4a9eff', 
+                    'épica': '#a335ee',
+                    'lendária': '#ff8000'
+                  };
+                  const borderColor = rarityColors[raridadeVal.toLowerCase()] || '#888';
+                  
+                  return `
+                    <div style="
+                      display: flex !important;
+                      flex-direction: column !important;
+                      align-items: center !important;
+                      gap: 15px !important;
+                      z-index: 100001 !important;
+                      position: relative !important;
+                      margin: 10px !important;
+                    ">
+                      <div style="
+                        width: 200px !important;
+                        height: 280px !important;
+                        background: linear-gradient(145deg, #2a2a2a, #1a1a1a) !important;
+                        border-radius: 15px !important;
+                        border: 3px solid ${borderColor} !important;
+                        position: relative !important;
+                        overflow: hidden !important;
+                        box-shadow: 0 0 20px ${borderColor}60 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                      ">
+                        <img src="${imagemUrl}" 
+                             alt="${nomeCartaVal}" 
+                             style="
+                          width: 90% !important;
+                          height: 90% !important;
+                          object-fit: contain !important;
+                          border-radius: 10px !important;
+                        " />
+                      </div>
+                      <div style="
+                        text-align: center !important;
+                        color: white !important;
+                      ">
+                        <div style="
+                          font-size: 16px !important;
+                          font-weight: 600 !important;
+                          margin-bottom: 5px !important;
+                          color: ${borderColor} !important;
+                        ">${nomeCartaVal}</div>
+                        <div style="
+                          font-size: 12px !important;
+                          text-transform: uppercase !important;
+                          color: ${borderColor} !important;
+                        ">${raridadeVal}</div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              
+              <button onclick="this.parentElement.remove(); if(window.carregarInventario) window.carregarInventario();" style="
+                position: fixed !important;
+                bottom: 30px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                background: linear-gradient(135deg, #5a039a, #7c4dff) !important;
+                color: white !important;
+                border: none !important;
+                padding: 15px 30px !important;
+                border-radius: 25px !important;
+                font-size: 16px !important;
+                font-weight: 600 !important;
+                cursor: pointer !important;
+                z-index: 100002 !important;
+                box-shadow: 0 5px 15px rgba(90, 3, 154, 0.3) !important;
+              ">✖ Fechar</button>
+            `;
             
-          }, 5000); // 5 segundos total de animação
+            // Adicionar ao body
+            document.body.appendChild(newOverlay);
+            console.log('[PackOpening] ✅ NOVO OVERLAY CRIADO E ADICIONADO!');
+            
+            resolve();
+            
+          }, 3500); // 3.5 segundos total de animação (reduzido de 5s)
         };
         
       }, 1500);
@@ -738,6 +807,18 @@ class PackOpeningManager {
       // Criar overlay preto imediatamente
       const blackOverlay = this.createBlackOverlay();
 
+      // Sortear cartas do pack
+      console.log('[PackOpening] Sorteando cartas do pack...');
+      const cartas = await this.sortearCartasPack();
+      
+      if (!cartas || cartas.length === 0) {
+        console.error('[PackOpening] ❌ Erro ao sortear cartas do pack');
+        blackOverlay.remove();
+        alert('❌ Erro ao abrir o pack. Tente novamente.');
+        return;
+      }
+      
+      console.log('[PackOpening] ✅ Cartas sorteadas:', cartas.length);
       
       // Decrementar pack do inventário
       await this.decrementarPackInventario(item);
