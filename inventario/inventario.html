@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="header-container"></div>
-  <script>
+  <script type="module">
     document.addEventListener('DOMContentLoaded', function() {
       fetch('../components/header.html')
         .then(res => res.text())
@@ -24,6 +24,8 @@
     });
   </script>
 
+
+
   <div class="wrap">
     <h1 class="page-title">Meu Inventário</h1>
     
@@ -31,6 +33,10 @@
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">Quantidade de Itens</div>
+          <!-- Botão temporário para excluir item do inventário -->
+          <button id="btn-excluir-item">Excluir item do inventário (TEMPORÁRIO)</button>
+          <!-- Botão para testar sistema de exclusão -->
+          <button id="btn-testar-exclusao" style="margin-top: 10px; background: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Testar Sistema de Exclusão</button>
         <div class="kpi-value" id="kpiQuantidade">0</div>
       </div>
       <div class="kpi-card">
@@ -130,6 +136,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="botaoExcluir-standalone.js"></script>
   <script src="scripts/pack-opening.js"></script>
   <script src="scripts/inventario-scripts.js"></script>
 </body>

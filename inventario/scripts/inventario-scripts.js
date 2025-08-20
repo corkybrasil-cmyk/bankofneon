@@ -548,6 +548,19 @@ class InventarioManager {
         this.closeModal();
       }
     });
+
+    // Botão de teste do sistema de exclusão
+    const btnTestarExclusao = document.getElementById('btn-testar-exclusao');
+    if (btnTestarExclusao) {
+      btnTestarExclusao.addEventListener('click', () => {
+        if (window.exclusaoStandalone) {
+          window.exclusaoStandalone.testCompleteDeletionSystem();
+        } else {
+          console.error('Sistema de exclusão não foi carregado ainda');
+          alert('Sistema de exclusão não está carregado. Aguarde um momento e tente novamente.');
+        }
+      });
+    }
   }
 
   showLoading(show) {
