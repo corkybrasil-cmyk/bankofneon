@@ -408,24 +408,27 @@ class InventarioManager {
 
     // Exibir botão apenas se categoria for Consumíveis
     const actionBtn = document.getElementById('usar');
-    console.log('[Inventario] Categoria detectada:', categoria);
-    console.log('[Inventario] Categoria normalizada:', categoria.toLowerCase().trim());
+    console.log('🔍 [Inventario] Botão "usar" encontrado no DOM?', !!actionBtn);
+    console.log('🏷️ [Inventario] Categoria detectada:', categoria);
+    console.log('🏷️ [Inventario] Categoria normalizada:', categoria.toLowerCase().trim());
+    
+    const categoriaNormalizada = categoria.toLowerCase().trim();
     
     if (actionBtn) {
-      const categoriaNormalizada = categoria.toLowerCase().trim();
       const isConsumivel = categoriaNormalizada === 'consumíveis';
       
-      console.log('[Inventario] É consumível?', isConsumivel);
+      console.log('🤔 [Inventario] É consumível?', isConsumivel);
+      console.log('🔍 [Inventario] Comparação: "' + categoriaNormalizada + '" === "consumíveis"');
       
       if (isConsumivel) {
         actionBtn.style.display = 'block';
-        console.log('[Inventario] Botão de ação exibido (consumível)');
+        console.log('✅ [Inventario] Botão de ação EXIBIDO (item consumível)');
       } else {
         actionBtn.style.display = 'none';
-        console.log('[Inventario] Botão de ação oculto (categoria:', categoriaNormalizada, ')');
+        console.log('❌ [Inventario] Botão de ação OCULTO (categoria:', categoriaNormalizada, ')');
       }
     } else {
-      console.log('[Inventario] Botão de ação não encontrado no DOM');
+      console.error('⚠️ [Inventario] Botão de ação não encontrado no DOM! Verificar HTML.');
     }
 
     // Mostrar modal com animação suave
@@ -443,9 +446,18 @@ class InventarioManager {
     
     // Adicionar event listener para o botão "usar" se for consumível
     if (actionBtn && categoriaNormalizada === 'consumíveis') {
+      console.log('🔗 [Inventario] Configurando event listener do botão "usar"...');
       actionBtn.onclick = () => {
+        console.log('👆 [Inventario] Botão "usar" foi clicado!');
         this.handleUseItem(item);
       };
+      console.log('✅ [Inventario] Event listener configurado com sucesso');
+    } else {
+      console.log('ℹ️ [Inventario] Event listener não configurado:', {
+        temBotao: !!actionBtn,
+        categoria: categoriaNormalizada,
+        ehConsumivel: categoriaNormalizada === 'consumíveis'
+      });
     }
   }
 
@@ -454,28 +466,48 @@ class InventarioManager {
   }
 
   handleUseItem(item) {
-    console.log('[Inventario] Usando item:', item);
+    console.log('🎯 [Inventario] === INICIANDO USO DO ITEM ===');
+    console.log('📦 [Inventario] Item recebido:', item);
+    console.log('🔍 [Inventario] Propriedades do item:', {
+      nome: item.nome,
+      productName: item.productName,
+      category: item.category,
+      subcategory: item.subcategory,
+      subcategoriaNome: item.subcategoriaNome,
+      subcategoria: item.subcategoria,
+      quantity: item.quantity
+    });
+    
     const subcategoria = item.subcategory || item.subcategoriaNome || item.subcategoria || '';
+    console.log('🏷️ [Inventario] Subcategoria detectada:', subcategoria);
+    console.log('🏷️ [Inventario] Subcategoria normalizada:', subcategoria.toLowerCase());
     
     if (subcategoria.toLowerCase() === 'pack de cartas') {
-      console.log('[Inventario] Abrindo pack de cartas');
+      console.log('🎁 [Inventario] ✅ ITEM IDENTIFICADO COMO PACK DE CARTAS!');
+      console.log('🔗 [Inventario] Verificando PackOpeningManager...');
       
       // Verificar se o PackOpeningManager está disponível
       if (this.packOpeningManager) {
+        console.log('✅ [Inventario] PackOpeningManager disponível');
+        console.log('🚪 [Inventario] Fechando modal...');
+        
         // Fechar modal antes de abrir pack
         this.closeModal();
         
+        console.log('🚀 [Inventario] Iniciando abertura do pack...');
         // Abrir pack com animação
         this.packOpeningManager.openPack(item);
       } else {
-        console.error('[Inventario] PackOpeningManager não disponível');
+        console.error('❌ [Inventario] PackOpeningManager não disponível');
         this.showError('Sistema de abertura de packs não disponível. Tente recarregar a página.');
       }
     } else {
-      console.log('[Inventario] Item usado (não é pack de cartas)');
+      console.log('ℹ️ [Inventario] Item não é pack de cartas (subcategoria:', subcategoria, ')');
+      console.log('🎯 [Inventario] Processando como consumível regular');
       // Lógica para outros consumíveis
       this.showSuccess(`Item "${item.productName || item.nome}" usado com sucesso!`);
     }
+    console.log('🏁 [Inventario] === FIM DO PROCESSO DE USO ===');
   }
 
   setupEventListeners() {

@@ -3,147 +3,498 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Dev • Banco da Neon</title>
-  <link rel="icon" href="logotipo.svg" type="image/svg+xml" />
+  <title>Dev Tools • Banco da Neon</title>
+  <link rel="icon" href="../assets/logotipo.svg" type="image/svg+xml" />
   <style>
     :root {
-      --bg: #0b0f14; --panel: #131a22; --panel-alt: #111820; --text: #e6eef8; --muted: #9fb3c8; --accent: #1ee1a8; --border: #223042; --danger: #ff6b6b;
+      --primary: #5a039a;
+      --secondary: #b6f902;
+      --secondary-700: #8bb601;
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #5d5d6a;
+      --border: #e8e8ef;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --info: #17a2b8;
     }
+    
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; color: var(--text); background: #0b0f14; }
-    .app-header { padding: 16px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); background: #0f1520; position: sticky; top:0; z-index:2; }
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, minmax(420px, auto)); gap: 16px; padding: 16px; }
-    .card { background: linear-gradient(180deg, var(--panel), var(--panel-alt)); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; }
-    h2 { margin: 0 0 12px 0; font-size: 18px; }
-    .actions { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
-    ul.list { margin: 8px 0 0 0; padding: 0; list-style: none; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
-    ul.list li { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-    button { background: #111a25; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
-    button.warn { border-color: #5c3b00; background: linear-gradient(180deg, #5c3b00, #2b1c00); color: #ffe8b3; }
-    .grid-compact { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 8px; }
-    .pill { font-size: 11px; border: 1px solid var(--border); border-radius: 9999px; padding: 4px 8px; color: var(--muted); }
-    @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
+    
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto;
+      background:
+        radial-gradient(800px 600px at 100% -10%, rgba(90,3,154,0.10), rgba(90,3,154,0.0) 60%),
+        var(--bg);
+      line-height: 1.6;
+    }
+    
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .page-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      color: var(--primary);
+    }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(16, 20, 40, 0.08);
+    }
+    
+    .card h2 {
+      margin: 0 0 16px 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .card h3 {
+      margin: 16px 0 8px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .constants-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .constant-item {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(90, 3, 154, 0.02);
+    }
+    
+    .constant-label {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    
+    .constant-value {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      margin: 4px;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background: #4a0380;
+      transform: translateY(-1px);
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-success:hover:not(:disabled) {
+      background: #218838;
+      transform: translateY(-1px);
+    }
+    
+    .btn-warning {
+      background: var(--warning);
+      color: #212529;
+    }
+    
+    .btn-warning:hover:not(:disabled) {
+      background: #e0a800;
+      transform: translateY(-1px);
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover:not(:disabled) {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+    
+    .btn-info {
+      background: var(--info);
+      color: white;
+    }
+    
+    .btn-info:hover:not(:disabled) {
+      background: #138496;
+      transform: translateY(-1px);
+    }
+    
+    .btn-large {
+      padding: 16px 32px;
+      font-size: 16px;
+      border-radius: 16px;
+    }
+    
+    .console-log {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      margin: 16px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 4px;
+    }
+    
+    .status-success {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+    
+    .status-error {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+    
+    .status-warning {
+      background: rgba(255, 193, 7, 0.1);
+      color: #856404;
+      border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+    
+    .status-info {
+      background: rgba(23, 162, 184, 0.1);
+      color: var(--info);
+      border: 1px solid rgba(23, 162, 184, 0.2);
+    }
+    
+    .loading {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(90, 3, 154, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .constants-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
   </style>
 </head>
 <body>
-  <div class="app-header">
-    <div>Banco da Neon • Dev</div>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <a href="index.html" style="color: var(--accent); text-decoration: none;">Sair</a>
-      <a href="adicionarAluno.html" style="color: var(--accent); text-decoration: none;">Adicionar Aluno</a>
+  <div id="header-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('../components/header.html')
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          // Após inserir o header, carrega o JS do menu
+          const script = document.createElement('script');
+          script.src = '../components/header-menu.js';
+          document.body.appendChild(script);
+        });
+    });
+  </script>
+
+  <div class="wrap">
+    <h1 class="page-title">🛠️ Dev Tools & Debug</h1>
+    
+    <!-- Status do Firebase -->
+    <div class="card">
+      <h2>🔥 Firebase Status</h2>
+      <div id="firebase-status">
+        <div class="loading">
+          <div class="spinner"></div>
+          Inicializando Firebase...
+        </div>
+      </div>
+      <div id="console-firebase" class="console-log" style="display: none;"></div>
     </div>
-  </div>
-
-  <main class="grid">
-    <section class="card" id="q2">
-      <h2>Lista de alunos (idAluno por nome)</h2>
-      <div class="actions">
-        <button id="btnRefreshList">Refresh</button>
-        <span style="color:#9fb3c8; font-size:12px;">Clique em um nome para ver o idAluno</span>
-      </div>
-      <ul class="list" id="listNames"></ul>
-    </section>
-
-    <section class="card" id="q3">
-      <h2>Excluir aluno</h2>
-      <div class="actions">
-        <button class="warn" id="btnRefreshDelete">Refresh</button>
-        <span style="color:#9fb3c8; font-size:12px;">Clique em um nome para solicitar exclusão</span>
-      </div>
-      <ul class="list" id="listDelete"></ul>
-    </section>
-
-    <section class="card" id="q4">
-      <h2>Debug Site</h2>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button id="btnBackupInventario" style="margin:8px 0;background:#ffe8b3;color:#0b0f14;font-weight:bold;border:2px solid #223042;border-radius:10px;padding:10px 18px;">Backup Inventário (localStorage)</button>
-        <button id="btnMigrarInventario" style="margin:8px 0;background:#1ee1a8;color:#0b0f14;font-weight:bold;border:2px solid #223042;border-radius:10px;padding:10px 18px;">Migrar Inventário (novo formato)</button>
-        <button id="btnReverterInventario" style="margin:8px 0;background:#ff6b6b;color:#fff;font-weight:bold;border:2px solid #223042;border-radius:10px;padding:10px 18px;">Reverter Inventário (restaurar backup)</button>
-      </div>
-    </section>
-    <section class="card" id="card-raridades-config">
-      <h2>Config • Probabilidades de Cartas</h2>
-      <form id="formRaridades" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-        <label>Comum (%)<input type="number" id="probComum" min="0" max="100" step="1" value="50" /></label>
-        <label>Rara (%)<input type="number" id="probRara" min="0" max="100" step="1" value="30" /></label>
-        <label>Épica (%)<input type="number" id="probEpica" min="0" max="100" step="1" value="15" /></label>
-        <label>Lendária (%)<input type="number" id="probLendaria" min="0" max="100" step="1" value="5" /></label>
-      </form>
-      <button id="btnSalvarRaridades">Salvar Probabilidades</button>
-      <span id="msgRaridades" style="color:var(--muted); font-size:13px; margin-top:8px; display:block;"></span>
-    </section>
-      <h2>Config • Ocorrências (custoFaltas)</h2>
-      <div id="ocorrencias-config" style="display:grid; grid-template-columns: 1fr; gap:10px;">
-        <div id="cfg-leve" style="display:flex; align-items:center; gap:10px;">
-          <span style="min-width:160px;">Falta leve</span>
-          <input id="valor-leve" type="number" step="1" style="max-width:160px;" />
-          <button id="btn-leve">Atualizar</button>
+    
+    <!-- Constantes do Sistema -->
+    <div class="card">
+      <h2>⚙️ Constantes do Sistema</h2>
+      <div class="constants-grid">
+        <div class="constant-item">
+          <div class="constant-label">Firebase Config</div>
+          <div class="constant-value" id="firebase-config-display">Carregando...</div>
         </div>
-        <div id="cfg-medio" style="display:flex; align-items:center; gap:10px;">
-          <span style="min-width:160px;">Falta média</span>
-          <input id="valor-medio" type="number" step="1" style="max-width:160px;" />
-          <button id="btn-medio">Atualizar</button>
+        <div class="constant-item">
+          <div class="constant-label">Database Name</div>
+          <div class="constant-value" id="database-name">bancodaneondb</div>
         </div>
-        <div id="cfg-grave" style="display:flex; align-items:center; gap:10px;">
-          <span style="min-width:160px;">Falta grave</span>
-          <input id="valor-grave" type="number" step="1" style="max-width:160px;" />
-          <button id="btn-grave">Atualizar</button>
+        <div class="constant-item">
+          <div class="constant-label">Storage Bucket</div>
+          <div class="constant-value" id="storage-bucket">crmdaneon.firebasestorage.app</div>
         </div>
-        <div id="cfg-gravissimo" style="display:flex; align-items:center; gap:10px;">
-          <span style="min-width:160px;">Falta gravíssima</span>
-          <input id="valor-gravissimo" type="number" step="1" style="max-width:160px;" />
-          <button id="btn-gravissimo">Atualizar</button>
+        <div class="constant-item">
+          <div class="constant-label">Coleções Principais</div>
+          <div class="constant-value">alunos, inventario, loja</div>
+        </div>
+        <div class="constant-item">
+          <div class="constant-label">Cards Collection Path</div>
+          <div class="constant-value">loja/config/produtos</div>
+        </div>
+        <div class="constant-item">
+          <div class="constant-label">Pack Probabilities</div>
+          <div class="constant-value">loja/config/packOpeningConfig/probabilidades</div>
         </div>
       </div>
-    </section>
-
-    <section class="card">
-      <h2>Sistema de Cartas Colecionáveis</h2>
-      <div class="actions">
-        <button id="btnPopularCartas">Popular Loja com 30 Cartas</button>
-        <span style="color:#9fb3c8; font-size:12px;">1 Lendária, 2 Épicas, 3 Raras, 24 Comuns</span>
+    </div>
+    
+    <!-- Setup Inicial -->
+    <div class="card">
+      <h2>⚙️ Setup Inicial</h2>
+      <p>Configure as categorias e subcategorias necessárias para o sistema de cartas.</p>
+      
+      <button id="btn-setup-categories" class="btn btn-warning">
+        📋 Configurar Categorias e Subcategorias
+      </button>
+      
+      <div id="setup-status" style="margin: 16px 0;">
+        <div class="status-info">
+          ℹ️ Clique para configurar as categorias básicas do sistema
+        </div>
       </div>
       
-      <h3 style="margin:16px 0 8px 0; font-size:16px;">Configurações de Pack Opening</h3>
-      <form style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
-        <label>Chance Carta Rara na posição 4 (%)<input type="number" id="chanceRaraCarta4" min="0" max="100" step="1" value="30" /></label>
-        <label>Chance Carta Épica na posição 5 (%)<input type="number" id="chanceEpicaCarta5" min="0" max="100" step="1" value="15" /></label>
-        <label>Chance Carta Lendária na posição 5 (%)<input type="number" id="chanceLendariaCarta5" min="0" max="100" step="1" value="5" /></label>
-      </form>
-      <div class="actions">
-        <button id="btnSalvarConfigCartas">Salvar Configurações</button>
-        <button id="btnCarregarConfigCartas">Carregar Configurações</button>
+      <div id="console-setup" class="console-log" style="display: none;"></div>
+    </div>
+    
+    <!-- Populador de Cartas -->
+    <div class="card">
+      <h2>🃏 Populador de Cartas</h2>
+      <p>Este botão irá popular o banco de dados com cartas para teste do sistema de abertura de packs.</p>
+      <p><strong>⚠️ Execute primeiro o setup das categorias acima!</strong></p>
+      
+      <h3>📊 Cartas que serão criadas:</h3>
+      <div class="constants-grid">
+        <div class="constant-item">
+          <div class="constant-label">🟫 Cartas Comuns</div>
+          <div class="constant-value">40 cartas</div>
+        </div>
+        <div class="constant-item">
+          <div class="constant-label">🔵 Cartas Raras</div>
+          <div class="constant-value">10 cartas</div>
+        </div>
+        <div class="constant-item">
+          <div class="constant-label">🟣 Cartas Épicas</div>
+          <div class="constant-value">3 cartas</div>
+        </div>
+        <div class="constant-item">
+          <div class="constant-label">🟠 Cartas Lendárias</div>
+          <div class="constant-value">1 carta</div>
+        </div>
       </div>
-      <span id="msgConfigCartas" style="color:var(--muted); font-size:13px; margin-top:8px; display:block;"></span>
-    </section>
-  </main>
-
-  <div class="modal-overlay" id="modalOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:20;">
-    <div class="modal" style="width:min(92vw,520px); background:#111820; border:1px solid var(--border); border-radius:12px; padding:16px;">
-      <h3 id="modalTitle" style="margin:0 0 8px 0;">Título</h3>
-      <p id="modalMessage" style="margin:0 0 12px 0; color:#9fb3c8;">Mensagem</p>
-      <div class="actions">
-        <button id="modalNo">Não</button>
-        <button id="modalYes" class="warn">Sim</button>
-        <button id="modalClose">Fechar</button>
+      
+      <div id="populate-status" style="margin: 16px 0;">
+        <div class="status-info">
+          ℹ️ Pronto para popular o banco de dados
+        </div>
+      </div>
+      
+      <div id="populate-progress" style="display: none;">
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div id="progress-text">0 / 54 cartas criadas</div>
+      </div>
+      
+      <button id="btn-populate" class="btn btn-primary btn-large">
+        🎯 Popular Banco com Cartas de Teste
+      </button>
+      
+      <div id="console-populate" class="console-log" style="display: none;"></div>
+    </div>
+    
+    <!-- Debug Tools -->
+    <div class="grid-2">
+      <div class="card">
+        <h2>🔍 Debug Tools</h2>
+        
+        <h3>Database Queries</h3>
+        <button id="btn-check-collections" class="btn btn-info">
+          📂 Verificar Coleções
+        </button>
+        <button id="btn-check-cards" class="btn btn-info">
+          🃏 Verificar Cartas Existentes
+        </button>
+        <button id="btn-debug-cards-detailed" class="btn btn-info">
+          🔍 Debug Detalhado das Cartas
+        </button>
+        <button id="btn-check-categories" class="btn btn-info">
+          📋 Verificar Categorias
+        </button>
+        
+        <h3>Pack System Tests</h3>
+        <button id="btn-test-pack-creation" class="btn btn-success">
+          📦 Criar Pack de Teste no Inventário
+        </button>
+        <button id="btn-test-pack-probabilities" class="btn btn-success">
+          🎲 Testar Probabilidades de Pack
+        </button>
+        <button id="btn-fix-missing-commons" class="btn btn-warning">
+          🔧 Fix: Criar Cartas Comuns Faltantes
+        </button>
+        
+        <h3>Limpeza</h3>
+        <button id="btn-clear-cards" class="btn btn-danger">
+          🗑️ Limpar Cartas de Teste
+        </button>
+        
+        <div id="console-debug" class="console-log" style="display: none;"></div>
+      </div>
+      
+      <div class="card">
+        <h2>📊 Estatísticas</h2>
+        <div id="stats-container">
+          <div class="loading">
+            <div class="spinner"></div>
+            Carregando estatísticas...
+          </div>
+        </div>
+        
+        <h3>Actions</h3>
+        <button id="btn-refresh-stats" class="btn btn-warning">
+          🔄 Atualizar Estatísticas
+        </button>
+        <button id="btn-export-logs" class="btn btn-success">
+          📥 Exportar Logs
+        </button>
       </div>
     </div>
   </div>
 
-  
-
   <script type="module">
-document.addEventListener('DOMContentLoaded', async () => {
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
-console.log('[DEV] Script ES module iniciado');
-
-(async () => {
-  try {
+    // Console log personalizado para capturar todas as mensagens
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    let allLogs = [];
+    
+    function captureLog(type, ...args) {
+      const timestamp = new Date().toLocaleTimeString();
+      const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ');
+      allLogs.push(`[${timestamp}] [${type.toUpperCase()}] ${message}`);
+      
+      // Também chama o console original
+      if (type === 'log') originalLog(...args);
+      else if (type === 'error') originalError(...args);
+      else if (type === 'warn') originalWarn(...args);
+    }
+    
+    console.log = (...args) => captureLog('log', ...args);
+    console.error = (...args) => captureLog('error', ...args);
+    console.warn = (...args) => captureLog('warn', ...args);
+    
+    // Início do script
+    console.log('🚀 [DEV-TOOLS] Iniciando página de desenvolvimento');
+    console.log('🔧 [DEV-TOOLS] Configurando captura de logs');
+    
+    // Imports do Firebase
+    console.log('📦 [DEV-TOOLS] Importando módulos do Firebase...');
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js");
+    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js");
+    const { getFirestore, collection, doc, setDoc, getDocs, query, where, deleteDoc } = await import("https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js");
+    console.log('✅ [DEV-TOOLS] Módulos do Firebase carregados com sucesso');
+    
+    // Configuração do Firebase
+    console.log('🔥 [DEV-TOOLS] Configurando Firebase...');
     const firebaseConfig = {
       apiKey: "AIzaSyBHU6yFDCKp9jm9tPGyRqQJFS3amewuuQY",
       authDomain: "crmdaneon.firebaseapp.com",
@@ -153,472 +504,735 @@ console.log('[DEV] Script ES module iniciado');
       appId: "1:564595832938:web:16fb660d8d433ae5f3f213",
       measurementId: "G-D3G4M9F17R"
     };
-    const app = initializeApp(firebaseConfig);
-    try { getAnalytics(app); } catch {}
-    try { await signInAnonymously(getAuth(app)); } catch {}
-    let db; try { db = getFirestore(app, "bancodaneondb"); } catch { db = getFirestore(app); }
-    const alunosCol = collection(db, "alunos");
-    console.log('[DEV] Firebase inicializado');
-
-    // Reuso de lógica essencialmente igual ao app original (Q2 a Q4)
-    const $ = (s) => document.querySelector(s);
-    const listNamesEl = $("#listNames");
-    const listDeleteEl = $("#listDelete");
-    const btnRefreshList = $("#btnRefreshList");
-    const btnRefreshDelete = $("#btnRefreshDelete");
-    const overlay = $("#modalOverlay");
-    const modalTitle = $("#modalTitle");
-    const modalMessage = $("#modalMessage");
-    const modalNo = $("#modalNo");
-    const modalYes = $("#modalYes");
-    const modalClose = $("#modalClose");
-    const showSpinner = () => {};
-    const hideSpinner = () => {};
-
-    function openModal({ title, message, mode = "info", onYes = null }) {
-      modalTitle.textContent = title || "Mensagem";
-      modalMessage.textContent = message || "";
-      overlay.style.display = "flex";
-      if (mode === "confirm") {
-        modalYes.style.display = "inline-block"; modalNo.style.display = "inline-block"; modalClose.style.display = "none";
-        modalYes.onclick = () => { try { onYes && onYes(); } finally { closeModal(); } };
-        modalNo.onclick = () => closeModal();
-      } else {
-        modalYes.style.display = "none"; modalNo.style.display = "none"; modalClose.style.display = "inline-block";
-        modalClose.onclick = () => closeModal();
-      }
-    }
-    function closeModal() { overlay.style.display = "none"; }
-
-    async function fetchAlunos() {
-      const snapshot = await getDocs(alunosCol);
-      const result = [];
-      snapshot.forEach(d => { const data = d.data(); result.push({ docId: d.id, firstName: data?.firstName ?? "(sem nome)", idAluno: data?.idAluno ?? "(sem idAluno)" }); });
-      return result;
-    }
-    function renderList(targetEl, items, onClick) {
-      targetEl.innerHTML = "";
-      if (!items.length) { const li = document.createElement("li"); li.innerHTML = '<span style="color:#9fb3c8; font-size:12px;">Nenhum aluno encontrado.</span>'; targetEl.appendChild(li); return; }
-      items.forEach(item => { const li = document.createElement("li"); const name = document.createElement("span"); name.textContent = item.firstName; li.addEventListener("click", () => onClick(item)); li.appendChild(name); targetEl.appendChild(li); });
-    }
-
-    btnRefreshList.addEventListener("click", async () => {
-      btnRefreshList.disabled = true;
-      try { showSpinner(); const arr = await fetchAlunos(); renderList(listNamesEl, arr, (item) => openModal({ title: `Aluno: ${item.firstName}`, message: `idAluno: ${item.idAluno}`, mode: "info" })); }
-      catch (e) { console.error(e); alert(e?.message || e); }
-      finally { btnRefreshList.disabled = false; hideSpinner(); }
-    });
-
-    btnRefreshDelete.addEventListener("click", async () => {
-      btnRefreshDelete.disabled = true;
-      try {
-        showSpinner();
-        const arr = await fetchAlunos();
-        renderList(listDeleteEl, arr, (item) => openModal({ title: `Excluir: ${item.firstName}`, message: `Deseja excluir? (idAluno: ${item.idAluno})`, mode: "confirm", onYes: async () => { try { await deleteDoc(doc(db, "alunos", item.docId)); btnRefreshDelete.click(); } catch (e) { console.error(e); alert(e?.message || e); } } }));
-      } catch (e) { console.error(e); alert(e?.message || e); }
-      finally { btnRefreshDelete.disabled = false; hideSpinner(); }
-    });
-
-    // MIGRAÇÃO DE ITENS DO INVENTÁRIO PARA NOVO FORMATO
-    async function migrateInventario(userDocId) {
-      console.log('[MIGRAÇÃO] Iniciando migração para usuário:', userDocId);
-      const invCol = collection(db, 'inventario', userDocId, 'inventarioAluno');
-      const snap = await getDocs(invCol);
-      let migrados = 0, falhas = 0;
-      for (const docSnap of snap.docs) {
-        const data = docSnap.data();
-        const productName = data.productName;
-        if (!productName) { falhas++; console.log(`[MIGRAÇÃO] Falha: item sem productName (id: ${docSnap.id})`); continue; }
-        try {
-          await setDoc(doc(invCol, productName), data);
-          await deleteDoc(doc(invCol, docSnap.id));
-          migrados++;
-          console.log(`[MIGRAÇÃO] Sucesso: ${docSnap.id} -> ${productName}`);
-        } catch (e) {
-          falhas++;
-          console.log(`[MIGRAÇÃO] Erro ao migrar ${docSnap.id}:`, e);
-        }
-      }
-      console.log(`[MIGRAÇÃO] Concluída! Itens migrados: ${migrados}, falhas: ${falhas}`);
-      alert(`Migração concluída! Itens migrados: ${migrados}, falhas: ${falhas}`);
-    }
-    // BACKUP DO INVENTÁRIO NO LOCALSTORAGE
-    async function backupInventario(userDocId) {
-      try {
-        console.log('[BACKUP] Iniciando backup para usuário:', userDocId);
-        const invCol = collection(db, 'inventario', userDocId, 'inventarioAluno');
-        const snap = await getDocs(invCol);
-        const backup = [];
-        for (const docSnap of snap.docs) {
-          backup.push({ id: docSnap.id, data: docSnap.data() });
-        }
-        localStorage.setItem('backupInventario_' + userDocId, JSON.stringify(backup));
-        console.log(`[BACKUP] Backup salvo para ${userDocId} (${backup.length} itens)`);
-        alert(`Backup salvo no localStorage! (${backup.length} itens)`);
-      } catch (e) {
-        console.error('[BACKUP] Falha ao fazer backup:', e);
-        alert('Falha ao fazer backup: ' + (e?.message || e));
-      }
-    }
-    // REVERTER INVENTÁRIO USANDO BACKUP DO LOCALSTORAGE
-    async function reverterInventario(userDocId) {
-      console.log('[REVERTER] Iniciando restauração para usuário:', userDocId);
-      const raw = localStorage.getItem('backupInventario_' + userDocId);
-      if (!raw) { console.log(`[REVERTER] Nenhum backup encontrado para ${userDocId}`); alert('Nenhum backup encontrado para este usuário!'); return; }
-      const backup = JSON.parse(raw);
-      let restaurados = 0, falhas = 0;
-      for (const item of backup) {
-        try {
-          await setDoc(doc(collection(db, 'inventario', userDocId, 'inventarioAluno'), item.id), item.data);
-          restaurados++;
-          console.log(`[REVERTER] Sucesso: ${item.id}`);
-        } catch (e) {
-          falhas++;
-          console.log(`[REVERTER] Erro ao restaurar ${item.id}:`, e);
-        }
-      }
-      console.log(`[REVERTER] Concluída! Itens restaurados: ${restaurados}, falhas: ${falhas}`);
-      alert(`Inventário restaurado! (${restaurados} itens, falhas: ${falhas})`);
-    }
-    // Card Ocorrências: carregar e atualizar custoFaltas
+    
+    console.log('🔧 [DEV-TOOLS] Firebase Config:', firebaseConfig);
+    document.getElementById('firebase-config-display').textContent = JSON.stringify(firebaseConfig, null, 2);
+    
+    let app, auth, db;
+    
     try {
-      const custoRef = doc(db, 'ocorrencias', 'custoFaltas');
-      const snap = await getDoc(custoRef);
-      const data = snap.exists() ? snap.data() : { leve: 0, medio: 0, grave: 0, gravissimo: 0 };
-      const vLeve = data.leve ?? 0;
-      const vMedio = (data.medio ?? data['média']) ?? 0;
-      const vGrave = data.grave ?? 0;
-      const vGravissimo = (data.gravissimo ?? data['gravíssima']) ?? 0;
-      document.getElementById('valor-leve').value = vLeve;
-      document.getElementById('valor-medio').value = vMedio;
-      document.getElementById('valor-grave').value = vGrave;
-      document.getElementById('valor-gravissimo').value = vGravissimo;
-
-      document.getElementById('btn-leve').onclick = async () => {
-        const v = Number(document.getElementById('valor-leve').value || 0);
-        await setDoc(custoRef, { leve: v }, { merge: true }); alert('Atualizado falta leve');
-      };
-      document.getElementById('btn-medio').onclick = async () => {
-        const v = Number(document.getElementById('valor-medio').value || 0);
-        await setDoc(custoRef, { medio: v, 'média': v }, { merge: true }); alert('Atualizado falta média');
-      };
-      document.getElementById('btn-grave').onclick = async () => {
-        const v = Number(document.getElementById('valor-grave').value || 0);
-        await setDoc(custoRef, { grave: v }, { merge: true }); alert('Atualizado falta grave');
-      };
-      document.getElementById('btn-gravissimo').onclick = async () => {
-        const v = Number(document.getElementById('valor-gravissimo').value || 0);
-        await setDoc(custoRef, { gravissimo: v, 'gravíssima': v }, { merge: true }); alert('Atualizado falta gravíssima');
-      };
-    } catch (e) {
-      console.error('Erro custoFaltas:', e);
-    }
-    // Configuração de probabilidades de cartas
-    const probComum = document.getElementById('probComum');
-    const probRara = document.getElementById('probRara');
-    const probEpica = document.getElementById('probEpica');
-    const probLendaria = document.getElementById('probLendaria');
-    const btnSalvarRaridades = document.getElementById('btnSalvarRaridades');
-    const msgRaridades = document.getElementById('msgRaridades');
-    async function carregarRaridades() {
+      console.log('🔥 [DEV-TOOLS] Inicializando Firebase App...');
+      app = initializeApp(firebaseConfig);
+      console.log('✅ [DEV-TOOLS] Firebase App inicializado');
+      
+      console.log('🔐 [DEV-TOOLS] Configurando autenticação...');
+      auth = getAuth(app);
+      await signInAnonymously(auth);
+      console.log('✅ [DEV-TOOLS] Autenticação anônima realizada');
+      
+      console.log('🗄️ [DEV-TOOLS] Conectando ao Firestore...');
       try {
-        const rarRef = doc(db, 'config', 'raridades');
-        const snap = await getDoc(rarRef);
-        if (snap.exists()) {
-          const cfg = snap.data().ultimaCarta || {};
-          probComum.value = cfg.comum ?? 50;
-          probRara.value = cfg.rara ?? 30;
-          probEpica.value = cfg.epica ?? 15;
-          probLendaria.value = cfg.lendaria ?? 5;
+        db = getFirestore(app, "bancodaneondb");
+        console.log('✅ [DEV-TOOLS] Conectado ao banco: bancodaneondb');
+      } catch {
+        db = getFirestore(app);
+        console.log('⚠️ [DEV-TOOLS] Conectado ao banco padrão (fallback)');
+      }
+      
+      document.getElementById('firebase-status').innerHTML = `
+        <div class="status-success">✅ Firebase conectado com sucesso</div>
+        <div class="status-info">📊 Database: ${db.app.options.projectId}</div>
+        <div class="status-info">🔐 Auth: ${auth.currentUser ? 'Logado' : 'Não logado'}</div>
+      `;
+      
+    } catch (error) {
+      console.error('❌ [DEV-TOOLS] Erro na inicialização do Firebase:', error);
+      document.getElementById('firebase-status').innerHTML = `
+        <div class="status-error">❌ Erro na conexão com Firebase</div>
+        <div class="status-error">🔧 ${error.message}</div>
+      `;
+    }
+    
+    console.log('🔄 [DEV-TOOLS] Meio do processo de inicialização concluído');
+    
+    // Função para atualizar console na tela
+    function updateConsole(elementId, newLogs) {
+      const consoleEl = document.getElementById(elementId);
+      consoleEl.style.display = 'block';
+      consoleEl.textContent = newLogs.join('\n');
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+    
+    // Função para configurar categorias
+    async function setupCategories() {
+      console.log('⚙️ [SETUP] Iniciando configuração de categorias...');
+      
+      const btn = document.getElementById('btn-setup-categories');
+      const statusEl = document.getElementById('setup-status');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Configurando...';
+      statusEl.innerHTML = '<div class="status-warning">⏳ Configurando categorias...</div>';
+      
+      try {
+        console.log('📂 [SETUP] Definindo categorias principais...');
+        
+        // Categorias principais
+        const categorias = [
+          {
+            id: 'Colecionáveis',
+            nome: 'Colecionáveis',
+            descricao: 'Itens colecionáveis como cartas',
+            ativo: true,
+            ordem: 1
+          },
+          {
+            id: 'Consumíveis',
+            nome: 'Consumíveis',
+            descricao: 'Itens que podem ser consumidos ou usados',
+            ativo: true,
+            ordem: 2
+          }
+        ];
+        
+        // Subcategorias para cartas
+        const subcategorias = [
+          {
+            id: 'Cartas Comuns',
+            nome: 'Cartas Comuns',
+            categoria: 'Colecionáveis',
+            descricao: 'Cartas comuns do jogo',
+            ativo: true,
+            ordem: 1
+          },
+          {
+            id: 'Cartas Raras',
+            nome: 'Cartas Raras',
+            categoria: 'Colecionáveis',
+            descricao: 'Cartas raras do jogo',
+            ativo: true,
+            ordem: 2
+          },
+          {
+            id: 'Cartas Épicas',
+            nome: 'Cartas Épicas',
+            categoria: 'Colecionáveis',
+            descricao: 'Cartas épicas do jogo',
+            ativo: true,
+            ordem: 3
+          },
+          {
+            id: 'Cartas Lendárias',
+            nome: 'Cartas Lendárias',
+            categoria: 'Colecionáveis',
+            descricao: 'Cartas lendárias do jogo',
+            ativo: true,
+            ordem: 4
+          },
+          {
+            id: 'Pack de Cartas',
+            nome: 'Pack de Cartas',
+            categoria: 'Consumíveis',
+            descricao: 'Pacotes que contêm cartas aleatórias',
+            ativo: true,
+            ordem: 1
+          }
+        ];
+        
+        console.log('📂 [SETUP] Criando categorias...');
+        const categoriasRef = collection(db, 'loja', 'config', 'categorias');
+        
+        for (const categoria of categorias) {
+          const docRef = doc(categoriasRef, categoria.id);
+          await setDoc(docRef, categoria);
+          console.log(`✅ [SETUP] Categoria criada: ${categoria.nome}`);
         }
-      } catch (e) { msgRaridades.textContent = 'Erro ao carregar: ' + e.message; }
+        
+        console.log('📋 [SETUP] Criando subcategorias...');
+        const subcategoriasRef = collection(db, 'loja', 'config', 'subcategorias');
+        
+        for (const subcategoria of subcategorias) {
+          const docRef = doc(subcategoriasRef, subcategoria.id);
+          await setDoc(docRef, subcategoria);
+          console.log(`✅ [SETUP] Subcategoria criada: ${subcategoria.nome}`);
+        }
+        
+        console.log('🎉 [SETUP] Configuração de categorias concluída!');
+        
+        statusEl.innerHTML = `
+          <div class="status-success">✅ Categorias configuradas com sucesso!</div>
+          <div class="status-info">📊 ${categorias.length} categorias e ${subcategorias.length} subcategorias criadas</div>
+        `;
+        
+        updateConsole('console-setup', allLogs.filter(log => log.includes('[SETUP]')));
+        
+      } catch (error) {
+        console.error('❌ [SETUP] Erro na configuração:', error);
+        statusEl.innerHTML = `<div class="status-error">❌ Erro: ${error.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📋 Configurar Categorias e Subcategorias';
+      }
     }
-    carregarRaridades();
-    btnSalvarRaridades.onclick = async () => {
-      const comum = Number(probComum.value||0);
-      const rara = Number(probRara.value||0);
-      const epica = Number(probEpica.value||0);
-      const lendaria = Number(probLendaria.value||0);
-      try {
-        const rarRef = doc(db, 'config', 'raridades');
-        await setDoc(rarRef, { ultimaCarta: { comum, rara, epica, lendaria } }, { merge:true });
-        msgRaridades.textContent = 'Probabilidades salvas com sucesso!';
-      } catch (e) {
-        msgRaridades.textContent = 'Erro ao salvar: ' + e.message;
-      }
-    };
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('[DEV] DOMContentLoaded disparado');
-      const cardDebug = document.getElementById('q4');
-      console.log('[DEV] Card Debug Site encontrado:', !!cardDebug);
-      const btnBackup = document.getElementById('btnBackupInventario');
-      const btnMigrar = document.getElementById('btnMigrarInventario');
-      const btnReverter = document.getElementById('btnReverterInventario');
-      console.log('[DEV] Botões encontrados:', {
-        btnBackup: !!btnBackup,
-        btnMigrar: !!btnMigrar,
-        btnReverter: !!btnReverter
-      });
-      if (btnBackup) {
-        btnBackup.addEventListener('click', async () => {
-          console.log('[DEV] Clique em btnBackupInventario');
-          const userDocId = prompt('Informe o ID do usuário para backup do inventário:');
-          console.log('[DEV] userDocId informado:', userDocId);
-          if (userDocId) {
-            await backupInventario(userDocId);
-            // Exibe o conteúdo do backup em JSON no console
-            const raw = localStorage.getItem('backupInventario_' + userDocId);
-            if (raw) {
-              console.log('[DEV] Backup JSON:', raw);
-            } else {
-              console.log('[DEV] Nenhum backup encontrado no localStorage para', userDocId);
-            }
-          }
-        });
-      } else {
-        console.log('[DEV] Botão btnBackupInventario não encontrado');
-      }
-      if (btnMigrar) {
-        btnMigrar.addEventListener('click', async () => {
-          console.log('[DEV] Clique em btnMigrarInventario');
-          const userDocId = prompt('Informe o ID do usuário para migrar o inventário:');
-          console.log('[DEV] userDocId informado:', userDocId);
-          if (userDocId) await migrateInventario(userDocId);
-        });
-      } else {
-        console.log('[DEV] Botão btnMigrarInventario não encontrado');
-      }
-      if (btnReverter) {
-        btnReverter.addEventListener('click', async () => {
-          console.log('[DEV] Clique em btnReverterInventario');
-          const userDocId = prompt('Informe o ID do usuário para restaurar o inventário:');
-          console.log('[DEV] userDocId informado:', userDocId);
-          if (userDocId) await reverterInventario(userDocId);
-        });
-      } else {
-        console.log('[DEV] Botão btnReverterInventario não encontrado');
-      }
-
-      // Sistema de Cartas Colecionáveis
-      const btnPopularCartas = document.getElementById('btnPopularCartas');
-      const btnSalvarConfigCartas = document.getElementById('btnSalvarConfigCartas');
-      const btnCarregarConfigCartas = document.getElementById('btnCarregarConfigCartas');
-      const msgConfigCartas = document.getElementById('msgConfigCartas');
-
-      console.log('[DEV-INIT] 🔍 Elementos encontrados:', {
-        btnPopularCartas: btnPopularCartas ? '✅ Encontrado' : '❌ Não encontrado',
-        btnSalvarConfigCartas: btnSalvarConfigCartas ? '✅ Encontrado' : '❌ Não encontrado',
-        btnCarregarConfigCartas: btnCarregarConfigCartas ? '✅ Encontrado' : '❌ Não encontrado',
-        msgConfigCartas: msgConfigCartas ? '✅ Encontrado' : '❌ Não encontrado'
-      });
-
-      // Popular loja com 30 cartas aleatórias
-      if (btnPopularCartas) {
-        console.log('[DEV-INIT] 🎮 Configurando listener para btnPopularCartas...');
-        btnPopularCartas.addEventListener('click', async () => {
-          console.log('[DEV-CARDS] 🚀 Botão popular cartas clicado!');
-          console.log('[DEV-CARDS] 🔄 Chamando popularLojaComCartas...');
-          msgConfigCartas.textContent = 'Populando loja...';
-          try {
-            await popularLojaComCartas(db);
-            console.log('[DEV-CARDS] ✅ popularLojaComCartas executado com sucesso!');
-            msgConfigCartas.textContent = 'Loja populada com 30 cartas!';
-          } catch (error) {
-            console.error('[DEV-CARDS] ❌ Erro ao executar popularLojaComCartas:', error);
-            msgConfigCartas.textContent = 'Erro ao popular loja. Veja console.';
-          }
-        });
-      } else {
-        console.error('[DEV-INIT] ❌ btnPopularCartas não encontrado!');
-      }
-
-      // Salvar configurações de pack opening
-      if (btnSalvarConfigCartas) {
-        console.log('[DEV-INIT] 💾 Configurando listener para btnSalvarConfigCartas...');
-        btnSalvarConfigCartas.addEventListener('click', async () => {
-          console.log('[DEV-PROB] 💾 Iniciando salvamento de probabilidades...');
-          
-          const config = {
-            chanceRaraCarta4: parseInt(document.getElementById('chanceRaraCarta4').value),
-            chanceEpicaCarta5: parseInt(document.getElementById('chanceEpicaCarta5').value),
-            chanceLendariaCarta5: parseInt(document.getElementById('chanceLendariaCarta5').value),
-            ultimaAtualizacao: new Date()
+    
+    // Função para gerar cartas de teste
+    function generateTestCards() {
+      console.log('🎯 [POPULATE] Gerando dados de cartas de teste...');
+      
+      const cards = [];
+      const raridades = [
+        { nome: 'Comum', count: 40, subcategoria: 'Cartas Comuns' },
+        { nome: 'Rara', count: 10, subcategoria: 'Cartas Raras' },
+        { nome: 'Épica', count: 3, subcategoria: 'Cartas Épicas' },
+        { nome: 'Lendária', count: 1, subcategoria: 'Cartas Lendárias' }
+      ];
+      
+      console.log('📋 [POPULATE] Raridades configuradas:', raridades);
+      
+      let cardId = 1;
+      
+      for (const raridade of raridades) {
+        console.log(`🃏 [POPULATE] Gerando ${raridade.count} cartas ${raridade.nome}s...`);
+        
+        for (let i = 1; i <= raridade.count; i++) {
+          const card = {
+            id: `test-card-${cardId.toString().padStart(3, '0')}`,
+            nome: `${raridade.nome} Card ${i.toString().padStart(2, '0')}`,
+            categoria: 'Colecionáveis',
+            subcategoria: raridade.subcategoria,
+            descricao: `Uma carta ${raridade.nome.toLowerCase()} para testes do sistema de packs. ID: ${cardId}`,
+            preco: getRarityPrice(raridade.nome),
+            imagem: "https://firebasestorage.googleapis.com/v0/b/crmdaneon.firebasestorage.app/o/imagemLoja%2Fcarta_teste_1755543322647.svg?alt=media&token=dc319a7e-c6e0-438a-bccf-0a9258b4622d",
+            ativo: true,
+            dataAdicao: new Date(),
+            raridade: raridade.nome,
+            poder: getRarityPower(raridade.nome),
+            elemento: getRandomElement()
           };
           
-          console.log('[DEV-PROB] 📊 Configurações a serem salvas:', config);
-          console.log('[DEV-PROB] 🎯 Validação dos valores:', {
-            chanceRaraCarta4: typeof config.chanceRaraCarta4,
-            chanceEpicaCarta5: typeof config.chanceEpicaCarta5,
-            chanceLendariaCarta5: typeof config.chanceLendariaCarta5,
-            valoresValidos: !isNaN(config.chanceRaraCarta4) && !isNaN(config.chanceEpicaCarta5) && !isNaN(config.chanceLendariaCarta5)
-          });
-          
-          const docPath = 'loja/config/packOpeningConfig/probabilidades';
-          console.log('[DEV-PROB] 📍 Caminho do documento:', docPath);
-          
+          cards.push(card);
+          cardId++;
+        }
+      }
+      
+      console.log(`✅ [POPULATE] Total de ${cards.length} cartas geradas`);
+      return cards;
+    }
+    
+    function getRarityPrice(raridade) {
+      const prices = {
+        'Comum': 10,
+        'Rara': 50,
+        'Épica': 150,
+        'Lendária': 500
+      };
+      return prices[raridade] || 10;
+    }
+    
+    function getRarityPower(raridade) {
+      const powers = {
+        'Comum': Math.floor(Math.random() * 100) + 50,
+        'Rara': Math.floor(Math.random() * 200) + 150,
+        'Épica': Math.floor(Math.random() * 300) + 350,
+        'Lendária': Math.floor(Math.random() * 500) + 650
+      };
+      return powers[raridade] || 50;
+    }
+    
+    function getRandomElement() {
+      const elements = ['Fogo', 'Água', 'Terra', 'Ar', 'Luz', 'Trevas', 'Neutro'];
+      return elements[Math.floor(Math.random() * elements.length)];
+    }
+    
+    // Função para popular o banco de dados
+    async function populateDatabase() {
+      console.log('🚀 [POPULATE] Iniciando população do banco de dados...');
+      
+      const btn = document.getElementById('btn-populate');
+      const statusEl = document.getElementById('populate-status');
+      const progressEl = document.getElementById('populate-progress');
+      const progressFill = document.getElementById('progress-fill');
+      const progressText = document.getElementById('progress-text');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Populando...';
+      statusEl.innerHTML = '<div class="status-warning">⏳ Gerando cartas...</div>';
+      progressEl.style.display = 'block';
+      
+      try {
+        console.log('🔍 [POPULATE] Verificando coleção de destino: loja/config/produtos');
+        const produtosRef = collection(db, 'loja', 'config', 'produtos');
+        console.log('✅ [POPULATE] Reference criada para:', produtosRef.path);
+        
+        const cards = generateTestCards();
+        console.log(`📦 [POPULATE] ${cards.length} cartas preparadas para inserção`);
+        
+        let created = 0;
+        const total = cards.length;
+        
+        for (const card of cards) {
           try {
-            const docRef = doc(db, 'loja', 'config', 'packOpeningConfig', 'probabilidades');
-            console.log('[DEV-PROB] 🔗 Document reference criada:', docRef);
+            console.log(`📝 [POPULATE] Criando carta ${created + 1}/${total}: ${card.nome}`);
             
-            await setDoc(docRef, config);
-            console.log('[DEV-PROB] ✅ Configurações salvas com sucesso no Firebase!');
+            const cardDocRef = doc(produtosRef, card.id);
+            console.log(`🔗 [POPULATE] Document path: ${cardDocRef.path}`);
             
-            msgConfigCartas.textContent = 'Configurações salvas com sucesso!';
-            console.log('[DEV-PROB] 🎉 Configurações de pack opening salvas:', config);
+            await setDoc(cardDocRef, card);
+            console.log(`✅ [POPULATE] Carta criada: ${card.nome} (${card.raridade})`);
             
-            // Verificar se realmente foi salvo
-            setTimeout(async () => {
-              console.log('[DEV-PROB] 🔍 Verificando se foi salvo...');
-              const verificacao = await getDoc(docRef);
-              if (verificacao.exists()) {
-                console.log('[DEV-PROB] ✅ Verificação: documento existe no Firebase');
-                console.log('[DEV-PROB] 📄 Dados salvos:', verificacao.data());
-              } else {
-                console.log('[DEV-PROB] ❌ Verificação: documento NÃO existe no Firebase');
-              }
-            }, 1000);
+            created++;
+            
+            // Atualizar progresso
+            const percentage = (created / total) * 100;
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${created} / ${total} cartas criadas`;
+            
+            // Pequena pausa para não sobrecarregar
+            await new Promise(resolve => setTimeout(resolve, 50));
             
           } catch (error) {
-            console.error('[DEV-PROB] ❌ Erro ao salvar configurações:', error);
-            console.error('[DEV-PROB] 🔍 Detalhes do erro:', {
-              code: error.code,
-              message: error.message,
-              stack: error.stack
-            });
-            msgConfigCartas.textContent = 'Erro ao salvar configurações.';
-          }
-        });
-      } else {
-        console.error('[DEV-INIT] ❌ btnSalvarConfigCartas não encontrado!');
-      }
-
-      // Carregar configurações de pack opening
-      if (btnCarregarConfigCartas) {
-        console.log('[DEV-INIT] 📂 Configurando listener para btnCarregarConfigCartas...');
-        btnCarregarConfigCartas.addEventListener('click', async () => {
-          console.log('[DEV-PROB] 📂 Iniciando carregamento de probabilidades...');
-          
-          const docPath = 'loja/config/packOpeningConfig/probabilidades';
-          console.log('[DEV-PROB] 📍 Caminho do documento:', docPath);
-          
-          try {
-            const docRef = doc(db, 'loja', 'config', 'packOpeningConfig', 'probabilidades');
-            console.log('[DEV-PROB] 🔗 Document reference criada:', docRef);
-            
-            const configDoc = await getDoc(docRef);
-            console.log('[DEV-PROB] 📊 Documento obtido:', configDoc);
-            console.log('[DEV-PROB] 🔍 Documento existe?', configDoc.exists());
-            
-            if (configDoc.exists()) {
-              const config = configDoc.data();
-              console.log('[DEV-PROB] 📄 Dados carregados do Firebase:', config);
-              
-              document.getElementById('chanceRaraCarta4').value = config.chanceRaraCarta4 || 30;
-              document.getElementById('chanceEpicaCarta5').value = config.chanceEpicaCarta5 || 15;
-              document.getElementById('chanceLendariaCarta5').value = config.chanceLendariaCarta5 || 5;
-              
-              console.log('[DEV-PROB] ✅ Valores aplicados aos inputs:', {
-                chanceRaraCarta4: document.getElementById('chanceRaraCarta4').value,
-                chanceEpicaCarta5: document.getElementById('chanceEpicaCarta5').value,
-                chanceLendariaCarta5: document.getElementById('chanceLendariaCarta5').value
-              });
-              
-              msgConfigCartas.textContent = 'Configurações carregadas!';
-              console.log('[DEV-PROB] 🎉 Configurações carregadas com sucesso:', config);
-            } else {
-              console.log('[DEV-PROB] ⚠️ Nenhuma configuração encontrada no Firebase');
-              msgConfigCartas.textContent = 'Nenhuma configuração encontrada.';
-              
-              // Mostrar valores padrão que estão sendo usados
-              console.log('[DEV-PROB] 🔧 Usando valores padrão:', {
-                chanceRaraCarta4: 30,
-                chanceEpicaCarta5: 15,
-                chanceLendariaCarta5: 5
-              });
-            }
-          } catch (error) {
-            console.error('[DEV-PROB] ❌ Erro ao carregar configurações:', error);
-            console.error('[DEV-PROB] 🔍 Detalhes do erro:', {
-              code: error.code,
-              message: error.message,
-              stack: error.stack
-            });
-            msgConfigCartas.textContent = 'Erro ao carregar configurações.';
-          }
-        });
-      } else {
-        console.error('[DEV-INIT] ❌ btnCarregarConfigCartas não encontrado!');
-      }
-
-      // Função para popular a loja com cartas
-      async function popularLojaComCartas(db) {
-        console.log('[DEV-CARDS] 🎮 Iniciando população da loja com cartas...');
-        console.log('[DEV-CARDS] 📊 Database object:', db);
-        
-        const raridades = ['Comum', 'Rara', 'Épica', 'Lendária'];
-        const quantidades = [24, 3, 2, 1]; // 24 comuns, 3 raras, 2 épicas, 1 lendária
-        
-        console.log('[DEV-CARDS] 🎯 Configuração:', { raridades, quantidades });
-        
-        let cartaId = 1;
-        let cartasCriadas = 0;
-        let cartasComErro = 0;
-        
-        for (let i = 0; i < raridades.length; i++) {
-          const raridade = raridades[i];
-          const quantidade = quantidades[i];
-          
-          console.log(`[DEV-CARDS] 🃏 Processando raridade: ${raridade} (${quantidade} cartas)`);
-          
-          for (let j = 0; j < quantidade; j++) {
-            const carta = {
-              nome: `Carta ${raridade} ${j + 1}`,
-              categoria: 'Colecionáveis',
-              subcategoria: `Cartas ${raridade}s`,
-              raridade: raridade,
-              preco: raridade === 'Comum' ? 100 : raridade === 'Rara' ? 500 : raridade === 'Épica' ? 1000 : 2000,
-              descricao: `Uma carta ${raridade.toLowerCase()} da coleção especial.`,
-              imagem: `https://via.placeholder.com/300x400/333/fff?text=Carta+${raridade}+${j + 1}`,
-              ativo: true,
-              criadoEm: new Date()
-            };
-            
-            const docPath = `loja/config/produtos/carta_${cartaId}`;
-            console.log(`[DEV-CARDS] 📝 Tentando criar carta ID ${cartaId}: ${carta.nome}`);
-            console.log(`[DEV-CARDS] 📍 Caminho do documento: ${docPath}`);
-            console.log(`[DEV-CARDS] 📄 Dados da carta:`, carta);
-            
-            try {
-              const docRef = doc(db, 'loja', 'config', 'produtos', `carta_${cartaId}`);
-              console.log(`[DEV-CARDS] 🔗 Document reference criada:`, docRef);
-              
-              await setDoc(docRef, carta);
-              console.log(`[DEV-CARDS] ✅ Carta criada com sucesso: ${carta.nome} (ID: carta_${cartaId})`);
-              cartasCriadas++;
-              cartaId++;
-            } catch (error) {
-              console.error(`[DEV-CARDS] ❌ Erro ao criar carta ${carta.nome}:`, error);
-              console.error(`[DEV-CARDS] 🔍 Detalhes do erro:`, {
-                code: error.code,
-                message: error.message,
-                stack: error.stack
-              });
-              cartasComErro++;
-            }
+            console.error(`❌ [POPULATE] Erro ao criar carta ${card.nome}:`, error);
           }
         }
         
-        console.log(`[DEV-CARDS] 🏁 Processo finalizado!`);
-        console.log(`[DEV-CARDS] 📊 Resumo: ${cartasCriadas} criadas, ${cartasComErro} com erro`);
-        alert(`Cartas criadas: ${cartasCriadas}\nErros: ${cartasComErro}\nVeja o console para detalhes.`);
+        console.log(`🎉 [POPULATE] População concluída! ${created}/${total} cartas criadas`);
+        
+        statusEl.innerHTML = `
+          <div class="status-success">✅ População concluída!</div>
+          <div class="status-info">📊 ${created} de ${total} cartas criadas</div>
+        `;
+        
+        updateConsole('console-populate', allLogs.filter(log => log.includes('[POPULATE]')));
+        
+      } catch (error) {
+        console.error('❌ [POPULATE] Erro durante a população:', error);
+        statusEl.innerHTML = `<div class="status-error">❌ Erro: ${error.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🎯 Popular Banco com Cartas de Teste';
+        setTimeout(() => {
+          progressEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+    
+    // Event Listeners
+    document.getElementById('btn-setup-categories').addEventListener('click', setupCategories);
+    document.getElementById('btn-populate').addEventListener('click', populateDatabase);
+    
+    // Debug functions
+    document.getElementById('btn-check-collections').addEventListener('click', async () => {
+      console.log('🔍 [DEBUG] Verificando coleções...');
+      
+      try {
+        const collections = ['alunos', 'inventario', 'loja'];
+        for (const collName of collections) {
+          const collRef = collection(db, collName);
+          const snapshot = await getDocs(collRef);
+          console.log(`📂 [DEBUG] ${collName}: ${snapshot.size} documentos`);
+        }
+        
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[DEBUG]')));
+      } catch (error) {
+        console.error('❌ [DEBUG] Erro ao verificar coleções:', error);
       }
     });
-  } catch (e) {
-    console.error('[DEV] Erro global no script:', e);
-  }
-})();
+    
+    document.getElementById('btn-check-cards').addEventListener('click', async () => {
+      console.log('🃏 [DEBUG] Verificando cartas existentes...');
+      
+      try {
+        const produtosRef = collection(db, 'loja', 'config', 'produtos');
+        const snapshot = await getDocs(produtosRef);
+        
+        console.log(`📊 [DEBUG] Total de produtos: ${snapshot.size}`);
+        
+        const raridades = {};
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.categoria === 'Colecionáveis') {
+            const subcategoria = data.subcategoria || 'Sem subcategoria';
+            raridades[subcategoria] = (raridades[subcategoria] || 0) + 1;
+          }
+        });
+        
+        console.log('📋 [DEBUG] Cartas por raridade:', raridades);
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[DEBUG]')));
+      } catch (error) {
+        console.error('❌ [DEBUG] Erro ao verificar cartas:', error);
+      }
+    });
+    
+    document.getElementById('btn-debug-cards-detailed').addEventListener('click', async () => {
+      console.log('🔍 [DEBUG-DETAILED] Iniciando debug detalhado das cartas...');
+      
+      try {
+        const produtosRef = collection(db, 'loja', 'config', 'produtos');
+        const snapshot = await getDocs(produtosRef);
+        
+        console.log(`📊 [DEBUG-DETAILED] Total de produtos no banco: ${snapshot.size}`);
+        
+        const cartasPorRaridade = {
+          'Cartas Comuns': [],
+          'Cartas Raras': [],
+          'Cartas Épicas': [],
+          'Cartas Lendárias': []
+        };
+        
+        let totalCartas = 0;
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          console.log(`🔎 [DEBUG-DETAILED] Produto: ${data.nome || doc.id}`);
+          console.log(`   📂 Categoria: "${data.categoria}"`);
+          console.log(`   🏷️ Subcategoria: "${data.subcategoria}"`);
+          console.log(`   🆔 ID: ${doc.id}`);
+          
+          if (data.categoria === 'Colecionáveis') {
+            totalCartas++;
+            const subcategoria = data.subcategoria || 'Sem subcategoria';
+            
+            if (cartasPorRaridade[subcategoria]) {
+              cartasPorRaridade[subcategoria].push({
+                id: doc.id,
+                nome: data.nome,
+                subcategoria: data.subcategoria
+              });
+            } else {
+              console.log(`⚠️ [DEBUG-DETAILED] Subcategoria não reconhecida: "${subcategoria}"`);
+            }
+          }
+        });
+        
+        console.log(`🎯 [DEBUG-DETAILED] === RESUMO DAS CARTAS ===`);
+        console.log(`📊 Total de cartas colecionáveis: ${totalCartas}`);
+        
+        Object.entries(cartasPorRaridade).forEach(([raridade, cartas]) => {
+          console.log(`${raridade}: ${cartas.length} cartas`);
+          cartas.forEach((carta, index) => {
+            console.log(`   ${index + 1}. ${carta.nome} (ID: ${carta.id})`);
+          });
+        });
+        
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[DEBUG-DETAILED]')));
+      } catch (error) {
+        console.error('❌ [DEBUG-DETAILED] Erro:', error);
+      }
+    });
+    
+    document.getElementById('btn-check-categories').addEventListener('click', async () => {
+      console.log('📋 [DEBUG] Verificando categorias...');
+      
+      try {
+        const categoriasRef = collection(db, 'loja', 'config', 'categorias');
+        const subcategoriasRef = collection(db, 'loja', 'config', 'subcategorias');
+        
+        const [catSnap, subSnap] = await Promise.all([
+          getDocs(categoriasRef),
+          getDocs(subcategoriasRef)
+        ]);
+        
+        console.log(`📂 [DEBUG] Categorias: ${catSnap.size}`);
+        console.log(`📂 [DEBUG] Subcategorias: ${subSnap.size}`);
+        
+        catSnap.forEach(doc => {
+          console.log(`📋 [DEBUG] Categoria: ${doc.id} - ${doc.data().nome || 'Sem nome'}`);
+        });
+        
+        subSnap.forEach(doc => {
+          console.log(`📋 [DEBUG] Subcategoria: ${doc.id} - ${doc.data().nome || 'Sem nome'}`);
+        });
+        
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[DEBUG]')));
+      } catch (error) {
+        console.error('❌ [DEBUG] Erro ao verificar categorias:', error);
+      }
+    });
+    
+    document.getElementById('btn-clear-cards').addEventListener('click', async () => {
+      if (!confirm('⚠️ Tem certeza que deseja limpar todas as cartas de teste? Esta ação não pode ser desfeita.')) {
+        return;
+      }
+      
+      console.log('🗑️ [DEBUG] Limpando cartas de teste...');
+      
+      try {
+        const produtosRef = collection(db, 'loja', 'config', 'produtos');
+        const q = query(produtosRef, where('categoria', '==', 'Colecionáveis'));
+        const snapshot = await getDocs(q);
+        
+        let deleted = 0;
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
+          if (data.id && data.id.startsWith('test-card-')) {
+            await deleteDoc(docSnap.ref);
+            deleted++;
+            console.log(`🗑️ [DEBUG] Carta removida: ${data.nome}`);
+          }
+        }
+        
+        console.log(`✅ [DEBUG] ${deleted} cartas de teste removidas`);
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[DEBUG]')));
+      } catch (error) {
+        console.error('❌ [DEBUG] Erro ao limpar cartas:', error);
+      }
+    });
+    
+    // Novo: Criar pack de teste no inventário
+    document.getElementById('btn-test-pack-creation').addEventListener('click', async () => {
+      console.log('📦 [PACK-TEST] Criando pack de teste no inventário...');
+      
+      try {
+        // Verificar se usuário está logado
+        const sessRaw = localStorage.getItem("bn.currentUser");
+        if (!sessRaw) {
+          console.error('❌ [PACK-TEST] Usuário não logado');
+          return;
+        }
+        
+        const currentUser = JSON.parse(sessRaw);
+        console.log('👤 [PACK-TEST] Usuário encontrado:', currentUser.user);
+        
+        // Criar pack no inventário
+        const packData = {
+          category: 'Consumíveis',
+          subcategory: 'Pack de Cartas',
+          description: 'Pack de cartas para teste do sistema de abertura',
+          firstPurchaseDate: new Date(),
+          lastPurchaseDate: new Date(),
+          imageUrl: 'https://via.placeholder.com/300x420/5a039a/ffffff?text=PACK',
+          nome: 'Pack de 5 Cartas (Teste)',
+          price: 100,
+          productId: 'test-pack-001',
+          productName: 'Pack de 5 Cartas (Teste)',
+          quantity: 3, // 3 packs para teste
+          status: 'active',
+          totalSpent: 300
+        };
+        
+        const inventarioRef = doc(db, 'inventario', currentUser.user, 'inventarioAluno', packData.nome);
+        await setDoc(inventarioRef, packData);
+        
+        console.log('✅ [PACK-TEST] Pack criado no inventário:', packData.nome);
+        console.log('📊 [PACK-TEST] Quantidade:', packData.quantity);
+        console.log('🎯 [PACK-TEST] Agora vá para o inventário e teste a abertura!');
+        
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[PACK-TEST]')));
+      } catch (error) {
+        console.error('❌ [PACK-TEST] Erro ao criar pack:', error);
+      }
+    });
+    
+    // Novo: Testar probabilidades de pack
+    document.getElementById('btn-test-pack-probabilities').addEventListener('click', async () => {
+      console.log('🎲 [PROB-TEST] Testando probabilidades de pack...');
+      
+      try {
+        // Simular 100 aberturas de pack para testar probabilidades
+        const results = {
+          comum: 0,
+          rara: 0,
+          epica: 0,
+          lendaria: 0
+        };
+        
+        const totalTests = 100;
+        console.log(`🔬 [PROB-TEST] Executando ${totalTests} simulações...`);
+        
+        // Configurações de probabilidade (igual ao sistema real)
+        const chanceRaraCarta4 = 30;
+        const chanceEpicaCarta5 = 15;
+        const chanceLendariaCarta5 = 5;
+        const chanceRaraCarta5 = 100 - chanceEpicaCarta5 - chanceLendariaCarta5;
+        
+        for (let i = 0; i < totalTests; i++) {
+          const pack = [];
+          
+          // Cartas 1, 2, 3: sempre comuns
+          pack.push('comum', 'comum', 'comum');
+          
+          // Carta 4: comum ou rara
+          const isRaraCarta4 = Math.random() * 100 < chanceRaraCarta4;
+          pack.push(isRaraCarta4 ? 'rara' : 'comum');
+          
+          // Carta 5: rara, épica ou lendária
+          const random5 = Math.random() * 100;
+          if (random5 < chanceLendariaCarta5) {
+            pack.push('lendaria');
+          } else if (random5 < chanceLendariaCarta5 + chanceEpicaCarta5) {
+            pack.push('epica');
+          } else {
+            pack.push('rara');
+          }
+          
+          // Contar raridades
+          pack.forEach(raridade => {
+            results[raridade]++;
+          });
+        }
+        
+        // Calcular porcentagens
+        const totalCards = totalTests * 5;
+        console.log('📊 [PROB-TEST] Resultados da simulação:');
+        console.log(`🟫 Comuns: ${results.comum} (${(results.comum/totalCards*100).toFixed(1)}%)`);
+        console.log(`🔵 Raras: ${results.rara} (${(results.rara/totalCards*100).toFixed(1)}%)`);
+        console.log(`🟣 Épicas: ${results.epica} (${(results.epica/totalCards*100).toFixed(1)}%)`);
+        console.log(`🟠 Lendárias: ${results.lendaria} (${(results.lendaria/totalCards*100).toFixed(1)}%)`);
+        
+        // Probabilidades esperadas
+        console.log('🎯 [PROB-TEST] Probabilidades esperadas:');
+        console.log(`🟫 Comuns: ~65% (3 fixas + carta 4 às vezes)`);
+        console.log(`🔵 Raras: ~28% (carta 4: 30% + carta 5: 80%)`);
+        console.log(`🟣 Épicas: ~${chanceEpicaCarta5}% (apenas carta 5)`);
+        console.log(`🟠 Lendárias: ~${chanceLendariaCarta5}% (apenas carta 5)`);
+        
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[PROB-TEST]')));
+      } catch (error) {
+        console.error('❌ [PROB-TEST] Erro no teste:', error);
+      }
+    });
+    
+    // Novo: Fix para cartas comuns faltantes
+    document.getElementById('btn-fix-missing-commons').addEventListener('click', async () => {
+      console.log('🔧 [FIX-COMMONS] Criando cartas comuns faltantes...');
+      
+      try {
+        // Verificar quantas cartas comuns existem
+        const produtosRef = collection(db, 'loja', 'config', 'produtos');
+        const q = query(produtosRef, 
+          where('categoria', '==', 'Colecionáveis'), 
+          where('subcategoria', '==', 'Cartas Comuns')
+        );
+        const snapshot = await getDocs(q);
+        
+        console.log(`📊 [FIX-COMMONS] Cartas comuns existentes: ${snapshot.size}`);
+        
+        if (snapshot.size >= 5) {
+          console.log('✅ [FIX-COMMONS] Já há cartas comuns suficientes');
+          return;
+        }
+        
+        // Criar cartas comuns
+        const cartasComuns = [];
+        for (let i = 1; i <= 10; i++) {
+          const carta = {
+            id: `fix-comum-${i.toString().padStart(2, '0')}`,
+            nome: `Carta Comum Fix ${i.toString().padStart(2, '0')}`,
+            categoria: 'Colecionáveis',
+            subcategoria: 'Cartas Comuns',
+            descricao: `Uma carta comum criada para fix do sistema de packs. ID: fix-comum-${i}`,
+            preco: 10,
+            imagem: `https://via.placeholder.com/300x420/6c757d/ffffff?text=Comum+${i}`,
+            ativo: true,
+            dataAdicao: new Date(),
+            raridade: 'Comum',
+            poder: Math.floor(Math.random() * 100) + 50,
+            elemento: getRandomElement()
+          };
+          cartasComuns.push(carta);
+        }
+        
+        console.log(`📦 [FIX-COMMONS] Criando ${cartasComuns.length} cartas comuns...`);
+        
+        for (const carta of cartasComuns) {
+          const docRef = doc(produtosRef, carta.id);
+          await setDoc(docRef, carta);
+          console.log(`✅ [FIX-COMMONS] Carta criada: ${carta.nome}`);
+        }
+        
+        console.log('🎉 [FIX-COMMONS] Fix concluído! Cartas comuns criadas.');
+        updateConsole('console-debug', allLogs.filter(log => log.includes('[FIX-COMMONS]')));
+        
+      } catch (error) {
+        console.error('❌ [FIX-COMMONS] Erro no fix:', error);
+      }
+    });
+    
+    document.getElementById('btn-refresh-stats').addEventListener('click', async () => {
+      console.log('🔄 [STATS] Atualizando estatísticas...');
+      await loadStats();
+    });
+    
+    document.getElementById('btn-export-logs').addEventListener('click', () => {
+      console.log('📥 [EXPORT] Exportando logs...');
+      
+      const logs = allLogs.join('\n');
+      const blob = new Blob([logs], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dev-logs-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      console.log('✅ [EXPORT] Logs exportados');
+    });
+    
+    // Carregar estatísticas
+    async function loadStats() {
+      const statsContainer = document.getElementById('stats-container');
+      
+      try {
+        console.log('📊 [STATS] Carregando estatísticas...');
+        
+        // Contagem de coleções
+        const alunos = await getDocs(collection(db, 'alunos'));
+        const inventarios = await getDocs(collection(db, 'inventario'));
+        const produtos = await getDocs(collection(db, 'loja', 'config', 'produtos'));
+        
+        // Contar cartas por raridade
+        const cartasPorRaridade = {};
+        produtos.forEach(doc => {
+          const data = doc.data();
+          if (data.categoria === 'Colecionáveis') {
+            const subcategoria = data.subcategoria || 'Sem subcategoria';
+            cartasPorRaridade[subcategoria] = (cartasPorRaridade[subcategoria] || 0) + 1;
+          }
+        });
+        
+        console.log('📈 [STATS] Estatísticas carregadas');
+        
+        statsContainer.innerHTML = `
+          <div class="constants-grid">
+            <div class="constant-item">
+              <div class="constant-label">👥 Alunos</div>
+              <div class="constant-value">${alunos.size}</div>
+            </div>
+            <div class="constant-item">
+              <div class="constant-label">🎒 Inventários</div>
+              <div class="constant-value">${inventarios.size}</div>
+            </div>
+            <div class="constant-item">
+              <div class="constant-label">🛍️ Produtos</div>
+              <div class="constant-value">${produtos.size}</div>
+            </div>
+            <div class="constant-item">
+              <div class="constant-label">🃏 Cartas</div>
+              <div class="constant-value">${Object.values(cartasPorRaridade).reduce((a, b) => a + b, 0)}</div>
+            </div>
+          </div>
+          
+          <h3>📊 Cartas por Raridade</h3>
+          <div class="constants-grid">
+            ${Object.entries(cartasPorRaridade).map(([raridade, count]) => `
+              <div class="constant-item">
+                <div class="constant-label">${raridade}</div>
+                <div class="constant-value">${count}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        
+      } catch (error) {
+        console.error('❌ [STATS] Erro ao carregar estatísticas:', error);
+        statsContainer.innerHTML = `
+          <div class="status-error">❌ Erro ao carregar estatísticas</div>
+        `;
+      }
+    }
+    
+    // Carregar estatísticas iniciais
+    setTimeout(loadStats, 2000);
+    
+    // Atualizar console do Firebase
+    setTimeout(() => {
+      updateConsole('console-firebase', allLogs.filter(log => log.includes('[DEV-TOOLS]')));
+    }, 1000);
+    
+    console.log('🏁 [DEV-TOOLS] Fim da inicialização da página de desenvolvimento');
   </script>
 </body>
 </html>
-
-
